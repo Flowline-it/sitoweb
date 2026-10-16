@@ -1,426 +1,421 @@
 ---
-import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import LineDiagram from '../components/LineDiagram.astro';
+import DashboardMockup from '../components/DashboardMockup.astro';
+import Bento from '../components/Bento.astro';
 import ContactForm from '../components/ContactForm.astro';
-import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, WHY, ABOUT, METHOD, SERVICES, FAQ, FINAL, SITE } from '../data/site.js';
-
-import ducati from '../assets/img/ducati-1957.jpg';
-import lingotto39 from '../assets/img/lingotto-1939.jpg';
-import lingotto63 from '../assets/img/lingotto-1963.jpg';
-import outbound from '../assets/img/outbound-partenze.png';
-import p101 from '../assets/img/programma-101.jpg';
-import ivrea from '../assets/img/ivrea-olivetti.jpg';
-import perforatrici from '../assets/img/perforatrici.jpg';
-
-const serviceImages: Record<string, { src: any; alt: string; caption: string }> = {
-  automazioni: { src: outbound, alt: 'Il tabellone "Partenze di oggi" di FlowLine Outbound, con le email in partenza e quelle in ritardo', caption: 'FlowLine Outbound, il nostro strumento interno per le email commerciali. Dati dimostrativi.' },
-  agenti: { src: p101, alt: 'La calcolatrice programmabile Olivetti Programma 101 in una teca museale', caption: 'Olivetti Programma 101, Ivrea, 1965. Foto d’archivio.' },
-  consulenza: { src: ivrea, alt: 'La facciata in mattoni rossi del primo stabilimento Olivetti a Ivrea', caption: 'Ivrea, primo stabilimento Olivetti. Foto d’archivio.' },
-  formazione: { src: perforatrici, alt: 'Due operatrici al lavoro su perforatrici di schede in un ufficio degli anni Settanta', caption: 'Operatrici di perforatrici di schede. Foto d’archivio.' },
-};
+import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, SERVICES, WHY, ABOUT, METHOD, METRICS, TOOLS, PLANS, FAQ, FAQ_EXTRA, FINAL, SITE } from '../data/site.js';
 
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-
+const faqs = [...FAQ.items, FAQ_EXTRA];
+const costIcons = [
+  '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  '<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/>',
+  '<path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/>',
+  '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5h.01"/>',
+];
 const jsonld = [
   { '@type': 'WebPage', '@id': `${SITE.url}/#webpage`, url: `${SITE.url}/`, name: HOME_META.title, description: HOME_META.description, inLanguage: 'it-IT', isPartOf: { '@id': `${SITE.url}/#website` }, about: { '@id': `${SITE.url}/#organization` } },
-  { '@type': 'FAQPage', '@id': `${SITE.url}/#faq`, mainEntity: FAQ.items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
+  { '@type': 'FAQPage', '@id': `${SITE.url}/#faq`, mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
   ...SERVICES.items.map((s) => ({ '@type': 'Service', name: s.name, description: `${s.text} ${s.quote}`, provider: { '@id': `${SITE.url}/#organization` }, areaServed: 'IT' })),
 ];
 ---
 <Base title={HOME_META.title} description={HOME_META.description} path="/" jsonld={jsonld}>
-  <!-- HERO: il marchio a scala di manifesto; la linea sottolinea il contenuto ed entra nel cerchio -->
+  <!-- ================= HERO ================= -->
   <section class="hero" aria-labelledby="hero-title">
+    <span class="glow hero__glow" aria-hidden="true"></span>
     <div class="wrap hero__inner">
-      <h1 id="hero-title" class="display hero__title">
-        <span data-rise style="--i:0">{HERO.title[0]}</span>
-        <span data-rise style="--i:1">{HERO.title[1]}</span>
-      </h1>
-      <p class="lead" data-rise style="--i:2">{HERO.lead}</p>
-      <p class="hero__text" data-rise style="--i:3">{HERO.text}</p>
-      <p data-rise style="--i:4"><a class="button" href="#contatti">{CTA} <Fragment set:html={arrow} /></a></p>
+      <a class="eyebrow" href="#formule" data-rise style="--i:0"><span class="badge">Nuovo</span> Pilot 30: il primo processo automatizzato in 30 giorni</a>
+      <h1 id="hero-title" class="display" data-rise style="--i:1">{HERO.title.join(' ')}</h1>
+      <p class="lead hero__lead" data-rise style="--i:2">{HERO.lead} Progettiamo sistemi AI, integrazioni e processi automatici su misura.</p>
+      <div class="hero__ctas" data-rise style="--i:3">
+        <a class="button" href="#contatti">{CTA} <Fragment set:html={arrow} /></a>
+        <a class="button button--ghost" href="#metodo">Scopri come lavoriamo</a>
+      </div>
+      <ul class="hero__trust" data-rise style="--i:4" role="list">
+        <li>Analisi preliminare gratuita</li>
+        <li>Preventivo trasparente</li>
+        <li>Supporto 24/7</li>
+      </ul>
     </div>
-    <div class="hero__line" aria-hidden="true">
-      <svg class="hero__mark" viewBox="60 80 1800 1800" aria-hidden="true" focusable="false">
-        <defs>
-        <mask id="hero-gap"><rect x="-40000" y="-2000" width="80000" height="6000" fill="#fff" /><rect x="0" y="730" width="520" height="568" fill="#000" /></mask>
-        </defs>
-        <path class="hero__ring" mask="url(#hero-gap)" fill-rule="evenodd" d="M958 83a877 877 0 1 0 0.1 0zM958 320a640 640 0 1 1-0.1 0z" />
-        <rect class="hero__bar" x="-40000" y="898" width="40482" height="205" />
-        <circle class="hero__disc" cx="968" cy="965" r="515" />
-      </svg>
+
+    <div class="wrap hero__stage" data-rise style="--i:5">
+      <span class="glow hero__glow2" aria-hidden="true"></span>
+      <DashboardMockup />
+      <!-- card flottanti -->
+      <div class="float float--note" aria-hidden="true">
+        <span class="float__icon float__icon--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5l4 4 8-9"/></svg></span>
+        <span><b>Fattura n. 2481 registrata</b><small>Dal tuo inbox al gestionale, in automatico</small></span>
+      </div>
+      <div class="float float--stat" aria-hidden="true">
+        <small>Ore risparmiate</small>
+        <b>20h <em>/ settimana</em></b>
+        <span class="float__bars"><i style="--h:40%"></i><i style="--h:55%"></i><i style="--h:48%"></i><i style="--h:70%"></i><i style="--h:82%"></i><i style="--h:100%"></i></span>
+      </div>
+      <div class="float float--team" aria-hidden="true">
+        <span class="avatars"><i style="--c:#ffd7a1">AM</i><i style="--c:#d6e4ff">LR</i><i style="--c:#d8f1e2">SB</i><i style="--c:#ececf0">+4</i></span>
+        <span><b>Il tuo team</b><small>Libero dai task ripetitivi</small></span>
+      </div>
     </div>
   </section>
 
-  <!-- IL COSTO DELL'INEFFICIENZA: un tabellone di perdite -->
-  <section class="section dark costs" aria-labelledby="costs-title">
-    <div class="wrap grid">
-      <div class="costs__intro">
-        <h2 id="costs-title" class="head" data-reveal>{COSTS.title}</h2>
-        <p class="lead" data-reveal style="--i:1">{COSTS.statement}</p>
-        <p class="muted" data-reveal style="--i:2">{COSTS.text}</p>
-        <figure class="photo costs__photo shutter" data-reveal>
-          <Picture src={ducati} formats={['avif', 'webp']} widths={[480, 800, 1200]} sizes="(max-width: 860px) 100vw, 38vw" alt="Operai alla linea di montaggio della Ducati 98 a Borgo Panigale" />
-          <figcaption>Bologna, linea di montaggio della Ducati 98, 1957 circa. Foto d'archivio.</figcaption>
-        </figure>
+  <!-- ================= STRUMENTI ================= -->
+  <section class="tools" aria-label="Strumenti che integriamo">
+    <div class="wrap">
+      <p class="tools__label">Integriamo gli strumenti che la tua azienda usa già</p>
+    </div>
+    <div class="marquee">
+      <div class="marquee__track">
+        {[0, 1].map((k) => (
+          <ul class="marquee__list" role="list" aria-hidden={k === 1 ? 'true' : undefined}>
+            {TOOLS.map((t) => <li>{t}</li>)}
+          </ul>
+        ))}
       </div>
-      <ul class="board" role="list">
+    </div>
+  </section>
+
+  <!-- ================= COSTI ================= -->
+  <section class="section costs" aria-labelledby="costs-title">
+    <div class="wrap">
+      <header class="section-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span>{COSTS.title}</span>
+        <h2 id="costs-title" class="h2" data-reveal style="--i:1">{COSTS.statement}</h2>
+        <p class="lead" data-reveal style="--i:2">{COSTS.text}</p>
+      </header>
+      <ul class="costs__grid" role="list">
         {COSTS.rows.map((r, i) => (
-          <li class="board__row" data-reveal style={`--i:${i}`}>
-            <div>
-              <h3 class="name">{r.name}</h3>
-              <p class="muted">{r.text}</p>
-            </div>
-            <p class="board__value"><span class="figure">{r.value}</span><span class="board__unit">{r.unit}</span></p>
+          <li class="card card--hover cost" data-reveal style={`--i:${i}`}>
+            <span class="cost__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={costIcons[i]} aria-hidden="true" /></span>
+            <h3>{r.name}</h3>
+            <p class="muted">{r.text}</p>
+            <p class="cost__fig"><b>{r.value}</b> {r.unit}</p>
           </li>
         ))}
       </ul>
     </div>
   </section>
 
-  <!-- SOLUZIONI: la foto della linea, poi quattro cifre in fila -->
-  <section class="section solutions" aria-labelledby="solutions-title">
+  <!-- ================= SOLUZIONI (BENTO) ================= -->
+  <section id="soluzioni" class="section solutions" aria-labelledby="sol-title">
+    <span class="glow solutions__glow" aria-hidden="true"></span>
     <div class="wrap">
-      <h2 id="solutions-title" class="head solutions__title" data-reveal>{SOLUTIONS.title}</h2>
-      <p class="lead solutions__sub" data-reveal style="--i:1">{SOLUTIONS.subtitle}</p>
-    </div>
-    <figure class="photo solutions__photo shutter" data-reveal>
-      <Picture src={lingotto39} formats={['avif', 'webp']} widths={[640, 1000, 1500]} sizes="100vw" alt="Automobili Fiat 1100 sulla rampa della linea di montaggio del Lingotto" />
-      <figcaption class="wrap">Torino, Lingotto, linea della Fiat 1100, 1939. Foto d'archivio.</figcaption>
-    </figure>
-    <div class="wrap">
-      <ul class="figures grid" role="list">
-        {SOLUTIONS.items.map((s, i) => (
-          <li data-reveal style={`--i:${i}`}>
-            <p class="figures__fig"><span class="figure">{s.figure}</span><span class="figures__label">{s.figureLabel}</span></p>
-            <h3 class="name">{s.name}</h3>
-            <p>{s.text}</p>
-            <p class="small muted">{s.time} · Garantito</p>
-          </li>
-        ))}
-      </ul>
+      <header class="section-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span>Soluzioni</span>
+        <h2 id="sol-title" class="h2" data-reveal style="--i:1">{SOLUTIONS.title}, {SOLUTIONS.subtitle.toLowerCase().replace('.', '')}</h2>
+        <p class="lead" data-reveal style="--i:2">{SERVICES.text}</p>
+      </header>
+      <Bento />
+      <p class="solutions__note" data-reveal>{SERVICES.note} {SERVICES.closing}</p>
     </div>
   </section>
 
-  <!-- PERCHÉ FLOWLINE -->
-  <section class="section white why" aria-labelledby="why-title">
-    <div class="wrap grid">
-      <div class="why__side">
-        <h2 id="why-title" class="head" data-reveal>{WHY.title}</h2>
-        <p data-reveal style="--i:1">{WHY.text}</p>
-      </div>
-      <ul class="why__list dash" role="list">
-        {WHY.items.map((w, i) => (
-          <li data-reveal style={`--i:${i % 2}`}>
-            <h3 class="name">{w.name}</h3>
-            <p>{w.text}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
+  <!-- ================= METODO ================= -->
+  <section id="metodo" class="section method" aria-labelledby="method-title">
     <div class="wrap">
-      <div class="why__cta" data-reveal>
-        <div>
-          <h3 class="lead">{WHY.cta.title}</h3>
-          <p>{WHY.cta.text}</p>
-        </div>
-        <a class="button" href="#contatti">{WHY.cta.button} <Fragment set:html={arrow} /></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CHI SIAMO: pannello antracite, foto nel cerchio del marchio -->
-  <section id="chi-siamo" class="section about" aria-labelledby="about-title">
-    <div class="about__panel dark">
-      <div class="about__text">
-        <h2 id="about-title" class="head" data-reveal>{ABOUT.title}</h2>
-        <p class="lead" data-reveal style="--i:1">{ABOUT.text}</p>
-        <p class="about__closing name" data-reveal style="--i:2">{ABOUT.closing}</p>
-      </div>
-      <figure class="about__photo" data-reveal>
-        <div class="about__disc">
-          <Picture src={lingotto63} formats={['avif', 'webp']} widths={[480, 800, 1067]} sizes="(max-width: 860px) 86vw, 40vw" alt="Fiat 1100 D in uscita dalla linea di montaggio del Lingotto" />
-        </div>
-        <figcaption class="small">Torino, Lingotto, linea della Fiat 1100 D, 1963. Foto d'archivio.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- COME LAVORIAMO: il lavoro sparso diventa la linea -->
-  <section id="come-lavoriamo" class="section method" aria-labelledby="method-title">
-    <div class="wrap">
-      <h2 id="method-title" class="head" data-reveal>{METHOD.title}</h2>
-      <div class="method__diagram">
-        <div class="only-wide"><LineDiagram /></div>
-        <div class="only-narrow"><LineDiagram vertical /></div>
-      </div>
-      <ol class="method__steps grid" role="list">
+      <header class="section-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span>Metodo</span>
+        <h2 id="method-title" class="h2" data-reveal style="--i:1">{METHOD.title}</h2>
+        <p class="lead" data-reveal style="--i:2">Dall'analisi al monitoraggio, in quattro passi. {METHOD.note}</p>
+      </header>
+      <ol class="steps" role="list">
+        <li class="steps__line" role="presentation" aria-hidden="true"><i></i></li>
         {METHOD.steps.map((s, i) => (
-          <li data-reveal style={`--i:${i}`}>
-            <p class="method__when">{s.when}</p>
-            <h3 class="name">{s.name}</h3>
-            <p>{s.text}</p>
-            <p class="small muted">Output: {s.output}</p>
+          <li class="step" data-reveal style={`--i:${i}`}>
+            <span class="step__num">{i + 1}</span>
+            <p class="step__when">{s.when}</p>
+            <h3>{s.name}</h3>
+            <p class="muted">{s.text}</p>
+            <p class="step__out">Output: {s.output}</p>
           </li>
         ))}
       </ol>
-      <p class="method__note" data-reveal>{METHOD.note}</p>
     </div>
   </section>
 
-  <!-- SERVIZI: elenco con anteprima -->
-  <section id="servizi" class="section white services" aria-labelledby="services-title">
+  <!-- ================= NUMERI ================= -->
+  <section class="metrics" aria-label="Risultati">
     <div class="wrap">
-      <div class="services__head grid">
-        <h2 id="services-title" class="head" data-reveal>{SERVICES.title}</h2>
-        <p class="lead" data-reveal style="--i:1">{SERVICES.text}</p>
+      <ul class="metrics__band card" role="list" data-reveal>
+        {METRICS.map((m) => (
+          <li>
+            <p class="metric__fig nums"><span>{m.prefix}</span><span data-count={m.value} data-decimals={m.decimals || 0}>{String(m.value).replace('.', ',')}</span><span>{m.suffix}</span></p>
+            <p class="muted">{m.label}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= CHI SIAMO + PERCHÉ ================= -->
+  <section id="chi-siamo" class="section about" aria-labelledby="about-title">
+    <div class="wrap about__grid">
+      <div class="about__text">
+        <span class="eyebrow" data-reveal><span class="dot"></span>{ABOUT.title}</span>
+        <h2 id="about-title" class="h2" data-reveal style="--i:1">{ABOUT.closing}</h2>
+        <p class="lead" data-reveal style="--i:2">{ABOUT.text}</p>
+        <p data-reveal style="--i:3">{HERO.text.split('. ')[1]}</p>
       </div>
-      <div class="index">
-        <ul class="index__list" role="list">
-          {SERVICES.items.map((s, i) => (
-            <li class="index__row" data-key={s.id} data-reveal>
-              <figure class="photo index__inline" data-key={s.id}>
-                <Picture src={serviceImages[s.id].src} formats={['avif', 'webp']} widths={[480, 800]} sizes="92vw" alt={serviceImages[s.id].alt} loading="lazy" />
-                <figcaption>{serviceImages[s.id].caption}</figcaption>
-              </figure>
-              <h3 class="index__name">{s.name}</h3>
-              <p class="lead">{s.text}</p>
-              <div class="index__more">
-                <p class="muted">{s.quote}</p>
-                <ul class="dash" role="list">{s.points.map((p) => <li>{p}</li>)}</ul>
-              </div>
-              <a class="link" href="#contatti">{SERVICES.link}</a>
+      <div class="card about__why" data-reveal style="--i:2">
+        <h3>{WHY.title}</h3>
+        <p class="muted">{WHY.text}</p>
+        <ul class="why" role="list">
+          {WHY.items.map((w) => (
+            <li>
+              <span class="why__tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5l4 4 8-9"/></svg></span>
+              <span><b>{w.name}</b><span class="muted">{w.text}</span></span>
             </li>
           ))}
         </ul>
-        <div class="index__frame" aria-hidden="true">
-          {SERVICES.items.map((s, i) => (
-            <figure class:list={['photo', 'index__shot', i === 0 && 'is-on']} data-key={s.id}>
-              <div class="index__img"><Picture src={serviceImages[s.id].src} formats={['avif', 'webp']} widths={[600, 1000]} sizes="38vw" alt="" loading="lazy" /></div>
-              <figcaption>{serviceImages[s.id].caption}</figcaption>
-            </figure>
-          ))}
-        </div>
-      </div>
-      <div class="services__foot" data-reveal>
-        <p class="lead">{SERVICES.note}</p>
-        <p class="muted">{SERVICES.closing}</p>
       </div>
     </div>
   </section>
 
-  <ContactForm />
+  <!-- ================= FORMULE ================= -->
+  <section id="formule" class="section plans" aria-labelledby="plans-title">
+    <span class="glow plans__glow" aria-hidden="true"></span>
+    <div class="wrap">
+      <header class="section-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span>Formule</span>
+        <h2 id="plans-title" class="h2" data-reveal style="--i:1">{PLANS.title}</h2>
+        <p class="lead" data-reveal style="--i:2">{PLANS.text}</p>
+      </header>
+      <div class="plans__grid">
+        {PLANS.items.map((p, i) => (
+          <article class:list={['card', 'card--hover', 'plan', p.featured && 'plan--featured']} data-reveal style={`--i:${i}`}>
+            {p.featured && <span class="badge plan__badge">Consigliato</span>}
+            <h3>{p.name}</h3>
+            <p class="plan__price">{p.price}</p>
+            <p class="plan__note">{p.note}</p>
+            <p class="muted">{p.text}</p>
+            <ul class="checks">{p.points.map((pt) => <li>{pt}</li>)}</ul>
+            <a class:list={['button', !p.featured && 'button--ghost']} href="#contatti">{p.cta} <Fragment set:html={arrow} /></a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
-  <!-- FAQ -->
-  <section id="faq" class="section white faq" aria-labelledby="faq-title">
-    <div class="wrap grid">
+  <!-- ================= FAQ ================= -->
+  <section id="faq" class="section faq" aria-labelledby="faq-title">
+    <div class="wrap faq__grid">
       <div class="faq__side">
-        <h2 id="faq-title" class="head" data-reveal>{FAQ.title}</h2>
-        <p data-reveal style="--i:1">{FAQ.aside}</p>
-        <p data-reveal style="--i:2"><a class="button" href="#contatti">{CTA} <Fragment set:html={arrow} /></a></p>
+        <span class="eyebrow" data-reveal><span class="dot"></span>FAQ</span>
+        <h2 id="faq-title" class="h2" data-reveal style="--i:1">{FAQ.title}</h2>
+        <p class="lead" data-reveal style="--i:2">{FAQ.aside}</p>
+        <p data-reveal style="--i:3"><a class="button button--ghost" href="#contatti">{CTA} <Fragment set:html={arrow} /></a></p>
       </div>
       <div class="faq__list">
-        {FAQ.items.map((f, i) => (
+        {faqs.map((f, i) => (
           <details name="faq" class="faq__item" data-reveal style={`--i:${i}`} open={i === 0}>
             <summary><span>{f.q}</span><span class="faq__sign" aria-hidden="true"></span></summary>
-            <div class="faq__answer"><p>{f.a}</p></div>
+            <div class="faq__answer"><p class="muted">{f.a}</p></div>
           </details>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- CHIAMATA FINALE: un campo pieno arancio -->
-  <section class="final" aria-labelledby="final-title">
+  <ContactForm />
+
+  <!-- ================= CTA FINALE ================= -->
+  <section class="section final" aria-labelledby="final-title">
     <div class="wrap">
-      <h2 id="final-title" class="display" data-reveal>{FINAL.title}</h2>
-      <div class="final__row">
-        <p class="lead" data-reveal style="--i:1">{FINAL.text}</p>
-        <p data-reveal style="--i:2"><a class="button button--ink" href="#contatti">{CTA} <Fragment set:html={arrow} /></a></p>
+      <div class="final__box" data-reveal>
+        <span class="final__ring" aria-hidden="true"></span>
+        <h2 id="final-title" class="display final__title">{FINAL.title}</h2>
+        <p class="final__text">{FINAL.text}</p>
+        <a class="button button--ink" href="#contatti">{CTA} <Fragment set:html={arrow} /></a>
       </div>
     </div>
   </section>
 </Base>
 
 <script>
-  // Servizi: l'anteprima segue la riga indicata (solo con mouse; su touch l'immagine sta nella riga)
-  const rows = document.querySelectorAll<HTMLElement>('.index__row');
-  const shots = document.querySelectorAll<HTMLElement>('.index__shot');
-  const list = document.querySelector('.index__list');
-  const activate = (key: string) => {
-    shots.forEach((s) => s.classList.toggle('is-on', s.dataset.key === key));
-    rows.forEach((r) => r.classList.toggle('is-active', r.dataset.key === key));
-  };
-  rows.forEach((r) => {
-    r.addEventListener('pointerenter', () => activate(r.dataset.key!));
-    r.addEventListener('focusin', () => activate(r.dataset.key!));
-  });
-  if (rows[0]) activate(rows[0].dataset.key!);
-  // senza mouse, la riga attiva è quella al centro dello schermo
-  if (list && !matchMedia('(hover: hover)').matches && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && activate((e.target as HTMLElement).dataset.key!)), { rootMargin: '-45% 0px -45% 0px' });
-    rows.forEach((r) => io.observe(r));
+  // contatori: da 0 al valore quando entrano nello schermo
+  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fmt = (v: number, d: number) => v.toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
+  if (counters.length && !reduce && 'IntersectionObserver' in window) {
+    counters.forEach((el) => (el.textContent = fmt(0, Number(el.dataset.decimals))));
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const el = e.target as HTMLElement; io.unobserve(el);
+      const to = Number(el.dataset.count), d = Number(el.dataset.decimals), t0 = performance.now(), dur = 1600;
+      const step = (t: number) => {
+        const k = Math.min(1, (t - t0) / dur), ease = 1 - Math.pow(1 - k, 3);
+        el.textContent = fmt(to * ease, d);
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }), { threshold: 0.5 });
+    counters.forEach((el) => io.observe(el));
   }
 </script>
 
 <style>
   /* ---------- hero ---------- */
-  .hero { --w: min(86svh, 56vw, 54rem); position: relative; overflow: hidden; padding-top: clamp(2rem, 7vh, 5rem); padding-bottom: calc(var(--w) * 0.2); }
-  .hero__inner { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.25rem; }
-  .hero__title span { display: block; }
-  .hero__title { margin-bottom: 0.25rem; }
-  .hero__inner .lead { max-width: 30ch; font-weight: 600; }
-  .hero__text { max-width: 30rem; }
-  .hero__inner .button { margin-top: 0.25rem; }
-  /* la riga della linea: alta quanto la barra del marchio; anello e cerchio sporgono sopra e sotto */
-  .hero__line { position: relative; height: calc(var(--w) * 0.1139); margin-top: clamp(2.5rem, 7vh, 4.5rem); }
-  .hero__mark { position: absolute; width: var(--w); height: var(--w); left: calc(79% - var(--w) * 0.5044); top: calc(var(--w) * -0.4544); overflow: visible; }
-  .hero__ring { fill: var(--anthracite); }
-  .hero__bar, .hero__disc { fill: var(--orange); }
+  .hero { position: relative; padding-top: clamp(3rem, 8vw, 6rem); overflow: hidden; }
+  .hero__glow { width: min(70rem, 140vw); height: 38rem; left: 50%; top: -14rem; transform: translateX(-50%); }
+  .hero__inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; }
+  .hero__inner .eyebrow { text-decoration: none; }
+  .hero h1 { max-width: 13ch; }
+  .hero__lead { max-width: 36rem; }
+  .hero__ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 0.25rem; }
+  .hero__trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.5rem; list-style: none; padding: 0; font-size: 0.875rem; color: var(--muted); }
+  .hero__trust li { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .hero__trust li::before { content: ''; width: 16px; height: 16px; border-radius: 50%; background: var(--ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e8a52' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 10px no-repeat; }
+  .hero__stage { position: relative; max-width: 66rem; margin-top: clamp(3rem, 6vw, 4.5rem); padding-bottom: clamp(4rem, 8vw, 6rem); }
+  .hero__glow2 { width: 90%; height: 70%; left: 5%; top: 12%; background: radial-gradient(closest-side, rgba(255, 153, 0, 0.32), rgba(255, 153, 0, 0.1) 60%, transparent); filter: blur(30px); }
+  .hero__stage :global(.mock) { position: relative; z-index: 1; }
+
+  .float { position: absolute; z-index: 2; display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: rgba(255, 255, 255, 0.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-float); font-size: 0.8rem; text-align: left; }
+  .float b { display: block; font-weight: 600; font-size: 0.85rem; }
+  .float small { display: block; color: var(--muted); font-size: 0.74rem; }
+  .float--note { left: -3.25rem; top: 46%; }
+  .float__icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+  .float__icon svg { width: 16px; height: 16px; }
+  .float__icon--ok { background: var(--ok-soft); color: var(--ok); }
+  .float--stat { right: -3rem; top: -2.25rem; flex-direction: column; align-items: flex-start; gap: 0.2rem; padding: 0.9rem 1.1rem; }
+  .float--stat b { font-family: var(--font-head); font-size: 1.6rem; letter-spacing: -0.03em; }
+  .float--stat em { font-style: normal; font-size: 0.8rem; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+  .float__bars { display: flex; align-items: end; gap: 4px; height: 30px; margin-top: 0.35rem; }
+  .float__bars i { width: 9px; height: var(--h); border-radius: 3px; background: var(--accent-soft); }
+  .float__bars i:last-child { background: var(--accent); }
+  .float--team { right: 9%; bottom: 2.25rem; }
+  .avatars { display: flex; }
+  .avatars i { width: 30px; height: 30px; margin-left: -8px; border-radius: 50%; border: 2px solid #fff; background: var(--c); display: grid; place-items: center; font-style: normal; font-size: 0.66rem; font-weight: 700; color: #3a3a40; }
+  .avatars i:first-child { margin-left: 0; }
   @media (prefers-reduced-motion: no-preference) {
-    :global(.js) .hero__bar { transform: scaleX(0); transform-box: fill-box; transform-origin: right center; animation: bar-in 1300ms var(--ease-in-out) 350ms forwards; }
-    :global(.js) .hero__disc { transform-box: fill-box; transform-origin: center; animation: disc-in 900ms var(--ease-out) 150ms both; }
+    .float--note { animation: bob 7s ease-in-out infinite; }
+    .float--stat { animation: bob 8s ease-in-out -2s infinite; }
+    .float--team { animation: bob 9s ease-in-out -4s infinite; }
   }
-  @keyframes bar-in { to { transform: none; } }
-  @keyframes disc-in { from { transform: scale(0.82); } to { transform: none; } }
-  @media (max-width: 860px) {
-    .hero { --w: 96vw; padding-top: 1.25rem; }
-    .hero__title { font-size: clamp(2.5rem, 11.4vw, 4.5rem); }
-    .hero__line { margin-top: calc(var(--w) * 0.47); }
-    .hero__mark { left: calc(74% - var(--w) * 0.5044); }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @media (max-width: 1180px) {
+    .float--note { left: -0.75rem; }
+    .float--stat { right: -0.5rem; }
   }
+  @media (max-width: 960px) {
+    .float--note { left: 0.25rem; top: -1.25rem; }
+    .float--stat { right: 0.25rem; top: auto; bottom: 1.25rem; }
+    .float--team { display: none; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: clamp(2.5rem, 11vw, 3rem); }
+    .hero__ctas .button { width: 100%; }
+    .float--note { left: 0.75rem; right: 0.75rem; top: -1.6rem; }
+    .float--stat { display: none; }
+  }
+
+  /* ---------- strumenti ---------- */
+  .tools { padding-block: 1rem clamp(3rem, 6vw, 4.5rem); }
+  .tools__label { text-align: center; font-size: 0.875rem; color: var(--muted); font-weight: 500; margin-bottom: 1.25rem; }
+  .marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee__track { display: flex; width: max-content; }
+  .marquee__list { display: flex; gap: 0.75rem; padding-right: 0.75rem; list-style: none; margin: 0; }
+  .marquee__list li { white-space: nowrap; padding: 0.6rem 1.1rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: #55555d; font-weight: 600; font-size: 0.925rem; letter-spacing: -0.01em; }
+  @media (prefers-reduced-motion: no-preference) { .marquee__track { animation: marquee 48s linear infinite; } .marquee:hover .marquee__track { animation-play-state: paused; } }
+  @media (prefers-reduced-motion: reduce) { .marquee__list[aria-hidden] { display: none; } .marquee__track { width: auto; justify-content: center; flex-wrap: wrap; } .marquee__list { flex-wrap: wrap; justify-content: center; } }
+  @keyframes marquee { to { transform: translateX(-50%); } }
 
   /* ---------- costi ---------- */
-  .costs .grid { row-gap: 3rem; }
-  .costs__intro { grid-column: 1 / span 5; display: flex; flex-direction: column; gap: 1.25rem; }
-  .costs__intro .head { max-width: 9ch; }
-  .costs__photo { margin-top: 1.5rem; }
-  .costs__photo img { aspect-ratio: 4 / 3; }
-  .board { grid-column: 7 / -1; display: grid; gap: 4px; align-self: start; }
-  .board__row { background: var(--anthracite-2); padding: clamp(1.25rem, 2.4vw, 2rem); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 16rem); gap: 1rem 2rem; align-items: end; }
-  .board__row .name { margin-bottom: 0.4rem; }
-  .board__value { display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 0.3rem; }
-  .board__value .figure { color: var(--board-ink); }
-  .board__unit { font-size: var(--s-small); color: var(--board-ink); }
-  @media (max-width: 960px) {
-    .costs__intro, .board { grid-column: 1 / -1; }
-    .board__row { grid-template-columns: 1fr; }
-    .board__value { align-items: flex-start; text-align: left; }
-  }
+  .costs__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  .cost { display: flex; flex-direction: column; gap: 0.6rem; }
+  .cost__icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #fdeeec; color: #c0392b; margin-bottom: 0.5rem; }
+  .cost__icon svg { width: 21px; height: 21px; }
+  .cost p.muted { font-size: 0.95rem; }
+  .cost__fig { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
+  .cost__fig b { display: block; font-family: var(--font-head); font-size: 1.75rem; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); line-height: 1.1; }
+  @media (max-width: 1024px) { .costs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .costs__grid { grid-template-columns: 1fr; } }
 
   /* ---------- soluzioni ---------- */
-  .solutions__sub { margin-top: 0.75rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); font-weight: 600; }
-  .solutions__photo img { aspect-ratio: 21 / 8; object-position: center 55%; }
-  .solutions__photo figcaption { margin-top: 0.75rem; }
-  .figures { margin-top: clamp(3rem, 6vw, 5rem); row-gap: 3rem; }
-  .figures li { grid-column: span 3; display: flex; flex-direction: column; gap: 0.75rem; }
-  .figures__fig { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.75rem; }
-  .figures__label { font-size: var(--s-small); font-weight: 600; }
-  @media (max-width: 960px) { .figures { row-gap: 5rem; } .figures li { grid-column: span 6; } .solutions__photo img { aspect-ratio: 16 / 10; } }
-  @media (max-width: 560px) { .figures li { grid-column: 1 / -1; } }
-
-  /* ---------- perché ---------- */
-  .why__side { grid-column: 1 / span 5; position: sticky; top: 2rem; align-self: start; display: flex; flex-direction: column; gap: 1.5rem; }
-  .why__list { grid-column: 7 / -1; display: grid; gap: clamp(2.25rem, 4vw, 3.5rem); }
-  .why__list li { display: flex; flex-direction: column; gap: 0.6rem; }
-  .why__list li::before { top: 0.6em; }
-  .why__cta { margin-top: clamp(4rem, 8vw, 7rem); padding-top: clamp(1.75rem, 3vw, 2.5rem); border-top: 6px solid var(--orange); display: flex; justify-content: space-between; align-items: center; gap: 1.5rem 3rem; flex-wrap: wrap; }
-  .why__cta h3 { font-weight: 700; margin-bottom: 0.35rem; }
-  @media (max-width: 960px) {
-    .why__side { position: static; grid-column: 1 / -1; margin-bottom: 3rem; }
-    .why__list { grid-column: 1 / -1; }
-  }
-
-  /* ---------- chi siamo ---------- */
-  .about { padding-inline: clamp(0.625rem, 1.4vw, 1.25rem); }
-  .about__panel { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--gutter); padding: clamp(2rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 4rem) 0; min-height: min(56rem, 100svh); }
-  .about__text { display: flex; flex-direction: column; gap: 1.75rem; padding-bottom: clamp(2.5rem, 5vw, 4.5rem); }
-  .about__text .lead { font-weight: 400; max-width: 34ch; }
-  .about__closing { color: var(--board-ink); border-left: 0; }
-  .about__photo { align-self: end; justify-self: end; width: min(100%, 40rem); margin: 0; display: flex; flex-direction: column-reverse; gap: 1rem; }
-  .about__photo figcaption { color: var(--rail-ink); text-align: right; }
-  .about__disc { aspect-ratio: 1; border-radius: 50%; overflow: hidden; margin-bottom: -22%; border: clamp(14px, 1.8vw, 26px) solid var(--anthracite-3); }
-  .about__disc :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
-  @media (max-width: 860px) {
-    .about__panel { grid-template-columns: 1fr; min-height: 0; }
-    .about__text { padding-bottom: 0; }
-    .about__photo { justify-self: center; width: 86%; }
-  }
+  .solutions { overflow: hidden; }
+  .solutions__glow { width: 60rem; height: 40rem; left: 50%; top: 10%; transform: translateX(-50%); opacity: 0.8; }
+  .solutions .wrap { position: relative; z-index: 1; }
+  .solutions__note { text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.95rem; }
 
   /* ---------- metodo ---------- */
-  .method__diagram { margin-block: clamp(2.5rem, 5vw, 4rem); }
-  .only-narrow { display: none; }
-  @media (max-width: 720px) { .only-wide { display: none; } .only-narrow { display: block; max-width: 22rem; margin-inline: auto; } }
-  .method__steps { row-gap: 2.5rem; }
-  .method__steps li { grid-column: span 3; display: flex; flex-direction: column; gap: 0.7rem; }
-  .method__when { font-weight: 700; color: var(--burnt); font-size: var(--s-small); }
-  .method__note { margin-top: clamp(3rem, 5vw, 4rem); font-weight: 600; }
-  @media (max-width: 960px) { .method__steps li { grid-column: span 6; } }
-  @media (max-width: 560px) { .method__steps li { grid-column: 1 / -1; } }
-
-  /* ---------- servizi ---------- */
-  .services__head { row-gap: 1.5rem; align-items: end; margin-bottom: clamp(3rem, 6vw, 5rem); }
-  .services__head .head { grid-column: 1 / span 6; }
-  .services__head .lead { grid-column: 7 / -1; font-weight: 400; }
-  .index { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gutter); }
-  .index__list { display: grid; gap: 0; }
-  .index__row { padding-block: clamp(2rem, 3.5vw, 3rem); display: flex; flex-direction: column; gap: 1rem; transition: opacity var(--t-hover) ease; }
-  .index__row + .index__row { padding-top: clamp(2rem, 3.5vw, 3rem); }
-  .index__name { font-size: var(--s-head); line-height: 0.95; }
-  .index__row .lead { font-weight: 400; max-width: 30ch; }
-  .index__more { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 1.5rem; margin-top: 0.25rem; }
-  .index__more ul { display: grid; gap: 0.35rem; }
-  .index__inline { display: none; }
-  .index__frame { position: sticky; top: 2rem; align-self: start; display: grid; }
-  .index__shot { grid-area: 1 / 1; opacity: 0; transition: opacity var(--t-ui) ease; margin: 0; }
-  .index__shot.is-on { opacity: 1; }
-  .index__img { aspect-ratio: 4 / 3; background: var(--anthracite); overflow: hidden; }
-  .index__img :global(img) { width: 100%; height: 100%; object-fit: cover; background: transparent; }
-  .index__shot[data-key='automazioni'] .index__img :global(img) { object-fit: contain; }
-  @media (hover: hover) and (pointer: fine) {
-    .index__list:hover .index__row:not(:hover) { opacity: 0.45; }
+  .steps { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
+  .steps__line { position: absolute; left: 12.5%; right: 12.5%; top: 1.4rem; height: 2px; background: var(--border-strong); border-radius: 2px; overflow: hidden; }
+  .steps__line i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; }
+  @media (prefers-reduced-motion: no-preference) {
+    .js .steps__line i { transform: scaleX(0); transition: transform 1.6s var(--ease-in-out) 0.3s; }
+    .js .steps:has(.step.is-in) .steps__line i { transform: none; }
   }
-  .services__foot { margin-top: clamp(3rem, 6vw, 5rem); display: flex; flex-direction: column; gap: 0.75rem; }
-  .services__foot .lead { font-weight: 700; }
+  .step { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; }
+  .step__num { width: 2.8rem; height: 2.8rem; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); font-family: var(--font-head); font-weight: 600; margin-bottom: 0.75rem; position: relative; z-index: 1; }
+  .step:first-of-type .step__num { background: var(--accent); border-color: var(--accent); }
+  .step__when { font-size: 0.8rem; font-weight: 600; color: var(--accent-text); }
+  .step p.muted { font-size: 0.95rem; max-width: 30ch; }
+  .step__out { margin-top: 0.4rem; font-size: 0.8rem; font-weight: 500; padding: 0.3rem 0.7rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
   @media (max-width: 860px) {
-    .services__head .head, .services__head .lead { grid-column: 1 / -1; }
-    .services__head .lead { font-size: var(--s-body); }
-    .index { grid-template-columns: 1fr; }
-    .index__frame { display: none; }
-    .index__inline { display: block; margin-bottom: 0.75rem; }
-    .index__inline :global(picture) { display: block; }
-    .index__inline :global(img) { aspect-ratio: 16 / 10; height: auto; }
-    .index__inline[data-key='automazioni'] :global(img) { object-fit: contain; background: var(--anthracite); }
-    .index__more { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; gap: 2rem; }
+    .steps__line { left: 1.4rem; right: auto; top: 1.4rem; bottom: 1.4rem; width: 2px; height: auto; }
+    .steps__line i { transform-origin: top; }
+    @media (prefers-reduced-motion: no-preference) { .js .steps__line i { transform: scaleY(0); } }
+    .step { align-items: flex-start; text-align: left; padding-left: 4.25rem; }
+    .step__num { position: absolute; left: 0; top: 0; margin: 0; }
   }
+
+  /* ---------- numeri ---------- */
+  .metrics { padding-block: clamp(1rem, 3vw, 2rem); }
+  .metrics__band { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: clamp(2rem, 4vw, 3rem) 1rem; background: var(--ink); border-color: var(--ink); color: #fff; overflow: hidden; }
+  .metrics__band::before { content: ''; position: absolute; inset: -40% -10% auto auto; width: 30rem; height: 30rem; background: radial-gradient(closest-side, rgba(255, 153, 0, 0.35), transparent); pointer-events: none; }
+  .metrics__band li { position: relative; text-align: center; padding: 0.5rem 1rem; }
+  .metrics__band li + li { border-left: 1px solid rgba(255, 255, 255, 0.12); }
+  .metric__fig { font-family: var(--font-head); font-weight: 600; font-size: clamp(2.5rem, 1.6rem + 2.8vw, 4rem); letter-spacing: -0.04em; line-height: 1; }
+  .metrics__band .muted { color: #a9a9b2; margin-top: 0.5rem; font-size: 0.95rem; }
+  @media (max-width: 860px) { .metrics__band { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; } .metrics__band li:nth-child(3) { border-left: 0; } }
+
+  /* ---------- chi siamo ---------- */
+  .about__grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  .about__text { display: flex; flex-direction: column; align-items: flex-start; gap: 1.25rem; position: sticky; top: 7rem; }
+  .about__why { display: flex; flex-direction: column; gap: 0.75rem; }
+  .why { list-style: none; padding: 0; margin-top: 0.75rem; display: grid; gap: 1.1rem; }
+  .why li { display: grid; grid-template-columns: auto 1fr; gap: 0.85rem; }
+  .why li b { display: block; font-weight: 600; margin-bottom: 0.15rem; }
+  .why li .muted { font-size: 0.95rem; }
+  .why__tick { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); display: grid; place-items: center; margin-top: 0.1rem; }
+  .why__tick svg { width: 14px; height: 14px; }
+  @media (max-width: 860px) { .about__grid { grid-template-columns: 1fr; } .about__text { position: static; } }
+
+  /* ---------- formule ---------- */
+  .plans { overflow: hidden; }
+  .plans__glow { width: 50rem; height: 36rem; left: 50%; top: 30%; transform: translateX(-50%); }
+  .plans .wrap { position: relative; z-index: 1; }
+  .plans__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; align-items: stretch; }
+  .plan { display: flex; flex-direction: column; gap: 0.6rem; }
+  .plan .checks { margin: 0.75rem 0 1.5rem; font-size: 0.95rem; }
+  .plan .button { margin-top: auto; }
+  .plan__price { font-family: var(--font-head); font-weight: 600; font-size: 1.9rem; letter-spacing: -0.03em; line-height: 1.15; margin-top: 0.25rem; }
+  .plan__note { font-size: 0.85rem; font-weight: 500; color: var(--accent-text); }
+  .plan--featured { border: 1.5px solid var(--accent); box-shadow: var(--shadow-lift), 0 0 0 6px rgba(255, 153, 0, 0.1); }
+  .plan__badge { position: absolute; top: 1.25rem; right: 1.25rem; }
+  @media (max-width: 960px) { .plans__grid { grid-template-columns: 1fr; max-width: 32rem; margin-inline: auto; } }
 
   /* ---------- faq ---------- */
-  .faq__side { grid-column: 1 / span 4; position: sticky; top: 2rem; align-self: start; display: flex; flex-direction: column; gap: 1.5rem; }
-  .faq__list { grid-column: 6 / -1; display: grid; gap: 8px; }
-  .faq__item { background: var(--ground); transition: background-color var(--t-ui) ease, color var(--t-ui) ease; }
-  .faq__item summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; min-height: 4.75rem; padding: 1.1rem 1.5rem; font-size: var(--s-body); font-weight: 600; line-height: 1.35; }
+  .faq__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  .faq__side { display: flex; flex-direction: column; align-items: flex-start; gap: 1.1rem; position: sticky; top: 7rem; }
+  .faq__list { display: grid; gap: 0.75rem; }
+  .faq__item { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; transition: border-color 200ms ease, box-shadow 200ms ease; }
+  .faq__item[open] { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: var(--shadow); }
+  .faq__item summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.15rem 1.35rem; font-weight: 600; font-size: 1.0625rem; border-radius: 18px; }
   .faq__item summary::-webkit-details-marker { display: none; }
-  .faq__sign { position: relative; flex: none; width: 18px; height: 18px; }
-  .faq__sign::before, .faq__sign::after { content: ''; position: absolute; left: 0; top: 7.5px; width: 18px; height: 3px; background: currentColor; border-radius: 2px; transition: transform var(--t-ui) var(--ease-out); }
+  .faq__sign { position: relative; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); transition: background-color 200ms ease; }
+  .faq__sign::before, .faq__sign::after { content: ''; position: absolute; left: 8px; top: 13px; width: 12px; height: 2px; border-radius: 2px; background: var(--ink); transition: transform 240ms var(--ease-out); }
   .faq__sign::after { transform: rotate(90deg); }
-  .faq__item[open] { background: var(--anthracite); color: var(--board-ink); }
+  .faq__item[open] .faq__sign { background: var(--accent); }
   .faq__item[open] .faq__sign::after { transform: rotate(0deg); }
-  .faq__item[open] .faq__sign::before { background: var(--orange); }
-  .faq__item[open] .faq__sign::after { background: var(--orange); }
-  .faq__answer { padding: 0 1.5rem 1.6rem; }
-  .faq__answer p { max-width: 54ch; }
-  @media (hover: hover) and (pointer: fine) { .faq__item:not([open]) summary:hover { background: var(--surface-2); } }
-  @media (max-width: 960px) {
-    .faq__side { position: static; grid-column: 1 / -1; margin-bottom: 2.5rem; }
-    .faq__list { grid-column: 1 / -1; }
-    .faq__item summary { padding: 1rem 1.25rem; min-height: 4rem; }
-    .faq__answer { padding: 0 1.25rem 1.25rem; }
-  }
+  .faq__answer { padding: 0 1.35rem 1.3rem; }
+  .faq__answer p { max-width: 60ch; }
+  @media (hover: hover) and (pointer: fine) { .faq__item:not([open]):hover { border-color: var(--border-strong); } }
+  @media (max-width: 860px) { .faq__grid { grid-template-columns: 1fr; } .faq__side { position: static; } }
 
-  /* ---------- finale ---------- */
-  .final { background: var(--orange); color: var(--anthracite); padding-block: clamp(5rem, 11vw, 10rem); }
-  
-  .final__row { margin-top: clamp(2rem, 4vw, 3.5rem); display: flex; justify-content: space-between; align-items: end; gap: 2rem 4rem; flex-wrap: wrap; }
-  .final .lead { max-width: 34ch; font-weight: 500; }
-  .final :focus-visible { outline-color: var(--anthracite); }
+  /* ---------- cta finale ---------- */
+  .final__box { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; padding: clamp(3.5rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4rem); border-radius: 32px; background: radial-gradient(120% 140% at 15% 0%, #ffc56b 0%, #ff9900 45%, #f07f00 100%); color: var(--ink); box-shadow: 0 30px 80px -30px rgba(240, 127, 0, 0.6); }
+  .final__ring { position: absolute; right: -8rem; bottom: -12rem; width: 30rem; height: 30rem; border-radius: 50%; border: 3.5rem solid rgba(255, 255, 255, 0.18); pointer-events: none; }
+  .final__title { max-width: 15ch; color: var(--ink); font-size: clamp(2.25rem, 1.2rem + 3.6vw, 4rem); position: relative; }
+  .final__text { max-width: 40rem; font-size: var(--s-lead); color: #2a1a00; position: relative; }
+  .final__box .button { position: relative; }
 </style>

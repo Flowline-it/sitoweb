@@ -126,12 +126,29 @@ export const FINAL = {
   text: 'Affidati a esperti del settore per ottimizzare i tuoi processi. Prenota una call conoscitiva per valutare insieme le opportunità di miglioramento.',
 };
 
-// Foto d'archivio: mai presentate come nostre, sempre con luogo e anno in didascalia e credito nel footer.
-export const CREDITS = [
-  { title: 'Ducati 98 assembly line (ca. 1957)', by: null, licence: 'pubblico dominio', licenceUrl: 'https://creativecommons.org/publicdomain/mark/1.0/', url: 'https://commons.wikimedia.org/wiki/File:Ducati_98_assembly_line_(ca._1957).jpg' },
-  { title: "Lingotto (1939) - Fiat 1100's assembly line", by: 'Archivio Centro Storico Fiat', licence: 'pubblico dominio', licenceUrl: 'https://creativecommons.org/publicdomain/mark/1.0/', url: 'https://commons.wikimedia.org/wiki/File:Lingotto_(1939)_-_Fiat_1100%27s_assembly_line.jpg' },
-  { title: "Lingotto (1963) - Fiat 1100 D's assembly line", by: 'Archivio Centro Storico Fiat', licence: 'pubblico dominio', licenceUrl: 'https://creativecommons.org/publicdomain/mark/1.0/', url: 'https://commons.wikimedia.org/wiki/File:Lingotto_(1963)_-_Fiat_1100_D%27s_assembly_line.jpg' },
-  { title: 'Ivrea Primo Stabilimento Olivetti', by: 'Laurom', licence: 'pubblico dominio', licenceUrl: 'https://creativecommons.org/publicdomain/mark/1.0/', url: 'https://commons.wikimedia.org/wiki/File:Ivrea_Primo_Stabilimento_Olivetti.JPG' },
-  { title: 'Olivetti Programma 101, calcolatrice elettronica programmabile, 1965', by: 'Sailko', licence: 'CC BY 3.0', licenceUrl: 'https://creativecommons.org/licenses/by/3.0/', url: 'https://commons.wikimedia.org/w/index.php?curid=86677916' },
-  { title: 'ICL 71 card punch and verifier', by: 'Queensland State Archives', licence: 'CC0', licenceUrl: 'https://creativecommons.org/publicdomain/zero/1.0/', url: 'https://commons.wikimedia.org/w/index.php?curid=112908293' },
+// ---------- versione 2 (landing SaaS) ----------
+
+// Strumenti che integriamo: solo testo, nessun logo di terzi.
+export const TOOLS = ['Gmail e Google Workspace', 'n8n', 'Supabase', 'WhatsApp Business', 'Fatturazione elettronica', 'CRM', 'ERP e gestionali', 'Excel e Google Sheets', 'Microsoft 365', 'Calendari e agende'];
+
+// Numeri del sito attuale, invariati.
+export const METRICS = [
+  { value: 40, prefix: '−', suffix: '%', label: 'costi operativi' },
+  { value: 300, prefix: '', suffix: '%', label: 'ROI in 6 mesi' },
+  { value: 20, prefix: '', suffix: 'h', label: 'risparmiate a settimana' },
+  { value: 99.9, prefix: '', suffix: '%', label: 'uptime garantito', decimals: 1 },
 ];
+
+// Formule di collaborazione: niente cifre, come dicono le FAQ ("non abbiamo listini fissi").
+// Pilot 30: offerta di ingresso di Flowline, da confermare prima della pubblicazione.
+export const PLANS = {
+  title: 'Scegli come iniziare',
+  text: 'Lavoriamo su preventivo in base alle specifiche esigenze. Ogni progetto parte da una consulenza gratuita e senza impegno.',
+  items: [
+    { name: 'Pilot 30', price: 'Su preventivo', note: '30 giorni, un processo', text: 'Automatizziamo un processo concreto in 30 giorni, per vedere i risultati prima di andare oltre.', points: ['Analisi preliminare gratuita', 'Un processo automatizzato', 'Report con le ore risparmiate', 'Soddisfatti o rimborsati'], cta: 'Parti con il Pilot' },
+    { name: 'Progetto su misura', price: 'Su preventivo', note: 'Da 2 settimane a 3 mesi', featured: true, text: 'Automazioni, integrazioni e agenti AI progettati sui tuoi processi, con una roadmap precisa.', points: ['Report audit e roadmap', 'Design del sistema e prototipo', 'Sviluppo, integrazione e test', 'Formazione del team inclusa'], cta: 'Richiedi una consulenza' },
+    { name: 'Manutenzione', price: 'Canone su preventivo', note: 'Dopo la consegna', text: 'Monitoriamo e ottimizziamo i sistemi perché evolvano con la tua azienda.', points: ['Supporto prioritario 24/7', 'Monitoraggio proattivo', 'Adattamenti ai nuovi processi', 'Dashboard delle performance'], cta: 'Parliamone' },
+  ],
+};
+
+export const FAQ_EXTRA = { q: "Cos'è il Pilot 30?", a: "È il modo più semplice per iniziare: in 30 giorni automatizziamo un processo concreto della tua azienda e misuriamo le ore risparmiate. Se il risultato non ti soddisfa, ti rimborsiamo." };

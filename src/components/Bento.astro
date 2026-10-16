@@ -1,0 +1,211 @@
+---
+import { WHY } from '../data/site.js';
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>';
+const steps = ['Email in arrivo', 'Estrae i dati della fattura', 'Registra nel gestionale', 'Avvisa il team'];
+const days = Array.from({ length: 35 }, (_, i) => i - 2);
+const workshop = [8, 15, 22];
+const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 99, 86, 100, 99, 100, 98, 100, 99, 100];
+---
+<div class="bento">
+  <!-- 2x2: automazioni -->
+  <article class="tile tile--a card card--hover" data-reveal style="--i:0">
+    <div class="tile__text">
+      <h3>Automazioni processi</h3>
+      <p class="muted">Workflow automatici per e-mail, fatturazione, data-entry e molto altro, attivi 24/7.</p>
+      <p class="tile__chips"><span>ROI 300% in 6 mesi</span><span>Implementazione: 2 settimane</span></p>
+    </div>
+    <div class="ui ui--flow" aria-hidden="true">
+      <span class="ui-flow__track"><i></i></span>
+      {steps.map((s, i) => (
+        <div class="ui-flow__node" style={`--n:${i}`}>
+          <span class="ui-flow__icon">{i + 1}</span>
+          <span class="ui-flow__name">{s}</span>
+          <span class="ui-flow__ok" set:html={tick} />
+        </div>
+      ))}
+    </div>
+  </article>
+
+  <!-- 2x1: agenti AI -->
+  <article class="tile tile--b card card--hover" data-reveal style="--i:1">
+    <div class="tile__text">
+      <h3>Agenti AI personalizzati</h3>
+      <p class="muted">Bot addestrati sui tuoi dati per customer service, analisi e molto altro.</p>
+    </div>
+    <div class="ui ui--chat" aria-hidden="true">
+      <p class="bubble bubble--me">A che punto è l'ordine 1042?</p>
+      <p class="bubble bubble--typing"><i></i><i></i><i></i></p>
+      <p class="bubble bubble--bot">È in spedizione: arriva giovedì. Ti mando il tracking?</p>
+    </div>
+  </article>
+
+  <!-- 2x1: integrazioni -->
+  <article class="tile tile--c card card--hover" data-reveal style="--i:2">
+    <div class="tile__text">
+      <h3>Integrazione totale</h3>
+      <p class="muted">Connessione fluida tra CRM, ERP e strumenti di marketing: 20 ore risparmiate a settimana.</p>
+    </div>
+    <div class="ui ui--sync" aria-hidden="true">
+      <span class="sync__node">CRM</span>
+      <span class="sync__wire"><i></i></span>
+      <span class="sync__node sync__node--hub">ERP</span>
+      <span class="sync__wire sync__wire--rev"><i></i></span>
+      <span class="sync__node">Marketing</span>
+    </div>
+  </article>
+
+  <!-- 1x1: supporto -->
+  <article class="tile tile--d card card--hover" data-reveal style="--i:3">
+    <div class="ui ui--uptime" aria-hidden="true">
+      <p class="uptime__fig">99,9%</p>
+      <div class="uptime__bars">{bars.map((h, i) => <i style={`--h:${h}%;--n:${i}`}></i>)}</div>
+    </div>
+    <div class="tile__text">
+      <h3>Supporto premium</h3>
+      <p class="muted">Assistenza prioritaria 24/7 e monitoraggio proattivo.</p>
+    </div>
+  </article>
+
+  <!-- 1x1: consulenza -->
+  <article class="tile tile--e card card--hover" data-reveal style="--i:4">
+    <ul class="ui ui--list" aria-hidden="true">
+      {['Roadmap digitale', 'Studio di fattibilità', 'Selezione vendor'].map((t, i) => (
+        <li style={`--n:${i}`}><span class="box" set:html={tick} />{t}</li>
+      ))}
+    </ul>
+    <div class="tile__text">
+      <h3>Consulenza strategica</h3>
+      <p class="muted">Le tecnologie giuste per il tuo business, senza sprechi.</p>
+    </div>
+  </article>
+
+  <!-- 1x1: formazione -->
+  <article class="tile tile--f card card--hover" data-reveal style="--i:5">
+    <div class="ui ui--cal" aria-hidden="true">
+      <div class="cal__head"><span>Workshop</span><span>3 sessioni</span></div>
+      <div class="cal__grid">
+        {days.map((d) => <i class:list={[d < 1 || d > 30 ? 'is-off' : '', workshop.includes(d) && 'is-on']}>{d >= 1 && d <= 30 ? d : ''}</i>)}
+      </div>
+    </div>
+    <div class="tile__text">
+      <h3>Formazione team</h3>
+      <p class="muted">Workshop pratici per rendere il tuo team autonomo con l'AI.</p>
+    </div>
+  </article>
+
+  <!-- 1x1: chiamata -->
+  <article class="tile tile--g card" data-reveal style="--i:6">
+    <div class="tile__text">
+      <h3>{WHY.cta.title}</h3>
+      <p>{WHY.cta.text}</p>
+    </div>
+    <a class="button button--ink button--sm" href="#contatti">{WHY.cta.button} <Fragment set:html={arrow} /></a>
+  </article>
+</div>
+
+<style>
+  .bento { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(15.5rem, auto); gap: 1rem; }
+  .tile { display: flex; flex-direction: column; gap: 1.25rem; overflow: hidden; }
+  .tile__text { display: flex; flex-direction: column; gap: 0.4rem; }
+  .tile__text p { font-size: 0.975rem; }
+  .tile--a { grid-column: span 2; grid-row: span 2; justify-content: space-between; }
+  .tile--b, .tile--c { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; gap: 1.5rem; }
+  .tile--d, .tile--e, .tile--f, .tile--g { justify-content: space-between; }
+  .tile--g { background: var(--accent-soft); border-color: #ffe0b3; }
+  .tile--g .button { align-self: flex-start; }
+  .tile__chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .tile__chips span { font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.65rem; border-radius: 999px; background: var(--surface-2); color: #3d3d44; }
+  .ui { position: relative; }
+
+  /* flusso */
+  .ui--flow { display: grid; gap: 0.6rem; padding: 1rem; border-radius: 18px; background: #fafaf8; border: 1px solid var(--border); }
+  .ui-flow__track { position: absolute; left: calc(1rem + 17px); top: 2.2rem; bottom: 2.2rem; width: 2px; background: var(--border); border-radius: 2px; }
+  .ui-flow__track i { position: absolute; left: -4px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(255, 153, 0, 0.2); }
+  .ui-flow__node { position: relative; display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 0.8rem; padding: 0.65rem 0.8rem 0.65rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding-left: 0; }
+  .ui-flow__icon { width: 36px; height: 36px; margin-left: 0; display: grid; place-items: center; font-size: 0.8rem; font-weight: 600; color: var(--accent-text); background: var(--accent-soft); border-radius: 10px; transform: translateX(-1px); }
+  .ui-flow__name { font-size: 0.9rem; font-weight: 500; }
+  .ui-flow__ok { width: 22px; height: 22px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; }
+  .ui-flow__ok :global(svg) { width: 12px; height: 12px; }
+
+  /* chat */
+  .ui--chat { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.9rem; background: #fafaf8; border: 1px solid var(--border); border-radius: 18px; min-height: 9.5rem; justify-content: flex-end; }
+  .bubble { max-width: 88%; padding: 0.55rem 0.8rem; border-radius: 14px; font-size: 0.82rem; line-height: 1.4; }
+  .bubble--me { align-self: flex-end; background: var(--ink); color: #fff; border-bottom-right-radius: 4px; }
+  .bubble--bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .bubble--typing { align-self: flex-start; display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); padding: 0.7rem 0.8rem; }
+  .bubble--typing i { width: 6px; height: 6px; border-radius: 50%; background: #b7b7bf; }
+
+  /* sync */
+  .ui--sync { display: flex; align-items: center; justify-content: center; gap: 0; padding: 1.25rem 0.75rem; background: #fafaf8; border: 1px solid var(--border); border-radius: 18px; }
+  .sync__node { flex: none; padding: 0.55rem 0.8rem; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; box-shadow: 0 1px 2px rgba(15, 15, 18, 0.05); }
+  .sync__node--hub { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .sync__wire { position: relative; flex: 1; min-width: 1.5rem; height: 2px; background: repeating-linear-gradient(90deg, var(--border-strong) 0 5px, transparent 5px 9px); }
+  .sync__wire i { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  /* uptime */
+  .uptime__fig { font-family: var(--font-head); font-weight: 600; font-size: 2.25rem; letter-spacing: -0.03em; line-height: 1; }
+  .uptime__bars { margin-top: 0.85rem; display: grid; grid-template-columns: repeat(24, 1fr); align-items: end; gap: 3px; height: 3.25rem; }
+  .uptime__bars i { height: var(--h); border-radius: 3px; background: var(--ok); opacity: 0.85; transform-origin: bottom; }
+  .uptime__bars i:nth-child(17) { background: var(--accent); }
+
+  /* checklist */
+  .ui--list { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+  .ui--list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; font-weight: 500; padding: 0.55rem 0.7rem; border: 1px solid var(--border); border-radius: 12px; background: #fafaf8; }
+  .ui--list .box { width: 20px; height: 20px; flex: none; border-radius: 6px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; color: #fff; transition: background-color 200ms ease, border-color 200ms ease; }
+  .ui--list .box :global(svg) { width: 12px; height: 12px; }
+
+  /* calendario */
+  .cal__head { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .cal__head span:last-child { color: var(--accent-text); }
+  .ui--cal { max-width: 17rem; }
+  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal__grid i { font-style: normal; aspect-ratio: 1; display: grid; place-items: center; font-size: 0.66rem; color: #6f6f78; border-radius: 6px; background: #fafaf8; }
+  .cal__grid i.is-off { background: transparent; }
+  .cal__grid i.is-on { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+
+  /* micro-animazioni: partono quando la tessera entra nello schermo */
+  @media (prefers-reduced-motion: no-preference) {
+    .tile.is-in .ui-flow__track i { animation: travel 4.8s var(--ease-in-out) infinite; }
+    .tile .ui-flow__ok { transform: scale(0); }
+    .tile.is-in .ui-flow__ok { animation: tick 4.8s var(--ease-out) infinite; animation-delay: calc(var(--n) * 1.05s + 0.3s); }
+    .tile .bubble--typing, .tile .bubble--bot { opacity: 0; }
+    .tile.is-in .bubble--me { animation: chat-me 7s ease infinite; }
+    .tile.is-in .bubble--typing { animation: chat-typing 7s ease infinite; }
+    .tile.is-in .bubble--typing i { animation: dots 1s ease-in-out infinite; }
+    .tile.is-in .bubble--typing i:nth-child(2) { animation-delay: 0.15s; }
+    .tile.is-in .bubble--typing i:nth-child(3) { animation-delay: 0.3s; }
+    .tile.is-in .bubble--bot { animation: chat-bot 7s ease infinite; }
+    .tile.is-in .sync__wire i { animation: wire 2.4s var(--ease-in-out) infinite; }
+    .tile.is-in .sync__wire--rev i { animation-direction: reverse; animation-delay: 1.2s; }
+    .tile .uptime__bars i { transform: scaleY(0.08); }
+    .tile.is-in .uptime__bars i { animation: grow 900ms var(--ease-out) forwards; animation-delay: calc(var(--n) * 35ms + 200ms); }
+    .tile.is-in .ui--list li .box { animation: check 4.5s ease infinite; animation-delay: calc(var(--n) * 0.7s + 0.4s); }
+    .tile.is-in .cal__grid i.is-on { animation: pop 3s ease-in-out infinite; }
+    .tile.is-in .cal__grid i.is-on:nth-of-type(n) { animation-delay: calc(var(--d, 0) * 1s); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui--list .box { background: var(--ok); border-color: var(--ok); }
+  }
+  @keyframes travel { 0% { top: 0; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { top: calc(100% - 10px); opacity: 0; } }
+  @keyframes tick { 0%, 4% { transform: scale(0); } 12%, 85% { transform: scale(1); } 95%, 100% { transform: scale(0); } }
+  @keyframes chat-me { 0% { opacity: 0; transform: translateY(6px); } 6%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+  @keyframes chat-typing { 0%, 14% { opacity: 0; } 18%, 38% { opacity: 1; } 42%, 100% { opacity: 0; height: 0; padding-block: 0; margin: 0; border-width: 0; } }
+  @keyframes chat-bot { 0%, 40% { opacity: 0; transform: translateY(6px); } 46%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+  @keyframes dots { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-3px); opacity: 1; } }
+  @keyframes wire { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 8px); opacity: 0; } }
+  @keyframes grow { to { transform: scaleY(1); } }
+  @keyframes check { 0%, 8% { background: transparent; border-color: var(--border-strong); } 14%, 80% { background: var(--ok); border-color: var(--ok); } 92%, 100% { background: transparent; border-color: var(--border-strong); } }
+  @keyframes pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+  @media (max-width: 1024px) {
+    .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tile--a { grid-column: span 2; grid-row: auto; }
+    .tile--b, .tile--c { grid-column: span 2; }
+  }
+  @media (max-width: 640px) {
+    .bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
+    .tile--a, .tile--b, .tile--c { grid-column: auto; }
+    .tile--b, .tile--c { grid-template-columns: 1fr; }
+  }
+</style>

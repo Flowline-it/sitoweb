@@ -5,15 +5,16 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 ---
 <section id="contatti" class="section contact" aria-labelledby="contatti-title">
   <div class="wrap">
-    <div class="coupon dark" data-reveal>
+    <div class="coupon card" data-reveal>
       <div class="coupon__intro">
-        <h2 id="contatti-title" class="head">{CONTACT.title}</h2>
+        <span class="eyebrow"><span class="dot"></span>Contatti</span>
+        <h2 id="contatti-title" class="h2">{CONTACT.title}</h2>
         <p class="lead">{CONTACT.text}</p>
+        <ul class="checks coupon__list"><li>Prima consulenza gratuita e senza impegno</li><li>Possiamo firmare un NDA prima dell'analisi</li><li>Ti rispondiamo entro 24 ore</li></ul>
         <p class="small muted coupon__note">{CONTACT.privacy}</p>
         <noscript><p class="small">Il modulo ha bisogno di JavaScript. Puoi scriverci a <a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p></noscript>
       </div>
-      <span class="perf" aria-hidden="true"></span>
-      <div class="coupon__body">
+            <div class="coupon__body">
         <form class="cform" id="cform" novalidate data-endpoint={`${SITE.supabaseUrl}/rest/v1/consultations`} data-key={SITE.supabaseAnonKey}>
           <div class="cform__progress" aria-hidden="true"><span class="is-on"></span><span></span><span></span></div>
           <p class="cform__step small" id="cform-step" aria-live="polite">Passo 1 di 3: i tuoi dati</p>
@@ -66,7 +67,8 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
         </form>
 
         <div class="cform__done" id="cform-done" hidden tabindex="-1">
-          <h3 class="head">{CONTACT.success.title}</h3>
+          <span class="done__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5l4 4 8-9"/></svg></span>
+          <h3 class="h2">{CONTACT.success.title}</h3>
           <p class="lead">{CONTACT.success.text}</p>
           <button type="button" class="button button--quiet" data-again>{CONTACT.success.again}</button>
         </div>
@@ -76,62 +78,47 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 </section>
 
 <style>
-  .contact { padding-block: calc(var(--section) * 0.62); }
-  .coupon { position: relative; display: grid; grid-template-columns: 44fr 56fr; overflow: hidden; }
-  .coupon__intro { padding: clamp(2rem, 4vw, 3.5rem); display: flex; flex-direction: column; gap: 1.25rem; }
-  @media (min-width: 1100px) { .coupon__intro .head { max-width: 9ch; } }
-  .coupon__note { margin-top: auto; padding-top: 2rem; max-width: 38ch; }
-  .coupon__body { padding: clamp(2rem, 4vw, 3.5rem); }
-  /* la perforazione: una linea tratteggiata con due tacche, il tagliando da staccare */
-  .perf { position: absolute; left: 44%; top: 0; bottom: 0; width: 0; border-left: 4px dotted var(--ground); }
-  .perf::before, .perf::after { content: ''; position: absolute; left: -18px; width: 32px; height: 32px; border-radius: 50%; background: var(--ground); }
-  .perf::before { top: -16px; }
-  .perf::after { bottom: -16px; }
+  .contact { padding-block: calc(var(--section) * 0.5); }
+  .coupon { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 0; padding: 0; overflow: hidden; }
+  .coupon__intro { position: relative; padding: clamp(2rem, 4vw, 3rem); display: flex; flex-direction: column; align-items: flex-start; gap: 1.1rem; background: radial-gradient(90% 70% at 0% 0%, rgba(255, 153, 0, 0.16), transparent 70%), #fbfbfa; border-right: 1px solid var(--border); }
+  .coupon__list { margin-top: 0.5rem; font-size: 0.95rem; }
+  .coupon__note { margin-top: auto; padding-top: 1.5rem; max-width: 36ch; }
+  .coupon__body { padding: clamp(2rem, 4vw, 3rem); }
   :global(html:not(.js)) .cform { display: none; }
-
-  .cform__progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 0.9rem; }
-  .cform__progress span { height: 6px; background: var(--anthracite-3); border-radius: 3px; transition: background-color var(--t-ui) ease; }
-  .cform__progress span.is-on { background: var(--orange); }
-  .cform__step { color: var(--rail-ink); margin-bottom: 1.5rem; }
+  .cform__progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 0.75rem; }
+  .cform__progress span { height: 5px; background: var(--surface-2); border-radius: 3px; transition: background-color 240ms ease; }
+  .cform__progress span.is-on { background: var(--accent); }
+  .cform__step { color: var(--muted); margin-bottom: 1.5rem; font-weight: 500; }
   fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
-  .cform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem 1.25rem; }
-  .field { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+  .cform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
   .field--wide { grid-column: 1 / -1; }
-  .field label { font-size: var(--s-small); font-weight: 600; color: var(--board-ink); }
-  .field label span { color: var(--orange); }
-  .field input, .field select, .field textarea {
-    width: 100%; min-height: 3.25rem; padding: 0.8rem 0.95rem; font-size: 1rem;
-    background: var(--anthracite-2); color: var(--board-ink);
-    border: 1px solid #5c5b56; border-radius: 0; transition: border-color var(--t-hover) ease, box-shadow var(--t-hover) ease;
-  }
-  .field textarea { resize: vertical; min-height: 7.5rem; }
-  .field select { appearance: none; padding-right: 2.75rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2f1ec' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; background-size: 1.1rem; }
-  .field ::placeholder { color: #a3a29c; }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 30%, transparent); }
-  .field [aria-invalid='true'] { border-color: #ff8a7f; }
-  .field__err { font-size: var(--s-small); color: #ff9d94; min-height: 0; }
+  .field label { font-size: 0.875rem; font-weight: 600; }
+  .field label span { color: var(--accent-text); }
+  .field input, .field select, .field textarea { width: 100%; min-height: 3rem; padding: 0.75rem 0.95rem; font-size: 1rem; background: var(--surface); color: var(--ink); border: 1px solid var(--border-strong); border-radius: 12px; transition: border-color 160ms ease, box-shadow 160ms ease; }
+  .field textarea { resize: vertical; min-height: 7rem; }
+  .field select { appearance: none; padding-right: 2.75rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6b73' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; background-size: 1.1rem; }
+  .field ::placeholder { color: #9a9aa2; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255, 153, 0, 0.18); }
+  .field [aria-invalid='true'] { border-color: #d14b3c; }
+  .field__err { font-size: 0.85rem; color: #b8382a; }
   .field__err:empty { display: none; }
-  .check { display: grid; grid-template-columns: auto 1fr; column-gap: 0.75rem; align-items: start; }
-  .check input { width: 1.25rem; height: 1.25rem; min-height: 0; margin-top: 0.2rem; accent-color: var(--orange); }
-  .check label { font-weight: 400; font-size: 1rem; }
+  .check { display: grid; grid-template-columns: auto 1fr; column-gap: 0.7rem; align-items: start; }
+  .check input { width: 1.2rem; height: 1.2rem; min-height: 0; margin-top: 0.2rem; accent-color: var(--accent); }
+  .check label { font-weight: 400; font-size: 0.95rem; }
   .check .field__err { grid-column: 2; }
-  .cform__actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-  .cform__status { margin-top: 1rem; color: #ff9d94; }
+  .cform__actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.75rem; flex-wrap: wrap; }
+  .cform__status { margin-top: 1rem; color: #b8382a; }
   .cform__status:empty { display: none; }
   .button[disabled] { opacity: 0.6; pointer-events: none; }
-  .cform__done { display: flex; flex-direction: column; gap: 1.25rem; align-items: flex-start; }
-  .cform__done[hidden] { display: none; }
-
+  .cform__done { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
+  .done__icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--ok-soft); color: var(--ok); }
+  .done__icon svg { width: 26px; height: 26px; }
   @media (max-width: 860px) {
     .coupon { grid-template-columns: 1fr; }
-    .perf { position: relative; left: auto; top: auto; bottom: auto; width: auto; height: 0; border-left: 0; border-top: 4px dotted var(--ground); }
-    .perf::before, .perf::after { top: -18px; bottom: auto; }
-    .perf::before { left: -16px; }
-    .perf::after { left: auto; right: -16px; }
-    .coupon__note { padding-top: 0.5rem; }
+    .coupon__intro { border-right: 0; border-bottom: 1px solid var(--border); }
     .cform__grid { grid-template-columns: 1fr; }
-    .cform__actions { justify-content: stretch; }
-    .cform__actions .button { flex: 1; justify-content: center; }
+    .cform__actions .button { flex: 1; }
   }
 </style>
 
