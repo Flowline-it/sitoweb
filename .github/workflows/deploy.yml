@@ -32,9 +32,9 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          # Indirizzo di prova: BASE_PATH=/sito e PUBLIC_STAGING=1 (variabili del repository).
+          # Indirizzo di prova: BASE_PATH=/sitoweb e PUBLIC_STAGING=1 (variabili del repository).
           # Al lancio su flowline.it: BASE_PATH vuoto e PUBLIC_STAGING=0.
-          BASE_PATH: ${{ vars.BASE_PATH || '/sito' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '/sitoweb' }}
           PUBLIC_STAGING: ${{ vars.PUBLIC_STAGING || '1' }}
       - uses: actions/upload-pages-artifact@v3
         with:

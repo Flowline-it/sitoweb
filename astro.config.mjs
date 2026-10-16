@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 
-// BASE_PATH vuoto = sito sul dominio (flowline.it); "/sito" = indirizzo di prova su GitHub Pages.
+// BASE_PATH vuoto = sito sul dominio (flowline.it); "/sitoweb" = indirizzo di prova su GitHub Pages.
 const base = process.env.BASE_PATH || '/';
 
 export default defineConfig({

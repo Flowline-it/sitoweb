@@ -33,7 +33,7 @@ Ogni push su `main` ricostruisce e pubblica il sito su GitHub Pages (`.github/wo
 - su richiesta, con un `repository_dispatch` di tipo `journal-update` (da un webhook Supabase o da n8n quando si pubblica un articolo):
 
 ```bash
-curl -X POST https://api.github.com/repos/flowline-it/sito/dispatches \
+curl -X POST https://api.github.com/repos/Flowline-it/sitoweb/dispatches \
   -H "Authorization: Bearer <token con permesso contents:write>" \
   -H "Accept: application/vnd.github+json" \
   -d '{"event_type":"journal-update"}'
