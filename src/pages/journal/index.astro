@@ -1,4 +1,5 @@
 ---
+import { p, isHome } from '../../lib/paths.js';
 import Base from '../../layouts/Base.astro';
 import { getArticles, fmtDate } from '../../lib/journal.js';
 import { CTA } from '../../data/site.js';
@@ -24,7 +25,7 @@ const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
           <span class="journal__line" aria-hidden="true"></span>
           <p class="lead">I primi articoli sono in preparazione.</p>
           <p>Nel frattempo, se vuoi capire cosa possiamo automatizzare nella tua azienda, parliamone direttamente.</p>
-          <p><a class="button" href="/#contatti">{CTA} <Fragment set:html={arrow} /></a></p>
+          <p><a class="button" href={p('/#contatti')}>{CTA} <Fragment set:html={arrow} /></a></p>
         </div>
       ) : (
         <>
@@ -32,7 +33,7 @@ const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
             {featured.cover_image && <img class="jfeat__img" src={featured.cover_image} alt={featured.cover_alt || ''} loading="eager" width="1600" height="900" onerror="this.remove()" />}
             <div class="jfeat__text">
               <p class="small muted">{featured.category?.name} · <time datetime={featured.published_at}>{fmtDate(featured.published_at)}</time></p>
-              <h2 class="head"><a href={`/journal/${featured.slug}`}>{featured.title}</a></h2>
+              <h2 class="head"><a href={p(`/journal/${featured.slug}`)}>{featured.title}</a></h2>
               {featured.subtitle && <p class="lead">{featured.subtitle}</p>}
               <p class="small muted">{featured.reading_time || 1} min di lettura</p>
             </div>
@@ -41,7 +42,7 @@ const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
             {rest.map((a, i) => (
               <li data-reveal style={`--i:${i % 3}`}>
                 <p class="small muted">{a.category?.name} · <time datetime={a.published_at}>{fmtDate(a.published_at)}</time> · {a.reading_time || 1} min</p>
-                <h2 class="name"><a href={`/journal/${a.slug}`}>{a.title}</a></h2>
+                <h2 class="name"><a href={p(`/journal/${a.slug}`)}>{a.title}</a></h2>
                 {a.subtitle && <p>{a.subtitle}</p>}
               </li>
             ))}

@@ -1,4 +1,5 @@
 ---
+import { p, isHome } from '../lib/paths.js';
 import Base from '../layouts/Base.astro';
 ---
 <Base title="Pagina non trovata | Flowline" description="La pagina che cercavi non esiste o è stata spostata." path="/404" noindex>
@@ -7,9 +8,9 @@ import Base from '../layouts/Base.astro';
       <h1 class="display">Pagina non trovata</h1>
       <p class="lead">La pagina che cercavi non esiste o è stata spostata.</p>
       <ul class="dash nf__links" role="list">
-        <li><a class="link" href="/">Torna alla home</a></li>
-        <li><a class="link" href="/#soluzioni">Scopri le soluzioni</a></li>
-        <li><a class="link" href="/#contatti">Prenota una consulenza gratuita</a></li>
+        <li><a class="link" href={p('/')}>Torna alla home</a></li>
+        <li><a class="link" href={p('/#soluzioni')}>Scopri le soluzioni</a></li>
+        <li><a class="link" href={p('/#contatti')}>Prenota una consulenza gratuita</a></li>
       </ul>
     </div>
     <span class="nf__line nf__line--a" aria-hidden="true"></span>

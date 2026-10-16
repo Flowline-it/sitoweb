@@ -1,14 +1,15 @@
 ---
+import { p, isHome } from '../lib/paths.js';
 import { SITE } from '../data/site.js';
-const onHome = Astro.url.pathname === '/';
-const base = onHome ? '' : '/';
+const onHome = isHome(Astro.url);
+const base = onHome ? '' : p('/');
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="wrap">
     <div class="footer-top">
       <div class="footer-brand">
-        <img src="/brand/flowline-logo-dark.png" alt="Flowline" width="1600" height="320" loading="lazy" />
+        <img src={p('/brand/flowline-logo-dark.png')} alt="Flowline" width="1600" height="320" loading="lazy" />
         <p>Automazioni e agenti AI su misura per le aziende. Niente teoria, solo automazioni che funzionano.</p>
       </div>
       <nav class="footer-col" aria-labelledby="f-sol">
@@ -32,8 +33,8 @@ const year = new Date().getFullYear();
       <nav class="footer-col" aria-labelledby="f-ris">
         <h2 id="f-ris">Risorse</h2>
         <ul>
-          <li><a href="/journal">Journal</a></li>
-          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li><a href={p('/journal')}>Journal</a></li>
+          <li><a href={p('/privacy-policy')}>Privacy Policy</a></li>
         </ul>
       </nav>
       <nav class="footer-col" aria-labelledby="f-con">
@@ -48,7 +49,7 @@ const year = new Date().getFullYear();
     </div>
     <div class="footer-legal">
       <p>© {year} Flowline · {SITE.legalName} · {SITE.street}, {SITE.postalCode} {SITE.city} ({SITE.province}) · P.IVA {SITE.vat}</p>
-      <p><a href="/privacy-policy" class="link" style="color:inherit;font-weight:500">Privacy Policy</a></p>
+      <p><a href={p('/privacy-policy')} class="link" style="color:inherit;font-weight:500">Privacy Policy</a></p>
     </div>
   </div>
 </footer>

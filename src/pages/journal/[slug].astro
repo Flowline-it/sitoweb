@@ -1,4 +1,5 @@
 ---
+import { p, isHome } from '../../lib/paths.js';
 import Base from '../../layouts/Base.astro';
 import { getArticles, fmtDate } from '../../lib/journal.js';
 import { SITE, CTA } from '../../data/site.js';
@@ -36,7 +37,7 @@ const jsonld = [
 >
   <article class="section post">
     <header class="wrap post__head">
-      <p class="small"><a class="link" href="/journal">Journal</a> · {a.category?.name}</p>
+      <p class="small"><a class="link" href={p('/journal')}>Journal</a> · {a.category?.name}</p>
       <h1 class="head" data-rise>{a.title}</h1>
       {a.subtitle && <p class="lead" data-rise style="--i:1">{a.subtitle}</p>}
       <p class="small muted" data-rise style="--i:2">{a.author?.name && <>{a.author.name} · </>}<time datetime={a.published_at}>{fmtDate(a.published_at)}</time> · {a.reading_time || 1} min di lettura</p>
@@ -69,11 +70,11 @@ const jsonld = [
     <div class="wrap">
       <h2 class="head">Ti è piaciuto questo articolo?</h2>
       <p class="lead">Parliamo di come applicare queste idee alla tua azienda.</p>
-      <p><a class="button" href="/#contatti">{CTA}</a></p>
+      <p><a class="button" href={p('/#contatti')}>{CTA}</a></p>
       {related.length > 0 && (
         <div class="post__related">
           <h3 class="name">Articoli correlati</h3>
-          <ul class="dash">{related.map((r) => <li><a class="link" href={`/journal/${r.slug}`}>{r.title}</a></li>)}</ul>
+          <ul class="dash">{related.map((r) => <li><a class="link" href={p(`/journal/${r.slug}`)}>{r.title}</a></li>)}</ul>
         </div>
       )}
     </div>
