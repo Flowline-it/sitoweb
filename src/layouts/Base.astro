@@ -1,0 +1,99 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../data/site.js';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  noindex?: boolean;
+  ogType?: string;
+  ogImage?: string;
+  jsonld?: object[];
+  headerTone?: 'light' | 'dark';
+}
+const { title, description, path, noindex = false, ogType = 'website', ogImage = '/og.png', jsonld = [], headerTone = 'light' } = Astro.props;
+const canonical = new URL(path, SITE.url).href;
+const image = new URL(ogImage, SITE.url).href;
+
+const organization = {
+  '@type': ['Organization', 'ProfessionalService'],
+  '@id': `${SITE.url}/#organization`,
+  name: SITE.name,
+  legalName: SITE.legalName,
+  url: SITE.url,
+  logo: `${SITE.url}/brand/flowline-logo-dark.png`,
+  image: `${SITE.url}/og.png`,
+  email: SITE.email,
+  vatID: SITE.vat,
+  address: { '@type': 'PostalAddress', streetAddress: SITE.street, postalCode: SITE.postalCode, addressLocality: SITE.city, addressRegion: SITE.province, addressCountry: 'IT' },
+  sameAs: [SITE.linkedin, SITE.instagram],
+};
+const graph = { '@context': 'https://schema.org', '@graph': [organization, { '@type': 'WebSite', '@id': `${SITE.url}/#website`, url: SITE.url, name: SITE.name, inLanguage: 'it-IT', publisher: { '@id': `${SITE.url}/#organization` } }, ...jsonld] };
+---
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta name="theme-color" content="#f3f2ef" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:site_name" content="Flowline" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="facebook-domain-verification" content="ql4fv3olrr9gt9sp8ihlz3q564ass2" />
+    <meta name="facebook-domain-verification" content="8lwz6dcv7tw3dgpgvbfqki9vfv170q" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <script is:inline>document.documentElement.classList.add('js')</script>
+    <script type="application/ld+json" set:html={JSON.stringify(graph)} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#contenuto">Vai al contenuto</a>
+    <Header tone={headerTone} />
+    <main id="contenuto">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // reveal una volta sola quando l'elemento entra nello schermo; mai contenuti lasciati nascosti
+      const targets = document.querySelectorAll('[data-reveal]');
+      if (targets.length) {
+        if (!('IntersectionObserver' in window)) targets.forEach((el) => el.classList.add('is-in'));
+        else {
+          const io = new IntersectionObserver((entries) => {
+            for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+          }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+          targets.forEach((el) => io.observe(el));
+          window.addEventListener('load', () => setTimeout(() => {
+            targets.forEach((el) => { const r = el.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) el.classList.add('is-in'); });
+          }, 2500));
+        }
+      }
+      // menu su telefono
+      const toggle = document.querySelector('.menu-toggle');
+      const nav = document.getElementById('nav');
+      if (toggle && nav) {
+        const close = () => { nav.classList.remove('is-open'); toggle.setAttribute('aria-expanded', 'false'); toggle.textContent = 'Menu'; };
+        toggle.addEventListener('click', () => { const open = nav.classList.toggle('is-open'); toggle.setAttribute('aria-expanded', String(open)); toggle.textContent = open ? 'Chiudi' : 'Menu'; });
+        nav.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+      }
+    </script>
+  </body>
+</html>

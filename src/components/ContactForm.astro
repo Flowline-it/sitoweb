@@ -1,0 +1,239 @@
+---
+import { CONTACT, SITE } from '../data/site.js';
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+---
+<section id="contatti" class="section contact" aria-labelledby="contatti-title">
+  <div class="wrap">
+    <div class="coupon dark" data-reveal>
+      <div class="coupon__intro">
+        <h2 id="contatti-title" class="head">{CONTACT.title}</h2>
+        <p class="lead">{CONTACT.text}</p>
+        <p class="small muted coupon__note">{CONTACT.privacy}</p>
+        <noscript><p class="small">Il modulo ha bisogno di JavaScript. Puoi scriverci a <a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p></noscript>
+      </div>
+      <span class="perf" aria-hidden="true"></span>
+      <div class="coupon__body">
+        <form class="cform" id="cform" novalidate data-endpoint={`${SITE.supabaseUrl}/rest/v1/consultations`} data-key={SITE.supabaseAnonKey}>
+          <div class="cform__progress" aria-hidden="true"><span class="is-on"></span><span></span><span></span></div>
+          <p class="cform__step small" id="cform-step" aria-live="polite">Passo 1 di 3: i tuoi dati</p>
+
+          <fieldset data-step="1">
+            <legend class="sr-only">I tuoi dati</legend>
+            <div class="cform__grid">
+              <div class="field"><label for="f-nome">Nome e cognome <span aria-hidden="true">*</span></label><input id="f-nome" name="nome_cognome" autocomplete="name" placeholder="Mario Rossi" required /><p class="field__err" id="e-nome_cognome"></p></div>
+              <div class="field"><label for="f-email">Email aziendale <span aria-hidden="true">*</span></label><input id="f-email" name="email" type="email" autocomplete="email" placeholder="mario@azienda.it" required /><p class="field__err" id="e-email"></p></div>
+              <div class="field"><label for="f-tel">Numero di telefono <span aria-hidden="true">*</span></label><input id="f-tel" name="telefono" type="tel" autocomplete="tel" placeholder="+39 333 1234567" required /><p class="field__err" id="e-telefono"></p></div>
+              <div class="field"><label for="f-az">Nome azienda <span aria-hidden="true">*</span></label><input id="f-az" name="nome_azienda" autocomplete="organization" placeholder="La Tua Azienda Srl" required /><p class="field__err" id="e-nome_azienda"></p></div>
+            </div>
+          </fieldset>
+
+          <fieldset data-step="2" hidden>
+            <legend class="sr-only">Il progetto</legend>
+            <div class="cform__grid">
+              <div class="field"><label for="f-ruolo">Qual è il ruolo nella tua azienda? <span aria-hidden="true">*</span></label><input id="f-ruolo" name="ruolo_azienda" autocomplete="organization-title" placeholder="es. CEO, Marketing Manager, Developer..." required /><p class="field__err" id="e-ruolo_azienda"></p></div>
+              <div class="field"><label for="f-serv">A quale servizio sei interessato? <span aria-hidden="true">*</span></label>
+                <select id="f-serv" name="servizio_interessato" required>
+                  <option value="">Seleziona…</option>
+                  {CONTACT.services.map((s) => <option value={s}>{s}</option>)}
+                </select><p class="field__err" id="e-servizio_interessato"></p></div>
+              <div class="field field--wide"><label for="f-desc">Descrivici in modo specifico il progetto <span aria-hidden="true">*</span></label><textarea id="f-desc" name="descrizione_progetto" rows="4" placeholder="Vorrei automatizzare la fatturazione, migliorare il customer service..." required></textarea><p class="field__err" id="e-descrizione_progetto"></p></div>
+            </div>
+          </fieldset>
+
+          <fieldset data-step="3" hidden>
+            <legend class="sr-only">Ultimo passo</legend>
+            <div class="cform__grid">
+              <div class="field"><label for="f-fonte">Come hai sentito parlare di noi? <span aria-hidden="true">*</span></label>
+                <select id="f-fonte" name="come_hai_sentito" required>
+                  <option value="">Seleziona…</option>
+                  {CONTACT.sources.map((s) => <option value={s}>{s}</option>)}
+                </select><p class="field__err" id="e-come_hai_sentito"></p></div>
+              <div class="field field--wide check">
+                <input id="f-privacy" name="privacy" type="checkbox" required />
+                <label for="f-privacy">Accetto la <a class="link" href="/privacy-policy">Privacy Policy</a> e autorizzo il trattamento dei dati per essere ricontattato. <span aria-hidden="true">*</span></label>
+                <p class="field__err" id="e-privacy"></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="cform__actions">
+            <button type="button" class="button button--quiet" data-back hidden><Fragment set:html={back} /> Indietro</button>
+            <button type="button" class="button" data-next>Continua <Fragment set:html={arrow} /></button>
+            <button type="submit" class="button" data-submit hidden>Invia richiesta <Fragment set:html={arrow} /></button>
+          </div>
+          <p class="cform__status small" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="cform__done" id="cform-done" hidden tabindex="-1">
+          <h3 class="head">{CONTACT.success.title}</h3>
+          <p class="lead">{CONTACT.success.text}</p>
+          <button type="button" class="button button--quiet" data-again>{CONTACT.success.again}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact { padding-block: calc(var(--section) * 0.62); }
+  .coupon { position: relative; display: grid; grid-template-columns: 44fr 56fr; overflow: hidden; }
+  .coupon__intro { padding: clamp(2rem, 4vw, 3.5rem); display: flex; flex-direction: column; gap: 1.25rem; }
+  @media (min-width: 1100px) { .coupon__intro .head { max-width: 9ch; } }
+  .coupon__note { margin-top: auto; padding-top: 2rem; max-width: 38ch; }
+  .coupon__body { padding: clamp(2rem, 4vw, 3.5rem); }
+  /* la perforazione: una linea tratteggiata con due tacche, il tagliando da staccare */
+  .perf { position: absolute; left: 44%; top: 0; bottom: 0; width: 0; border-left: 4px dotted var(--ground); }
+  .perf::before, .perf::after { content: ''; position: absolute; left: -18px; width: 32px; height: 32px; border-radius: 50%; background: var(--ground); }
+  .perf::before { top: -16px; }
+  .perf::after { bottom: -16px; }
+  :global(html:not(.js)) .cform { display: none; }
+
+  .cform__progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 0.9rem; }
+  .cform__progress span { height: 6px; background: var(--anthracite-3); border-radius: 3px; transition: background-color var(--t-ui) ease; }
+  .cform__progress span.is-on { background: var(--orange); }
+  .cform__step { color: var(--rail-ink); margin-bottom: 1.5rem; }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  .cform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem 1.25rem; }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+  .field--wide { grid-column: 1 / -1; }
+  .field label { font-size: var(--s-small); font-weight: 600; color: var(--board-ink); }
+  .field label span { color: var(--orange); }
+  .field input, .field select, .field textarea {
+    width: 100%; min-height: 3.25rem; padding: 0.8rem 0.95rem; font-size: 1rem;
+    background: var(--anthracite-2); color: var(--board-ink);
+    border: 1px solid #5c5b56; border-radius: 0; transition: border-color var(--t-hover) ease, box-shadow var(--t-hover) ease;
+  }
+  .field textarea { resize: vertical; min-height: 7.5rem; }
+  .field select { appearance: none; padding-right: 2.75rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2f1ec' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; background-size: 1.1rem; }
+  .field ::placeholder { color: #a3a29c; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 30%, transparent); }
+  .field [aria-invalid='true'] { border-color: #ff8a7f; }
+  .field__err { font-size: var(--s-small); color: #ff9d94; min-height: 0; }
+  .field__err:empty { display: none; }
+  .check { display: grid; grid-template-columns: auto 1fr; column-gap: 0.75rem; align-items: start; }
+  .check input { width: 1.25rem; height: 1.25rem; min-height: 0; margin-top: 0.2rem; accent-color: var(--orange); }
+  .check label { font-weight: 400; font-size: 1rem; }
+  .check .field__err { grid-column: 2; }
+  .cform__actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
+  .cform__status { margin-top: 1rem; color: #ff9d94; }
+  .cform__status:empty { display: none; }
+  .button[disabled] { opacity: 0.6; pointer-events: none; }
+  .cform__done { display: flex; flex-direction: column; gap: 1.25rem; align-items: flex-start; }
+  .cform__done[hidden] { display: none; }
+
+  @media (max-width: 860px) {
+    .coupon { grid-template-columns: 1fr; }
+    .perf { position: relative; left: auto; top: auto; bottom: auto; width: auto; height: 0; border-left: 0; border-top: 4px dotted var(--ground); }
+    .perf::before, .perf::after { top: -18px; bottom: auto; }
+    .perf::before { left: -16px; }
+    .perf::after { left: auto; right: -16px; }
+    .coupon__note { padding-top: 0.5rem; }
+    .cform__grid { grid-template-columns: 1fr; }
+    .cform__actions { justify-content: stretch; }
+    .cform__actions .button { flex: 1; justify-content: center; }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('cform') as HTMLFormElement | null;
+  if (form) {
+    const done = document.getElementById('cform-done') as HTMLElement;
+    const stepLabel = document.getElementById('cform-step') as HTMLElement;
+    const status = form.querySelector('.cform__status') as HTMLElement;
+    const sets = [...form.querySelectorAll<HTMLFieldSetElement>('fieldset[data-step]')];
+    const bars = [...form.querySelectorAll<HTMLElement>('.cform__progress span')];
+    const btnBack = form.querySelector('[data-back]') as HTMLButtonElement;
+    const btnNext = form.querySelector('[data-next]') as HTMLButtonElement;
+    const btnSubmit = form.querySelector('[data-submit]') as HTMLButtonElement;
+    const names = ['i tuoi dati', 'il progetto', 'ultimo passo'];
+    let step = 1;
+
+    const val = (n: string) => ((form.elements.namedItem(n) as HTMLInputElement)?.value || '').trim();
+    const setErr = (n: string, msg: string) => {
+      const el = form.elements.namedItem(n) as HTMLElement | null;
+      const err = document.getElementById(`e-${n}`);
+      if (err) err.textContent = msg;
+      if (el) { el.setAttribute('aria-invalid', msg ? 'true' : 'false'); if (msg) el.setAttribute('aria-describedby', `e-${n}`); else el.removeAttribute('aria-describedby'); }
+    };
+    const emailOk = (v: string) => /^[^\s@<>()[\]\\.,;:"]+(\.[^\s@<>()[\]\\.,;:"]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(v);
+    const phoneOk = (v: string) => !!v && (v.startsWith('+39') || v.length > 8);
+
+    function validate(s: number) {
+      const errs: Record<string, string> = {};
+      if (s === 1) {
+        if (!val('nome_cognome')) errs.nome_cognome = 'Nome e cognome richiesto';
+        if (!val('email') || !emailOk(val('email'))) errs.email = 'Email non valida';
+        if (!phoneOk(val('telefono'))) errs.telefono = 'Telefono non valido';
+        if (!val('nome_azienda')) errs.nome_azienda = 'Nome azienda richiesto';
+      }
+      if (s === 2) {
+        if (!val('ruolo_azienda')) errs.ruolo_azienda = 'Ruolo aziendale richiesto';
+        if (!val('servizio_interessato')) errs.servizio_interessato = 'Seleziona un servizio';
+        if (!val('descrizione_progetto')) errs.descrizione_progetto = 'Descrizione richiesta';
+      }
+      if (s === 3) {
+        if (!val('come_hai_sentito')) errs.come_hai_sentito = 'Campo richiesto';
+        if (!(form.elements.namedItem('privacy') as HTMLInputElement).checked) errs.privacy = 'Devi accettare la Privacy Policy per procedere.';
+      }
+      const fields = [...sets[s - 1].querySelectorAll<HTMLInputElement>('[name]')].map((f) => f.name);
+      fields.forEach((n) => setErr(n, errs[n] || ''));
+      const first = fields.find((n) => errs[n]);
+      if (first) (form.elements.namedItem(first) as HTMLElement).focus();
+      return !first;
+    }
+
+    function show(s: number, focus = true) {
+      step = s;
+      sets.forEach((f, i) => (f.hidden = i !== s - 1));
+      bars.forEach((b, i) => b.classList.toggle('is-on', i < s));
+      stepLabel.textContent = `Passo ${s} di 3: ${names[s - 1]}`;
+      btnBack.hidden = s === 1;
+      btnNext.hidden = s === 3;
+      btnSubmit.hidden = s !== 3;
+      status.textContent = '';
+      if (focus) (sets[s - 1].querySelector('input, select, textarea') as HTMLElement)?.focus();
+    }
+
+    btnNext.addEventListener('click', () => { if (validate(step)) show(step + 1); });
+    btnBack.addEventListener('click', () => show(step - 1));
+    form.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && step < 3 && (e.target as HTMLElement).tagName === 'INPUT') { e.preventDefault(); btnNext.click(); }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate(3)) return;
+      btnSubmit.disabled = true;
+      btnSubmit.firstChild!.textContent = 'Invio… ';
+      const body = {
+        nome_cognome: val('nome_cognome'), email: val('email'), telefono: val('telefono'), nome_azienda: val('nome_azienda'),
+        ruolo_azienda: val('ruolo_azienda'), servizio_interessato: val('servizio_interessato'),
+        descrizione_progetto: val('descrizione_progetto'), come_hai_sentito: val('come_hai_sentito'),
+      };
+      try {
+        const key = form.dataset.key!;
+        const res = await fetch(form.dataset.endpoint!, {
+          method: 'POST',
+          headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        form.hidden = true;
+        done.hidden = false;
+        done.focus();
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Si è verificato un errore durante l'invio. Riprova più tardi, oppure scrivici a info@flowline.it.";
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.firstChild!.textContent = 'Invia richiesta ';
+      }
+    });
+
+    done.querySelector('[data-again]')!.addEventListener('click', () => {
+      done.hidden = true; form.hidden = false; show(1);
+    });
+  }
+</script>

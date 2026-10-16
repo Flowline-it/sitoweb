@@ -1,0 +1,59 @@
+---
+import { SITE, CREDITS } from '../data/site.js';
+const onHome = Astro.url.pathname === '/';
+const base = onHome ? '' : '/';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer on-dark">
+  <div class="wrap">
+    <div class="footer-mark">
+      <img src="/brand/flowline-logo-light.png" alt="Flowline" width="1600" height="320" loading="lazy" />
+    </div>
+    <div class="grid footer-cols">
+      <div class="footer-legal">
+        <p>{SITE.legalName}<br />{SITE.street}, {SITE.postalCode} {SITE.city} ({SITE.province}), Italia<br />P.IVA {SITE.vat}</p>
+      </div>
+      <nav class="footer-col" aria-labelledby="f-azienda">
+        <h2 id="f-azienda">Azienda</h2>
+        <ul>
+          <li><a href={`${base}#chi-siamo`}>Chi siamo</a></li>
+          <li><a href={`${base}#come-lavoriamo`}>Metodo</a></li>
+          <li><a href={`${base}#servizi`}>Servizi</a></li>
+          <li><a href={`${base}#faq`}>FAQ</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-col" aria-labelledby="f-contatti">
+        <h2 id="f-contatti">Contatti</h2>
+        <ul>
+          <li><a href={`${base}#contatti`}>Prenota una consulenza</a></li>
+          <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-col" aria-labelledby="f-legale">
+        <h2 id="f-legale">Legale</h2>
+        <ul>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-contact" aria-labelledby="f-social">
+        <h2 id="f-social">Seguici</h2>
+        <ul>
+          <li><a href={SITE.linkedin} rel="noopener">LinkedIn</a></li>
+          <li><a href={SITE.instagram} rel="noopener">Instagram</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p class="credits">
+        Foto d'archivio:{' '}
+        {CREDITS.map((c, i) => (
+          <>
+            <a href={c.url} rel="noopener">{c.title}</a>{c.by && <> di {c.by}</>}, <a href={c.licenceUrl} rel="noopener">{c.licence}</a>{i < CREDITS.length - 1 ? '; ' : '.'}{' '}
+          </>
+        ))}
+        Mostrano il mondo della produzione italiana, non il nostro lavoro.
+      </p>
+      <p>© {year} Flowline. Tutti i diritti riservati.</p>
+    </div>
+  </div>
+</footer>

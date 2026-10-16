@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Testo invariato dalla privacy policy pubblicata (ultimo aggiornamento 12 febbraio 2026).
+const sections = [
+  { t: 'Titolare del trattamento', b: [
+    { p: 'Il Titolare del trattamento dei dati è Callforus Agenzia del Digitale di Giuseppe Romano, con sede legale in Via Antonio Pacinotti 13, 93012 Gela (CL), Italia – P.IVA IT02110530850.' },
+    { p: "Per qualsiasi informazione relativa al trattamento dei dati, è possibile contattarci all'indirizzo email: info@flowline.it.", mail: true },
+  ] },
+  { t: 'Tipologia di dati raccolti', b: [
+    { p: 'Durante la navigazione e l’utilizzo dei nostri servizi, possiamo raccogliere le seguenti categorie di dati:' },
+    { ul: [
+      ['Dati di navigazione:', ' I sistemi informatici e le procedure software preposte al funzionamento di questo sito web acquisiscono, nel corso del loro normale esercizio, alcuni dati personali la cui trasmissione è implicita nell’uso dei protocolli di comunicazione di Internet (es. indirizzi IP, tipo di browser, orari di accesso).'],
+      ['Dati forniti volontariamente dall’utente:', ' L’invio facoltativo, esplicito e volontario di posta elettronica agli indirizzi indicati su questo sito o la compilazione di form di contatto comporta la successiva acquisizione dell’indirizzo del mittente, necessario per rispondere alle richieste, nonché degli eventuali altri dati personali inseriti nella missiva o nel form (es. nome, cognome, email, numero di telefono, nome azienda).'],
+    ] },
+  ] },
+  { t: 'Finalità del trattamento', b: [
+    { p: 'I dati raccolti sono trattati per le seguenti finalità:' },
+    { ul: [
+      ['', 'Rispondere alle richieste di informazioni, preventivi o consulenza inviate tramite il form di contatto o via email.'],
+      ['', 'Fornire i servizi richiesti e gestire i rapporti amministrativi e commerciali con i clienti.'],
+      ['', 'Inviare comunicazioni informative e promozionali relative ai nostri servizi (newsletter), solo previo consenso esplicito e revocabile in qualsiasi momento.'],
+      ['', 'Adempiere agli obblighi di legge, contabili e fiscali.'],
+      ['', 'Manutenzione e sicurezza del sito web, per prevenire o scoprire attività fraudolente o abusi dannosi per il sito.'],
+    ] },
+  ] },
+  { t: 'Base giuridica del trattamento', b: [
+    { p: 'Il trattamento dei dati personali si basa sulle seguenti basi giuridiche:' },
+    { ul: [
+      ['Esecuzione di un contratto o misure precontrattuali (Art. 6.1.b GDPR):', ' per rispondere alle richieste dell’utente o fornire i servizi contrattualizzati.'],
+      ['Adempimento di un obbligo legale (Art. 6.1.c GDPR):', ' per rispettare normative fiscali, amministrative o ordini dell’autorità giudiziaria.'],
+      ['Legittimo interesse del Titolare (Art. 6.1.f GDPR):', ' per garantire la sicurezza del sito e migliorare i servizi offerti.'],
+      ['Consenso (Art. 6.1.a GDPR):', ' per l’invio di comunicazioni di marketing o newsletter. Il consenso è facoltativo e revocabile in ogni momento.'],
+    ] },
+  ] },
+  { t: 'Modalità di trattamento e sicurezza', b: [
+    { p: 'Il trattamento è effettuato mediante strumenti informatici e/o telematici, con modalità organizzative e logiche strettamente correlate alle finalità indicate. Il Titolare adotta adeguate misure di sicurezza tecniche e organizzative per proteggere i dati personali da accessi non autorizzati, divulgazione, modifica o distruzione non autorizzata.' },
+  ] },
+  { t: 'Conservazione dei dati', b: [
+    { p: 'I dati personali saranno conservati per il tempo strettamente necessario a conseguire gli scopi per cui sono stati raccolti. In particolare:' },
+    { ul: [
+      ['', 'I dati per finalità di contatto e precontrattuali saranno conservati per il tempo necessario a gestire la richiesta.'],
+      ['', 'I dati amministrativi e contabili saranno conservati per 10 anni come previsto dalla legge.'],
+      ['', 'I dati per finalità di marketing saranno conservati fino alla revoca del consenso da parte dell’utente (opt-out).'],
+    ] },
+  ] },
+  { t: 'Destinatari dei dati', b: [
+    { p: 'I dati non saranno diffusi indiscriminatamente. Potranno essere comunicati a soggetti terzi nominati, se necessario, Responsabili del Trattamento (art. 28 GDPR), quali:' },
+    { ul: [['', 'Fornitori di servizi tecnici e hosting provider.'], ['', 'Consulenti fiscali, legali e amministrativi.'], ['', 'Autorità pubbliche, se richiesto dalla legge.']] },
+  ] },
+  { t: 'Trasferimento dei dati extra UE', b: [
+    { p: 'I dati personali sono conservati su server ubicati all’interno dell’Unione Europea. Qualora per questioni di natura tecnica e/o operativa si renda necessario avvalersi di soggetti ubicati al di fuori dell’Unione Europea, tali soggetti saranno nominati Responsabili del Trattamento e il trasferimento dei dati avverrà in conformità alle disposizioni di legge (artt. 44 e ss. GDPR), garantendo un livello di protezione adeguato.' },
+  ] },
+  { t: 'Diritti dell’interessato', b: [
+    { p: 'In qualità di interessato, l’utente ha il diritto di esercitare in qualsiasi momento i diritti previsti dagli artt. 15-22 del GDPR, tra cui:' },
+    { ul: [['', 'Chiedere l’accesso ai propri dati personali.'], ['', 'Chiedere la rettifica o la cancellazione degli stessi.'], ['', 'Chiedere la limitazione del trattamento.'], ['', 'Opporsi al trattamento per motivi legittimi.'], ['', 'Richiedere la portabilità dei dati.'], ['', 'Revocare il consenso in qualsiasi momento (senza pregiudicare la liceità del trattamento basata sul consenso prestato prima della revoca).']] },
+    { p: 'Per esercitare tali diritti, è possibile inviare una richiesta scritta all’indirizzo email: info@flowline.it.', mail: true },
+  ] },
+  { t: 'Modifiche a questa policy', b: [
+    { p: 'Il Titolare si riserva il diritto di apportare modifiche alla presente Privacy Policy in qualunque momento dandone informazione agli utenti su questa pagina. Si prega dunque di consultare regolarmente questa pagina, facendo riferimento alla data di ultima modifica indicata in alto.' },
+  ] },
+];
+const slug = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const withMail = (p: string) => p.replace('info@flowline.it', '<a class="link" href="mailto:info@flowline.it">info@flowline.it</a>');
+---
+<Base title="Privacy Policy | Flowline" description="Informativa sulla privacy e trattamento dei dati personali di Flowline, in conformità con il GDPR." path="/privacy-policy">
+  <section class="section legal">
+    <div class="wrap legal__grid">
+      <header class="legal__head">
+        <h1 class="display">Privacy Policy</h1>
+        <p class="small muted">Ultimo aggiornamento: 12 febbraio 2026</p>
+        <p>La presente Privacy Policy descrive le modalità di gestione del sito web flowline.it in riferimento al trattamento dei dati personali degli utenti che lo consultano, ai sensi del Regolamento UE 2016/679 (GDPR).</p>
+      </header>
+      <nav class="legal__toc" aria-label="Indice">
+        <ol>
+          {sections.map((s) => <li><a href={`#${slug(s.t)}`}>{s.t}</a></li>)}
+        </ol>
+      </nav>
+      <div class="legal__body">
+        {sections.map((s) => (
+          <section id={slug(s.t)}>
+            <h2 class="name">{s.t}</h2>
+            {s.b.map((b: any) => b.ul ? (
+              <ul class="dash">{b.ul.map(([strong, rest]: [string, string]) => <li>{strong && <strong>{strong}</strong>}{rest}</li>)}</ul>
+            ) : b.mail ? <p set:html={withMail(b.p)} /> : <p>{b.p}</p>)}
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal { padding-top: clamp(2rem, 6vw, 5rem); }
+  .legal__grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 2.5rem var(--gutter); }
+  .legal__head { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 1.25rem; max-width: 46rem; margin-bottom: clamp(1.5rem, 4vw, 3rem); }
+  .legal__toc { position: sticky; top: 2rem; align-self: start; }
+  .legal__toc ol { padding-left: 1.4em; display: grid; gap: 0.45rem; font-size: var(--s-small); }
+  .legal__toc a { text-decoration: none; }
+  @media (hover: hover) and (pointer: fine) { .legal__toc a:hover { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 0.25em; } }
+  .legal__body { display: flex; flex-direction: column; gap: 2.75rem; max-width: 44rem; }
+  .legal__body section { display: flex; flex-direction: column; gap: 1rem; scroll-margin-top: 2rem; }
+  .legal__body p + p { margin-top: 0; }
+  .legal__body ul { display: grid; gap: 0.6rem; }
+  @media (max-width: 860px) { .legal__grid { grid-template-columns: 1fr; } .legal__toc { position: static; } }
+</style>

@@ -1,0 +1,102 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getArticles, fmtDate } from '../../lib/journal.js';
+import { SITE, CTA } from '../../data/site.js';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((a) => ({ params: { slug: a.slug }, props: { article: a, related: articles.filter((b) => b.id !== a.id && b.category_id === a.category_id).slice(0, 2) } }));
+}
+const { article: a, related } = Astro.props;
+const path = `/journal/${a.slug}`;
+const blocks = Array.isArray(a.content) ? a.content : [];
+const ytId = (u = '') => (u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/) || [])[1];
+const jsonld = [
+  {
+    '@type': 'BlogPosting', headline: a.title, description: a.meta_description || a.subtitle || '', image: a.cover_image || undefined,
+    datePublished: a.published_at, dateModified: a.updated_at || a.published_at, inLanguage: 'it-IT',
+    author: { '@type': a.author ? 'Person' : 'Organization', name: a.author?.name || 'Flowline' },
+    publisher: { '@id': `${SITE.url}/#organization` }, mainEntityOfPage: `${SITE.url}${path}`,
+    keywords: (a.tags || []).map((t) => t.name).join(', ') || undefined,
+  },
+  { '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal` },
+    { '@type': 'ListItem', position: 3, name: a.title, item: `${SITE.url}${path}` },
+  ] },
+];
+---
+<Base
+  title={a.seo_title || `${a.title} | Flowline Journal`}
+  description={a.meta_description || a.subtitle || ''}
+  path={a.canonical_url || path}
+  ogType="article"
+  ogImage={a.cover_image || '/og.png'}
+  jsonld={jsonld}
+>
+  <article class="section post">
+    <header class="wrap post__head">
+      <p class="small"><a class="link" href="/journal">Journal</a> · {a.category?.name}</p>
+      <h1 class="head" data-rise>{a.title}</h1>
+      {a.subtitle && <p class="lead" data-rise style="--i:1">{a.subtitle}</p>}
+      <p class="small muted" data-rise style="--i:2">{a.author?.name && <>{a.author.name} · </>}<time datetime={a.published_at}>{fmtDate(a.published_at)}</time> · {a.reading_time || 1} min di lettura</p>
+    </header>
+    {a.cover_image && (
+      <figure class="wrap post__cover"><img src={a.cover_image} alt={a.cover_alt || ''} width="1600" height="900" onerror="this.parentElement.remove()" /></figure>
+    )}
+    <div class="wrap">
+      <div class="post__body">
+        {blocks.map((b) => {
+          switch (b.type) {
+            case 'heading': return b.level === 3 ? <h3 class="name">{b.text}</h3> : <h2 class="name post__h2">{b.text}</h2>;
+            case 'paragraph': return <p>{b.text}</p>;
+            case 'list': return b.ordered ? <ol>{(b.items || []).map((it) => <li>{it}</li>)}</ol> : <ul class="dash">{(b.items || []).map((it) => <li>{it}</li>)}</ul>;
+            case 'quote': return <blockquote><p class="lead">{b.text}</p>{b.author && <footer class="small muted">{b.author}</footer>}</blockquote>;
+            case 'image': return <figure class="photo"><img src={b.url} alt={b.alt || ''} loading="lazy" />{b.caption && <figcaption>{b.caption}</figcaption>}</figure>;
+            case 'gallery': return <div class="post__gallery">{(b.images || []).map((im) => <figure class="photo"><img src={im.url} alt={im.alt || ''} loading="lazy" />{im.caption && <figcaption>{im.caption}</figcaption>}</figure>)}</div>;
+            case 'table': return <div class="post__table"><table><thead><tr>{(b.headers || []).map((h) => <th scope="col">{h}</th>)}</tr></thead><tbody>{(b.rows || []).map((r) => <tr>{r.map((c) => <td>{c}</td>)}</tr>)}</tbody></table></div>;
+            case 'video': return ytId(b.url) ? <figure class="post__video"><iframe src={`https://www.youtube-nocookie.com/embed/${ytId(b.url)}`} title={b.caption || 'Video'} loading="lazy" allowfullscreen></iframe>{b.caption && <figcaption class="small muted">{b.caption}</figcaption>}</figure> : <p><a class="link" href={b.url}>{b.caption || 'Guarda il video'}</a></p>;
+            case 'cta': return <p class="post__cta"><span>{b.text}</span><a class="button" href={b.href || '/#contatti'}>{b.buttonLabel || 'Scopri di più'}</a></p>;
+            default: return null;
+          }
+        })}
+        {a.tags?.length > 0 && <p class="small muted post__tags">Tag: {a.tags.map((t) => t.name).join(', ')}</p>}
+      </div>
+    </div>
+  </article>
+
+  <section class="section white post__more">
+    <div class="wrap">
+      <h2 class="head">Ti è piaciuto questo articolo?</h2>
+      <p class="lead">Parliamo di come applicare queste idee alla tua azienda.</p>
+      <p><a class="button" href="/#contatti">{CTA}</a></p>
+      {related.length > 0 && (
+        <div class="post__related">
+          <h3 class="name">Articoli correlati</h3>
+          <ul class="dash">{related.map((r) => <li><a class="link" href={`/journal/${r.slug}`}>{r.title}</a></li>)}</ul>
+        </div>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .post { padding-top: clamp(2rem, 6vw, 5rem); }
+  .post__head { display: flex; flex-direction: column; gap: 1.25rem; max-width: 62rem; margin-inline: 0; }
+  .post__head .lead { font-weight: 400; max-width: 40ch; }
+  .post__cover { margin-top: clamp(2.5rem, 5vw, 4rem); }
+  .post__cover img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; }
+  .post__body { max-width: 42rem; margin-top: clamp(2.5rem, 5vw, 4rem); display: flex; flex-direction: column; gap: 1.25rem; font-size: 1.1875rem; line-height: 1.65; }
+  .post__body p + p { margin-top: 0; }
+  .post__h2 { margin-top: 1.5rem; }
+  .post__body ol { padding-left: 1.25em; }
+  .post__body blockquote { margin: 1rem 0; padding-left: 1.25rem; border-left: 6px solid var(--orange); }
+  .post__gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .post__table { overflow-x: auto; }
+  .post__table table { border-collapse: collapse; width: 100%; font-size: 1rem; }
+  .post__table th, .post__table td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid #cbc9c2; }
+  .post__video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; }
+  .post__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; padding: 1.5rem; background: var(--surface); }
+  .post__more .wrap { display: flex; flex-direction: column; gap: 1.25rem; }
+  .post__related { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 1rem; }
+</style>

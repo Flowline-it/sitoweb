@@ -1,0 +1,21 @@
+---
+interface Props { tone?: 'light' | 'dark' }
+const { tone = 'light' } = Astro.props;
+const onHome = Astro.url.pathname === '/';
+const base = onHome ? '' : '/';
+---
+<header class:list={['site-header', tone === 'dark' && 'dark']}>
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="Flowline, home">
+      <img src={tone === 'dark' ? '/brand/flowline-logo-light.png' : '/brand/flowline-logo-dark.png'} alt="Flowline" width="1600" height="320" />
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Principale">
+      <a href={`${base}#chi-siamo`}>Chi siamo</a>
+      <a href={`${base}#come-lavoriamo`}>Metodo</a>
+      <a href={`${base}#servizi`}>Servizi</a>
+      <a href={`${base}#faq`}>FAQ</a>
+      <a class="button" href={`${base}#contatti`}>Contattaci</a>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Pagina non trovata | Flowline" description="La pagina che cercavi non esiste o è stata spostata." path="/404" noindex>
+  <section class="section nf">
+    <div class="wrap">
+      <h1 class="display">Qui la linea si interrompe</h1>
+      <p class="lead">La pagina che cercavi non esiste o è stata spostata.</p>
+      <ul class="dash nf__links" role="list">
+        <li><a class="link" href="/">Torna alla home</a></li>
+        <li><a class="link" href="/#servizi">Scopri i servizi</a></li>
+        <li><a class="link" href="/#contatti">Prenota una consulenza gratuita</a></li>
+      </ul>
+    </div>
+    <span class="nf__line nf__line--a" aria-hidden="true"></span>
+    <span class="nf__line nf__line--b" aria-hidden="true"></span>
+  </section>
+</Base>
+
+<style>
+  .nf { position: relative; min-height: 70svh; overflow: hidden; padding-top: clamp(2rem, 7vw, 6rem); }
+  .nf .wrap { display: flex; flex-direction: column; gap: 1.5rem; }
+  .nf h1 { max-width: 14ch; }
+  .nf__links { display: grid; gap: 0.6rem; }
+  .nf__line { position: absolute; bottom: 14%; height: clamp(24px, 3.4vw, 48px); background: var(--orange); }
+  .nf__line--a { left: 0; width: 40%; border-radius: 0 999px 999px 0; }
+  .nf__line--b { right: 0; width: 34%; border-radius: 999px 0 0 999px; }
+</style>
