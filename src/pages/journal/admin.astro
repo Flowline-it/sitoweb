@@ -1,0 +1,767 @@
+---
+// Area riservata del Journal: si accede con email e password (Supabase Auth del sito).
+// La pagina è statica; tutto il lavoro avviene nel browser con la chiave pubblica "anon":
+// cosa si può leggere e scrivere lo decidono le policy RLS del database, non questa pagina.
+import '../../styles/global.css';
+import fontHead from '../../assets/fonts/inter-tight-latin.woff2?url';
+import fontBody from '../../assets/fonts/inter-latin.woff2?url';
+import { p } from '../../lib/paths.js';
+import { SITE } from '../../data/site.js';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Area editoriale | Flowline Journal</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f6f6f4" />
+    <link rel="icon" href={p('/favicon.svg')} type="image/svg+xml" />
+    <link rel="preload" href={fontHead} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontBody} as="font" type="font/woff2" crossorigin />
+  </head>
+  <body class="adm" data-url={SITE.supabaseUrl} data-key={SITE.supabaseAnonKey} data-base={base}>
+    <header class="adm-top">
+      <div class="adm-top__in">
+        <a class="adm-brand" href={p('/journal')} aria-label="Flowline Journal">
+          <img src={p('/brand/flowline-logo-dark.png')} alt="Flowline" width="1600" height="320" />
+        </a>
+        <span class="adm-top__title">Area editoriale</span>
+        <span class="adm-spacer"></span>
+        <a class="adm-top__link" href={p('/journal')} target="_blank" rel="noopener">Apri il Journal</a>
+        <span class="adm-top__user" id="who" hidden></span>
+        <button class="button button--ghost button--sm" id="logout" type="button" hidden>Esci</button>
+      </div>
+    </header>
+
+    <main class="adm-main" id="root" aria-live="polite">
+      <div class="adm-boot"><span class="adm-spin" aria-hidden="true"></span> Caricamento…</div>
+    </main>
+
+    <div class="adm-toasts" id="toasts" aria-live="polite"></div>
+    <noscript><p class="adm-main">L'area editoriale ha bisogno di JavaScript.</p></noscript>
+
+    <script>
+      import { createClient } from '@supabase/supabase-js';
+
+      const B = document.body.dataset;
+      const sb = createClient(B.url!, B.key!, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'flowline-journal-admin' } });
+      const BUCKET = 'journal-media';
+      const root = document.getElementById('root')!;
+      const whoEl = document.getElementById('who')!;
+      const logoutBtn = document.getElementById('logout')!;
+
+      /* ---------------- helpers ---------------- */
+      type Any = Record<string, any>;
+      const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+      const slugify = (s: string) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 90);
+      const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      const fmtDateTime = (d?: string | null) => d ? new Date(d).toLocaleString('it-IT', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+      const toLocalInput = (iso?: string | null) => { if (!iso) return ''; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+      const fromLocalInput = (v: string) => (v ? new Date(v).toISOString() : null);
+      const isDemo = (a: Any) => /^\s*\[DEMO\]/i.test(a.title || '') || /^demo-/.test(a.slug || '');
+      const sitePath = (path: string) => (B.base || '') + path;
+      const I = {
+        plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+        up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
+        down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+        x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+        back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+        img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>',
+        ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+      };
+
+      function toast(msg: string, kind: '' | 'ok' | 'err' = '') {
+        const el = document.createElement('div');
+        el.className = 'adm-toast ' + kind;
+        el.textContent = msg;
+        document.getElementById('toasts')!.appendChild(el);
+        setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 250); }, kind === 'err' ? 6000 : 3500);
+      }
+      function errMsg(e: Any): string {
+        const m = String(e?.message || e || 'Errore sconosciuto');
+        if (e?.code === '23505' || /duplicate key/i.test(m)) return 'Esiste già un elemento con lo stesso indirizzo (slug): cambialo e riprova.';
+        if (e?.code === '42501' || /row-level security|permission denied/i.test(m)) return 'Il tuo account non ha i permessi per questa operazione sul Journal.';
+        if (e?.code === '23503' || /foreign key/i.test(m)) return 'È ancora usato da uno o più articoli: toglilo prima dagli articoli.';
+        if (/Invalid login credentials/i.test(m)) return 'Email o password non corretti.';
+        if (/Email not confirmed/i.test(m)) return "L'email di questo account non è ancora stata confermata.";
+        if (/Failed to fetch|NetworkError/i.test(m)) return 'Connessione al database non riuscita. Controlla la rete e riprova.';
+        return m;
+      }
+
+      /* ---------------- stato ---------------- */
+      const S: Any = { user: null, tab: 'articles', filter: 'all', q: '', articles: [], categories: [], tags: [], authors: [], links: [], editing: null, dirty: false, preview: false };
+
+      function articleStatus(a: Any): { key: string; label: string } {
+        if (a.status === 'draft') return { key: 'draft', label: 'Bozza' };
+        if (a.status === 'archived') return { key: 'archived', label: 'Archiviato' };
+        if (a.status === 'scheduled') return { key: 'scheduled', label: 'Programmato' };
+        if (a.status === 'published' && a.published_at && Date.parse(a.published_at) > Date.now()) return { key: 'scheduled', label: 'Programmato' };
+        if (a.status === 'published') return { key: 'published', label: 'Pubblicato' };
+        return { key: 'draft', label: a.status || 'Bozza' };
+      }
+      const wordCount = (blocks: Any[]) => (blocks || []).map((r) =>
+        r.type === 'heading' || r.type === 'paragraph' || r.type === 'quote' ? r.text || '' :
+        r.type === 'list' ? (r.items || []).join(' ') :
+        r.type === 'table' ? [...(r.headers || []), ...(r.rows || []).flat()].join(' ') :
+        r.type === 'cta' ? `${r.text || ''} ${r.buttonLabel || ''}` : '').join(' ').trim().split(/\s+/).filter(Boolean).length;
+      const readingTime = (blocks: Any[]) => Math.max(1, Math.round(wordCount(blocks) / 220));
+
+      /* ---------------- dati ---------------- */
+      async function loadAll() {
+        const [a, c, t, au, l] = await Promise.all([
+          sb.from('journal_articles').select('*').order('created_at', { ascending: false }),
+          sb.from('journal_categories').select('*').order('name'),
+          sb.from('journal_tags').select('*').order('name'),
+          sb.from('journal_authors').select('*').order('name'),
+          sb.from('journal_article_tags').select('article_id,tag_id'),
+        ]);
+        for (const r of [a, c, t, au, l]) if (r.error) throw r.error;
+        S.articles = a.data || []; S.categories = c.data || []; S.tags = t.data || []; S.authors = au.data || []; S.links = l.data || [];
+      }
+      const tagIdsOf = (id: string) => S.links.filter((x: Any) => x.article_id === id).map((x: Any) => x.tag_id);
+
+      async function uploadImage(file: File): Promise<string> {
+        if (!file.type.startsWith('image/')) throw new Error('Il file scelto non è un\'immagine.');
+        if (file.size > 8 * 1024 * 1024) throw new Error('Immagine troppo pesante: massimo 8 MB.');
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const name = slugify(file.name.replace(/\.[^.]+$/, '')) || 'immagine';
+        const path = `${S.user.id}/${Date.now()}-${name}.${ext}`;
+        const { error } = await sb.storage.from(BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
+        if (error) throw error;
+        return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+      }
+      function pickImage(): Promise<File | null> {
+        return new Promise((res) => {
+          const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*';
+          i.onchange = () => res(i.files?.[0] || null); i.click();
+        });
+      }
+
+      /* ---------------- login ---------------- */
+      function viewLogin(msg = '') {
+        whoEl.hidden = true; logoutBtn.hidden = true;
+        root.innerHTML = `
+          <section class="adm-login">
+            <h1 class="adm-h1">Area editoriale del Journal</h1>
+            <p class="lead">Accedi con l'account del Journal per scrivere, programmare e pubblicare gli articoli.</p>
+            <form class="adm-card adm-login__form" id="loginForm" novalidate>
+              <div class="adm-field"><label for="lg-email">Email</label><input id="lg-email" type="email" autocomplete="username" required /></div>
+              <div class="adm-field"><label for="lg-pass">Password</label><input id="lg-pass" type="password" autocomplete="current-password" required /></div>
+              <p class="adm-err" id="lg-err" role="alert">${esc(msg)}</p>
+              <button class="button" type="submit" id="lg-btn">Accedi</button>
+            </form>
+          </section>`;
+        const f = document.getElementById('loginForm') as HTMLFormElement;
+        (document.getElementById('lg-email') as HTMLInputElement).focus();
+        f.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = (document.getElementById('lg-email') as HTMLInputElement).value.trim();
+          const password = (document.getElementById('lg-pass') as HTMLInputElement).value;
+          const err = document.getElementById('lg-err')!; const btn = document.getElementById('lg-btn') as HTMLButtonElement;
+          if (!email || !password) { err.textContent = 'Inserisci email e password.'; return; }
+          btn.disabled = true; btn.innerHTML = '<span class="adm-spin" aria-hidden="true"></span> Accesso…'; err.textContent = '';
+          const { error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) { err.textContent = errMsg(error); btn.disabled = false; btn.textContent = 'Accedi'; }
+        });
+      }
+
+      /* ---------------- shell + liste ---------------- */
+      async function enter() {
+        whoEl.textContent = S.user.email || ''; whoEl.hidden = false; logoutBtn.hidden = false;
+        root.innerHTML = '<div class="adm-boot"><span class="adm-spin" aria-hidden="true"></span> Carico gli articoli…</div>';
+        try { await loadAll(); } catch (e) { root.innerHTML = `<div class="adm-card adm-empty"><h2 class="adm-h2">Non riesco a leggere il Journal</h2><p>${esc(errMsg(e))}</p><button class="button button--ghost" id="retry">Riprova</button></div>`; document.getElementById('retry')!.onclick = enter; return; }
+        renderList();
+      }
+
+      function tabsHtml() {
+        const tabs = [['articles', 'Articoli', S.articles.length], ['categories', 'Categorie', S.categories.length], ['tags', 'Tag', S.tags.length], ['authors', 'Autori', S.authors.length]];
+        return `<nav class="adm-tabs" aria-label="Sezioni">${tabs.map(([k, l, n]) => `<button type="button" class="adm-tab${S.tab === k ? ' on' : ''}" data-tab="${k}" aria-current="${S.tab === k}">${l}<span class="adm-tab__n">${n}</span></button>`).join('')}</nav>`;
+      }
+
+      function renderList() {
+        S.editing = null; S.dirty = false;
+        let body = '';
+        if (S.tab === 'articles') body = articlesHtml();
+        else body = taxonomyHtml(S.tab);
+        root.innerHTML = `
+          <div class="adm-head">
+            <div><h1 class="adm-h1">Journal</h1><p class="muted">${S.articles.filter((a: Any) => articleStatus(a).key === 'published' && !isDemo(a)).length} articoli online · ${S.articles.filter((a: Any) => a.status === 'draft').length} bozze</p></div>
+            <span class="adm-spacer"></span>
+            <button class="button" type="button" id="newArt">${I.plus} Nuovo articolo</button>
+          </div>
+          ${tabsHtml()}
+          ${body}`;
+        root.querySelectorAll<HTMLElement>('[data-tab]').forEach((b) => b.onclick = () => { S.tab = b.dataset.tab; renderList(); });
+        document.getElementById('newArt')!.onclick = () => openEditor(null);
+        if (S.tab === 'articles') bindArticles(); else bindTaxonomy(S.tab);
+      }
+
+      function articlesHtml() {
+        const filters = [['all', 'Tutti'], ['draft', 'Bozze'], ['scheduled', 'Programmati'], ['published', 'Pubblicati'], ['archived', 'Archiviati']];
+        const q = S.q.toLowerCase();
+        const rows = S.articles.filter((a: Any) => (S.filter === 'all' || articleStatus(a).key === S.filter) && (!q || `${a.title} ${a.subtitle} ${a.slug}`.toLowerCase().includes(q)));
+        const cat = (id: string) => S.categories.find((c: Any) => c.id === id)?.name || '—';
+        return `
+          <div class="adm-filters">
+            <div class="adm-search">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'}<input id="q" type="search" placeholder="Cerca per titolo o indirizzo…" value="${esc(S.q)}" aria-label="Cerca articoli" /></div>
+            <div class="adm-seg" role="group" aria-label="Filtra per stato">${filters.map(([k, l]) => `<button type="button" class="adm-seg__b${S.filter === k ? ' on' : ''}" data-f="${k}" aria-pressed="${S.filter === k}">${l}</button>`).join('')}</div>
+          </div>
+          ${rows.length ? `<div class="adm-card adm-tablewrap"><table class="adm-table">
+            <thead><tr><th>Articolo</th><th>Categoria</th><th>Stato</th><th>Data</th><th><span class="sr-only">Azioni</span></th></tr></thead>
+            <tbody>${rows.map((a: Any) => { const st = articleStatus(a); return `<tr data-open="${a.id}">
+              <td class="adm-t-title"><button type="button" class="adm-linkbtn" data-open="${a.id}">${esc(a.title || '(senza titolo)')}</button>
+                <div class="adm-t-sub">/journal/${esc(a.slug)}${a.featured ? ' · <span class="adm-feat">In evidenza</span>' : ''}${isDemo(a) ? ' · <span class="adm-demo" title="Gli articoli [DEMO] non vengono mai pubblicati sul sito">Demo, non pubblicato</span>' : ''}</div></td>
+              <td>${esc(cat(a.category_id))}</td>
+              <td><span class="adm-pill ${st.key}">${st.label}</span></td>
+              <td class="adm-nums">${st.key === 'draft' ? `<span class="muted">mod. ${fmtDate(a.updated_at || a.created_at)}</span>` : fmtDate(a.published_at || a.scheduled_at)}</td>
+              <td class="adm-t-act">
+                ${st.key === 'published' && !isDemo(a) ? `<a class="adm-iconbtn" href="${sitePath('/journal/' + a.slug)}" target="_blank" rel="noopener" title="Apri sul sito" aria-label="Apri sul sito">${I.ext}</a>` : ''}
+                <button type="button" class="adm-mini" data-dup="${a.id}">Duplica</button>
+                <button type="button" class="adm-mini danger" data-del="${a.id}">Elimina</button>
+              </td></tr>`; }).join('')}</tbody></table></div>`
+          : `<div class="adm-card adm-empty"><h2 class="adm-h2">${S.articles.length ? 'Nessun articolo con questo filtro' : 'Ancora nessun articolo'}</h2><p class="muted">${S.articles.length ? 'Cambia filtro o ricerca.' : 'Scrivi il primo articolo: lo puoi salvare come bozza e pubblicarlo quando è pronto.'}</p></div>`}`;
+      }
+      function bindArticles() {
+        const q = document.getElementById('q') as HTMLInputElement;
+        q.oninput = () => { S.q = q.value; const pos = q.selectionStart; renderList(); const n = document.getElementById('q') as HTMLInputElement; n.focus(); n.setSelectionRange(pos, pos); };
+        root.querySelectorAll<HTMLElement>('[data-f]').forEach((b) => b.onclick = () => { S.filter = b.dataset.f; renderList(); });
+        root.querySelectorAll<HTMLElement>('tr[data-open]').forEach((tr) => tr.onclick = (e) => { if ((e.target as HTMLElement).closest('a,[data-dup],[data-del]')) return; openEditor(S.articles.find((a: Any) => a.id === tr.dataset.open)); });
+        root.querySelectorAll<HTMLElement>('[data-dup]').forEach((b) => b.onclick = () => {
+          const a = S.articles.find((x: Any) => x.id === b.dataset.dup); if (!a) return;
+          const copy = { ...a, id: null, title: a.title + ' (copia)', slug: a.slug + '-copia', status: 'draft', published_at: null, scheduled_at: null, featured: false, _tags: tagIdsOf(a.id) };
+          openEditor(copy, true);
+        });
+        root.querySelectorAll<HTMLElement>('[data-del]').forEach((b) => b.onclick = async () => {
+          const a = S.articles.find((x: Any) => x.id === b.dataset.del); if (!a) return;
+          if (!confirm(`Eliminare definitivamente "${a.title}"?\n\nSe è online, sparirà dal sito al prossimo aggiornamento.`)) return;
+          await sb.from('journal_article_tags').delete().eq('article_id', a.id);
+          const { error } = await sb.from('journal_articles').delete().eq('id', a.id);
+          if (error) return toast(errMsg(error), 'err');
+          toast('Articolo eliminato', 'ok'); await loadAll(); renderList();
+        });
+      }
+
+      const TAX: Any = {
+        categories: { table: 'journal_categories', one: 'categoria', extra: 'description', extraLabel: 'Descrizione', ref: 'category_id' },
+        tags: { table: 'journal_tags', one: 'tag', extra: null, ref: null },
+        authors: { table: 'journal_authors', one: 'autore', extra: 'bio', extraLabel: 'Biografia breve', ref: 'author_id' },
+      };
+      function taxonomyHtml(kind: string) {
+        const T = TAX[kind]; const list = S[kind];
+        const used = (id: string) => T.ref ? S.articles.filter((a: Any) => a[T.ref] === id).length : S.links.filter((l: Any) => l.tag_id === id).length;
+        return `
+          <form class="adm-card adm-taxadd" id="taxAdd">
+            <div class="adm-field"><label for="tx-name">Nuov${kind === 'tags' ? 'o' : (kind === 'authors' ? 'o' : 'a')} ${T.one}</label><input id="tx-name" placeholder="Nome" required /></div>
+            ${T.extra ? `<div class="adm-field adm-grow"><label for="tx-extra">${T.extraLabel}</label><input id="tx-extra" placeholder="Facoltativo" /></div>` : ''}
+            <button class="button button--ink" type="submit">${I.plus} Aggiungi</button>
+          </form>
+          ${list.length ? `<div class="adm-card adm-taxlist">${list.map((x: Any) => `
+            <div class="adm-taxrow" data-id="${x.id}">
+              <div class="adm-field"><label class="sr-only" for="n-${x.id}">Nome</label><input id="n-${x.id}" data-k="name" value="${esc(x.name)}" /></div>
+              ${T.extra ? `<div class="adm-field adm-grow"><label class="sr-only" for="e-${x.id}">${T.extraLabel}</label><input id="e-${x.id}" data-k="${T.extra}" value="${esc(x[T.extra] || '')}" placeholder="${T.extraLabel}" /></div>` : ''}
+              <span class="adm-t-sub adm-taxuse">${used(x.id)} articol${used(x.id) === 1 ? 'o' : 'i'}</span>
+              <button type="button" class="adm-mini" data-save disabled>Salva</button>
+              <button type="button" class="adm-mini danger" data-rm>Elimina</button>
+            </div>`).join('')}</div>`
+          : `<div class="adm-card adm-empty"><p class="muted">Nessun${kind === 'categories' ? 'a categoria' : (kind === 'tags' ? ' tag' : ' autore')} ancora.</p></div>`}`;
+      }
+      function bindTaxonomy(kind: string) {
+        const T = TAX[kind];
+        (document.getElementById('taxAdd') as HTMLFormElement).onsubmit = async (e) => {
+          e.preventDefault();
+          const name = (document.getElementById('tx-name') as HTMLInputElement).value.trim(); if (!name) return;
+          const row: Any = { name, slug: slugify(name) };
+          if (T.extra) { const v = (document.getElementById('tx-extra') as HTMLInputElement).value.trim(); if (v) row[T.extra] = v; }
+          const { error } = await sb.from(T.table).insert(row);
+          if (error) return toast(errMsg(error), 'err');
+          toast(`${T.one[0].toUpperCase() + T.one.slice(1)} aggiunt${kind === 'categories' ? 'a' : 'o'}`, 'ok'); await loadAll(); renderList();
+        };
+        root.querySelectorAll<HTMLElement>('.adm-taxrow').forEach((row) => {
+          const id = row.dataset.id!; const save = row.querySelector<HTMLButtonElement>('[data-save]')!;
+          row.querySelectorAll('input').forEach((i) => i.addEventListener('input', () => save.disabled = false));
+          save.onclick = async () => {
+            const patch: Any = {}; row.querySelectorAll<HTMLInputElement>('input[data-k]').forEach((i) => patch[i.dataset.k!] = i.value.trim() || null);
+            if (!patch.name) return toast('Il nome non può essere vuoto', 'err');
+            const { error } = await sb.from(T.table).update(patch).eq('id', id);
+            if (error) return toast(errMsg(error), 'err');
+            toast('Salvato', 'ok'); await loadAll(); renderList();
+          };
+          row.querySelector<HTMLButtonElement>('[data-rm]')!.onclick = async () => {
+            const x = S[kind].find((y: Any) => y.id === id);
+            if (!confirm(`Eliminare "${x?.name}"?`)) return;
+            if (kind === 'tags') await sb.from('journal_article_tags').delete().eq('tag_id', id);
+            const { error } = await sb.from(T.table).delete().eq('id', id);
+            if (error) return toast(errMsg(error), 'err');
+            toast('Eliminato', 'ok'); await loadAll(); renderList();
+          };
+        });
+      }
+
+      /* ---------------- editor ---------------- */
+      const BLOCKS: Any = {
+        paragraph: { label: 'Paragrafo', make: () => ({ type: 'paragraph', text: '' }) },
+        heading: { label: 'Titoletto', make: () => ({ type: 'heading', level: 2, text: '' }) },
+        list: { label: 'Elenco', make: () => ({ type: 'list', ordered: false, items: [''] }) },
+        quote: { label: 'Citazione', make: () => ({ type: 'quote', text: '', author: '' }) },
+        image: { label: 'Immagine', make: () => ({ type: 'image', url: '', alt: '', caption: '' }) },
+        gallery: { label: 'Galleria', make: () => ({ type: 'gallery', images: [] }) },
+        table: { label: 'Tabella', make: () => ({ type: 'table', headers: ['', ''], rows: [['', '']] }) },
+        video: { label: 'Video', make: () => ({ type: 'video', url: '', caption: '' }) },
+        cta: { label: 'Invito all\'azione', make: () => ({ type: 'cta', text: '', buttonLabel: 'Prenota una consulenza gratuita', href: '/#contatti' }) },
+      };
+      const EMPTY = { id: null, title: '', slug: '', subtitle: '', cover_image: '', cover_alt: '', content: [], author_id: '', category_id: '', status: 'draft', published_at: null, scheduled_at: null, seo_title: '', meta_description: '', focus_keyword: '', canonical_url: '', featured: false };
+
+      function openEditor(a: Any | null, isCopy = false) {
+        const src = a ? JSON.parse(JSON.stringify(a)) : JSON.parse(JSON.stringify(EMPTY));
+        if (!a) { const red = S.authors.find((x: Any) => /giuseppe/i.test(x.name)) || S.authors[0]; if (red) src.author_id = red.id; }
+        src._tags = a ? (isCopy ? a._tags : tagIdsOf(a.id)) : [];
+        src._slugTouched = !!(a && a.id);
+        if (src.status === 'scheduled' && !src.published_at) src.published_at = src.scheduled_at;
+        if (!Array.isArray(src.content)) src.content = [];
+        S.editing = src; S.dirty = isCopy; S.preview = false;
+        renderEditor();
+        window.scrollTo(0, 0);
+      }
+
+      function blockBody(b: Any, i: number) {
+        const f = (k: string, label: string, ph = '', type = 'text') => `<div class="adm-field"><label for="b${i}-${k}">${label}</label><input id="b${i}-${k}" type="${type}" data-b="${i}" data-k="${k}" value="${esc(b[k] || '')}" placeholder="${esc(ph)}" /></div>`;
+        switch (b.type) {
+          case 'paragraph': return `<textarea class="adm-autogrow adm-prose" data-b="${i}" data-k="text" rows="3" placeholder="Scrivi il paragrafo…" aria-label="Testo del paragrafo">${esc(b.text)}</textarea>`;
+          case 'heading': return `<div class="adm-row"><select data-b="${i}" data-k="level" aria-label="Livello"><option value="2"${b.level !== 3 ? ' selected' : ''}>Titoletto grande</option><option value="3"${b.level === 3 ? ' selected' : ''}>Titoletto piccolo</option></select><input class="adm-grow adm-hinput" data-b="${i}" data-k="text" value="${esc(b.text)}" placeholder="Testo del titoletto" aria-label="Testo del titoletto" /></div>`;
+          case 'list': return `<label class="adm-check"><input type="checkbox" data-b="${i}" data-k="ordered"${b.ordered ? ' checked' : ''} /> Elenco numerato</label><textarea class="adm-autogrow" data-b="${i}" data-k="items" rows="3" placeholder="Una voce per riga" aria-label="Voci dell'elenco">${esc((b.items || []).join('\n'))}</textarea><p class="adm-hint">Una voce per riga.</p>`;
+          case 'quote': return `<textarea class="adm-autogrow adm-prose" data-b="${i}" data-k="text" rows="2" placeholder="Testo della citazione" aria-label="Testo della citazione">${esc(b.text)}</textarea>${f('author', 'Autore (facoltativo)')}`;
+          case 'image': return `<div class="adm-imgpick">${b.url ? `<img src="${esc(b.url)}" alt="" />` : `<div class="adm-imgph">${I.img}</div>`}<div class="adm-imgpick__f"><div class="adm-row">${'<input class="adm-grow" data-b="' + i + '" data-k="url" value="' + esc(b.url) + '" placeholder="Indirizzo dell\'immagine (https://…)" aria-label="Indirizzo immagine" />'}<button type="button" class="button button--ghost button--sm" data-up="${i}">Carica</button></div>${f('alt', 'Descrizione per chi non vede l\'immagine')}${f('caption', 'Didascalia (facoltativa)')}</div></div>`;
+          case 'gallery': return `<div class="adm-gal">${(b.images || []).map((im: Any, j: number) => `<div class="adm-gal__it"><img src="${esc(im.url)}" alt="" /><input data-b="${i}" data-g="${j}" data-k="alt" value="${esc(im.alt || '')}" placeholder="Descrizione" aria-label="Descrizione immagine ${j + 1}" /><input data-b="${i}" data-g="${j}" data-k="caption" value="${esc(im.caption || '')}" placeholder="Didascalia" aria-label="Didascalia immagine ${j + 1}" /><button type="button" class="adm-iconbtn" data-grm="${i}:${j}" aria-label="Togli immagine">${I.x}</button></div>`).join('')}</div><button type="button" class="button button--ghost button--sm" data-gup="${i}">${I.plus} Aggiungi immagine</button>`;
+          case 'table': return `<textarea class="adm-autogrow adm-mono" data-b="${i}" data-k="table" rows="4" aria-label="Contenuto della tabella" placeholder="Intestazione 1 | Intestazione 2&#10;Valore | Valore">${esc([(b.headers || []).join(' | '), ...(b.rows || []).map((r: string[]) => r.join(' | '))].join('\n'))}</textarea><p class="adm-hint">Prima riga = intestazioni. Separa le colonne con <b>|</b>, una riga per riga di tabella.</p>`;
+          case 'video': return `${f('url', 'Link YouTube', 'https://www.youtube.com/watch?v=…', 'url')}${f('caption', 'Didascalia (facoltativa)')}`;
+          case 'cta': return `${f('text', 'Testo', 'Vuoi capire cosa automatizzare nella tua azienda?')}<div class="adm-row">${f('buttonLabel', 'Etichetta del pulsante')}${f('href', 'Link del pulsante', '/#contatti')}</div>`;
+        }
+        return '';
+      }
+
+      function previewHtml(e: Any) {
+        const ytId = (u = '') => (u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/) || [])[1];
+        const cat = S.categories.find((c: Any) => c.id === e.category_id)?.name || '';
+        const au = S.authors.find((c: Any) => c.id === e.author_id)?.name || '';
+        const blocks = (e.content || []).map((b: Any) => {
+          switch (b.type) {
+            case 'heading': return b.level === 3 ? `<h3 class="name">${esc(b.text)}</h3>` : `<h2 class="name pv-h2">${esc(b.text)}</h2>`;
+            case 'paragraph': return `<p>${esc(b.text)}</p>`;
+            case 'list': return b.ordered ? `<ol>${(b.items || []).map((x: string) => `<li>${esc(x)}</li>`).join('')}</ol>` : `<ul class="dash">${(b.items || []).map((x: string) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+            case 'quote': return `<blockquote><p class="lead">${esc(b.text)}</p>${b.author ? `<footer class="small muted">${esc(b.author)}</footer>` : ''}</blockquote>`;
+            case 'image': return b.url ? `<figure><img src="${esc(b.url)}" alt="${esc(b.alt)}" />${b.caption ? `<figcaption class="small muted">${esc(b.caption)}</figcaption>` : ''}</figure>` : '';
+            case 'gallery': return `<div class="pv-gal">${(b.images || []).map((im: Any) => `<figure><img src="${esc(im.url)}" alt="${esc(im.alt)}" />${im.caption ? `<figcaption class="small muted">${esc(im.caption)}</figcaption>` : ''}</figure>`).join('')}</div>`;
+            case 'table': return `<div class="pv-table"><table><thead><tr>${(b.headers || []).map((h: string) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${(b.rows || []).map((r: string[]) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+            case 'video': return ytId(b.url) ? `<figure class="pv-video"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(b.url)}" title="${esc(b.caption || 'Video')}" allowfullscreen></iframe></figure>` : `<p class="muted">Video: link non riconosciuto</p>`;
+            case 'cta': return `<p class="pv-cta"><span>${esc(b.text)}</span><span class="button">${esc(b.buttonLabel || 'Scopri di più')}</span></p>`;
+          }
+          return '';
+        }).join('');
+        return `<article class="pv">
+          <p class="small muted">Journal${cat ? ' · ' + esc(cat) : ''}</p>
+          <h1 class="head">${esc(e.title || 'Titolo dell\'articolo')}</h1>
+          ${e.subtitle ? `<p class="lead">${esc(e.subtitle)}</p>` : ''}
+          <p class="small muted">${au ? esc(au) + ' · ' : ''}${fmtDate(e.published_at || new Date().toISOString())} · ${readingTime(e.content)} min di lettura</p>
+          ${e.cover_image ? `<img class="pv-cover" src="${esc(e.cover_image)}" alt="${esc(e.cover_alt)}" />` : ''}
+          <div class="pv-body">${blocks || '<p class="muted">L\'articolo non ha ancora contenuto.</p>'}</div>
+        </article>`;
+      }
+
+      function renderEditor() {
+        const e = S.editing; const st = articleStatus(e);
+        const future = e.published_at && Date.parse(e.published_at) > Date.now();
+        const isLive = e.id && st.key === 'published';
+        const words = wordCount(e.content);
+        const counter = (v: string, max: number) => `<span class="adm-count${(v || '').length > max ? ' over' : ''}">${(v || '').length}/${max}</span>`;
+        root.innerHTML = `
+          <div class="adm-edhead">
+            <button type="button" class="button button--ghost button--sm" id="edBack">${I.back} Tutti gli articoli</button>
+            <span class="adm-pill ${st.key}">${e.id ? st.label : 'Nuovo'}</span>
+            <span class="adm-saved muted small" id="savedState">${S.dirty ? 'Modifiche non salvate' : (e.updated_at ? 'Salvato ' + fmtDateTime(e.updated_at) : '')}</span>
+            <span class="adm-spacer"></span>
+            <div class="adm-seg" role="group" aria-label="Vista"><button type="button" class="adm-seg__b${!S.preview ? ' on' : ''}" data-view="edit" aria-pressed="${!S.preview}">Scrivi</button><button type="button" class="adm-seg__b${S.preview ? ' on' : ''}" data-view="preview" aria-pressed="${S.preview}">Anteprima</button></div>
+            <div class="adm-edhead__act">
+              ${isLive || st.key === 'scheduled' ? `<button type="button" class="button button--ghost button--sm" data-save="draft">Riporta in bozza</button><button type="button" class="button button--sm" data-save="published">${future ? 'Aggiorna programmazione' : 'Aggiorna articolo'}</button>` :
+              `<button type="button" class="button button--ghost button--sm" data-save="draft">Salva bozza</button><button type="button" class="button button--sm" data-save="published" id="pubBtn">${future ? 'Programma' : 'Pubblica'}</button>`}
+            </div>
+          </div>
+          <div class="adm-ed">
+            <div class="adm-ed__main">
+              ${S.preview ? `<div class="adm-card adm-pvwrap">${previewHtml(e)}</div>` : `
+              <div class="adm-card adm-ed__title">
+                <textarea id="f-title" class="adm-autogrow adm-titleinput" rows="1" placeholder="Titolo dell'articolo" aria-label="Titolo">${esc(e.title)}</textarea>
+                <textarea id="f-subtitle" class="adm-autogrow adm-subinput" rows="1" placeholder="Sottotitolo: una o due frasi che invogliano a leggere" aria-label="Sottotitolo">${esc(e.subtitle)}</textarea>
+                <p class="adm-hint">${words} parole · ${readingTime(e.content)} min di lettura</p>
+              </div>
+              <div class="adm-blocks">
+                ${e.content.map((b: Any, i: number) => `
+                  <section class="adm-card adm-block" data-i="${i}">
+                    <div class="adm-block__h"><span class="adm-block__t">${BLOCKS[b.type]?.label || b.type}</span><span class="adm-spacer"></span>
+                      <button type="button" class="adm-iconbtn" data-mv="${i}:-1" aria-label="Sposta su"${i === 0 ? ' disabled' : ''}>${I.up}</button>
+                      <button type="button" class="adm-iconbtn" data-mv="${i}:1" aria-label="Sposta giù"${i === e.content.length - 1 ? ' disabled' : ''}>${I.down}</button>
+                      <button type="button" class="adm-iconbtn" data-rmb="${i}" aria-label="Elimina blocco">${I.x}</button></div>
+                    ${blockBody(b, i)}
+                  </section>`).join('')}
+                <div class="adm-addblock"><span class="adm-hint">Aggiungi</span>${Object.entries(BLOCKS).map(([k, v]: [string, Any]) => `<button type="button" class="adm-chip" data-add="${k}">${I.plus} ${v.label}</button>`).join('')}</div>
+              </div>`}
+            </div>
+            <aside class="adm-ed__side">
+              <section class="adm-card adm-side">
+                <h2 class="adm-h3">Pubblicazione</h2>
+                <div class="adm-field"><label for="f-date">Data di pubblicazione</label><input id="f-date" type="datetime-local" value="${toLocalInput(e.published_at)}" /><p class="adm-hint">Vuota = adesso. Una data futura programma l'uscita.</p></div>
+                <label class="adm-check"><input type="checkbox" id="f-featured"${e.featured ? ' checked' : ''} /> In evidenza in cima al Journal</label>
+                <p class="adm-hint">Dopo la pubblicazione il sito si aggiorna da solo entro circa 15 minuti.</p>
+                ${e.id && st.key !== 'archived' ? `<div class="adm-side__act"><button type="button" class="adm-mini" data-save="archived">Archivia: toglilo dal sito senza eliminarlo</button></div>` : ''}
+              </section>
+              <section class="adm-card adm-side">
+                <h2 class="adm-h3">Copertina</h2>
+                <div class="adm-cover">${e.cover_image ? `<img src="${esc(e.cover_image)}" alt="" />` : `<div class="adm-imgph">${I.img}</div>`}</div>
+                <div class="adm-row"><input class="adm-grow" id="f-cover" value="${esc(e.cover_image)}" placeholder="https://…" aria-label="Indirizzo immagine di copertina" /><button type="button" class="button button--ghost button--sm" id="coverUp">Carica</button></div>
+                <div class="adm-field"><label for="f-coveralt">Descrizione dell'immagine</label><input id="f-coveralt" value="${esc(e.cover_alt)}" /></div>
+              </section>
+              <section class="adm-card adm-side">
+                <h2 class="adm-h3">Organizzazione</h2>
+                <div class="adm-field"><label for="f-cat">Categoria</label><select id="f-cat"><option value="">Nessuna</option>${S.categories.map((c: Any) => `<option value="${c.id}"${c.id === e.category_id ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
+                <div class="adm-field"><label for="f-author">Autore</label><select id="f-author"><option value="">Nessuno</option>${S.authors.map((c: Any) => `<option value="${c.id}"${c.id === e.author_id ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
+                <fieldset class="adm-field"><legend>Tag</legend><div class="adm-tagpick">${S.tags.map((t: Any) => `<label class="adm-tagopt"><input type="checkbox" data-tag="${t.id}"${e._tags.includes(t.id) ? ' checked' : ''} /><span>${esc(t.name)}</span></label>`).join('') || '<span class="adm-hint">Nessun tag: aggiungili dalla scheda Tag.</span>'}</div></fieldset>
+              </section>
+              <section class="adm-card adm-side">
+                <h2 class="adm-h3">Indirizzo e SEO</h2>
+                <div class="adm-field"><label for="f-slug">Indirizzo</label><div class="adm-slug"><span>/journal/</span><input id="f-slug" value="${esc(e.slug)}" /></div></div>
+                <div class="adm-field"><label for="f-seo">Titolo per Google ${counter(e.seo_title, 60)}</label><input id="f-seo" value="${esc(e.seo_title)}" placeholder="${esc((e.title || 'Titolo') + ' | Flowline Journal')}" /></div>
+                <div class="adm-field"><label for="f-meta">Descrizione per Google ${counter(e.meta_description, 160)}</label><textarea id="f-meta" class="adm-autogrow" rows="3" placeholder="${esc(e.subtitle || '')}">${esc(e.meta_description)}</textarea></div>
+                <div class="adm-field"><label for="f-kw">Parola chiave principale</label><input id="f-kw" value="${esc(e.focus_keyword)}" /></div>
+                <div class="adm-field"><label for="f-canon">URL canonico (facoltativo)</label><input id="f-canon" value="${esc(e.canonical_url)}" placeholder="Solo se l'articolo è pubblicato anche altrove" /></div>
+              </section>
+              ${e.id ? `<button type="button" class="adm-mini danger adm-side__del" id="edDel">Elimina articolo</button>` : ''}
+            </aside>
+          </div>`;
+        bindEditor();
+      }
+
+      function markDirty() {
+        S.dirty = true;
+        const s = document.getElementById('savedState'); if (s) s.textContent = 'Modifiche non salvate';
+      }
+      function autogrow(el: HTMLTextAreaElement) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 2 + 'px'; }
+
+      function bindEditor() {
+        const e = S.editing;
+        root.querySelectorAll<HTMLTextAreaElement>('.adm-autogrow').forEach((t) => { autogrow(t); t.addEventListener('input', () => autogrow(t)); });
+        document.getElementById('edBack')!.onclick = () => { if (S.dirty && !confirm('Ci sono modifiche non salvate. Uscire comunque?')) return; renderList(); };
+        root.querySelectorAll<HTMLElement>('[data-view]').forEach((b) => b.onclick = () => { S.preview = b.dataset.view === 'preview'; renderEditor(); });
+        const val = (id: string) => (document.getElementById(id) as HTMLInputElement | null);
+        const bindField = (id: string, key: string, after?: () => void) => { const el = val(id); if (!el) return; el.addEventListener('input', () => { e[key] = el.value; markDirty(); after?.(); }); };
+        bindField('f-title', 'title', () => { if (!e._slugTouched) { e.slug = slugify(e.title); const s = val('f-slug'); if (s) s.value = e.slug; } });
+        bindField('f-subtitle', 'subtitle');
+        bindField('f-cover', 'cover_image');
+        bindField('f-coveralt', 'cover_alt');
+        bindField('f-seo', 'seo_title', () => counterUpd('f-seo', 60));
+        bindField('f-meta', 'meta_description', () => counterUpd('f-meta', 160));
+        bindField('f-kw', 'focus_keyword');
+        bindField('f-canon', 'canonical_url');
+        const slugEl = val('f-slug'); if (slugEl) { slugEl.addEventListener('input', () => { e._slugTouched = true; markDirty(); }); slugEl.addEventListener('change', () => { slugEl.value = e.slug = slugify(slugEl.value); }); }
+        const cover = val('f-cover'); if (cover) cover.addEventListener('change', () => renderEditor());
+        const date = val('f-date'); if (date) date.addEventListener('change', () => { e.published_at = fromLocalInput(date.value); markDirty(); renderEditor(); });
+        const feat = val('f-featured'); if (feat) feat.addEventListener('change', () => { e.featured = (feat as HTMLInputElement).checked; markDirty(); });
+        const cat = val('f-cat'); if (cat) cat.addEventListener('change', () => { e.category_id = cat.value; markDirty(); });
+        const au = val('f-author'); if (au) au.addEventListener('change', () => { e.author_id = au.value; markDirty(); });
+        root.querySelectorAll<HTMLInputElement>('[data-tag]').forEach((c) => c.addEventListener('change', () => { const id = c.dataset.tag!; e._tags = c.checked ? [...new Set([...e._tags, id])] : e._tags.filter((x: string) => x !== id); markDirty(); }));
+        document.getElementById('coverUp')?.addEventListener('click', async () => { const f = await pickImage(); if (!f) return; await withUpload(async () => { e.cover_image = await uploadImage(f); if (!e.cover_alt) e.cover_alt = ''; markDirty(); renderEditor(); }); });
+        root.querySelectorAll<HTMLElement>('[data-save]').forEach((b) => b.onclick = () => save(b.dataset.save!));
+        document.getElementById('edDel')?.addEventListener('click', async () => {
+          if (!confirm(`Eliminare definitivamente "${e.title}"?`)) return;
+          await sb.from('journal_article_tags').delete().eq('article_id', e.id);
+          const { error } = await sb.from('journal_articles').delete().eq('id', e.id);
+          if (error) return toast(errMsg(error), 'err');
+          S.dirty = false; toast('Articolo eliminato', 'ok'); await loadAll(); renderList();
+        });
+
+        // blocchi
+        root.querySelectorAll<HTMLElement>('[data-add]').forEach((b) => b.onclick = () => { e.content.push(BLOCKS[b.dataset.add!].make()); markDirty(); renderEditor(); const last = root.querySelectorAll('.adm-block'); (last[last.length - 1] as HTMLElement)?.querySelector<HTMLElement>('textarea,input')?.focus(); });
+        root.querySelectorAll<HTMLElement>('[data-mv]').forEach((b) => b.onclick = () => { const [i, d] = b.dataset.mv!.split(':').map(Number); const j = i + d; if (j < 0 || j >= e.content.length) return; [e.content[i], e.content[j]] = [e.content[j], e.content[i]]; markDirty(); renderEditor(); });
+        root.querySelectorAll<HTMLElement>('[data-rmb]').forEach((b) => b.onclick = () => { const i = +b.dataset.rmb!; const blk = e.content[i]; const has = JSON.stringify(blk).replace(/"type":"\w+"/, '').match(/"[^"]{3,}"/); if (has && !confirm('Eliminare questo blocco?')) return; e.content.splice(i, 1); markDirty(); renderEditor(); });
+        root.querySelectorAll<HTMLInputElement>('[data-b]').forEach((el) => {
+          const ev = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
+          el.addEventListener(ev, () => {
+            const blk = e.content[+el.dataset.b!]; const k = el.dataset.k!;
+            if (el.dataset.g != null) { blk.images[+el.dataset.g][k] = el.value; }
+            else if (k === 'ordered') blk.ordered = el.checked;
+            else if (k === 'level') blk.level = +el.value;
+            else if (k === 'items') blk.items = el.value.split('\n');
+            else if (k === 'table') { const lines = el.value.split('\n').map((l) => l.split('|').map((c) => c.trim())); blk.headers = lines[0] || []; blk.rows = lines.slice(1).filter((r) => r.some(Boolean)); }
+            else blk[k] = el.value;
+            markDirty();
+          });
+          if (el.dataset.k === 'url' && el.dataset.g == null) el.addEventListener('change', () => renderEditor());
+        });
+        root.querySelectorAll<HTMLElement>('[data-up]').forEach((b) => b.onclick = async () => { const f = await pickImage(); if (!f) return; await withUpload(async () => { e.content[+b.dataset.up!].url = await uploadImage(f); markDirty(); renderEditor(); }); });
+        root.querySelectorAll<HTMLElement>('[data-gup]').forEach((b) => b.onclick = async () => { const f = await pickImage(); if (!f) return; await withUpload(async () => { const blk = e.content[+b.dataset.gup!]; blk.images = [...(blk.images || []), { url: await uploadImage(f), alt: '', caption: '' }]; markDirty(); renderEditor(); }); });
+        root.querySelectorAll<HTMLElement>('[data-grm]').forEach((b) => b.onclick = () => { const [i, j] = b.dataset.grm!.split(':').map(Number); e.content[i].images.splice(j, 1); markDirty(); renderEditor(); });
+      }
+      function counterUpd(id: string, max: number) {
+        const el = document.getElementById(id) as HTMLInputElement; const c = el?.closest('.adm-field')?.querySelector('.adm-count');
+        if (c) { c.textContent = `${el.value.length}/${max}`; c.classList.toggle('over', el.value.length > max); }
+      }
+      async function withUpload(fn: () => Promise<void>) {
+        toast('Carico l\'immagine…');
+        try { await fn(); toast('Immagine caricata', 'ok'); } catch (err) { toast(errMsg(err), 'err'); }
+      }
+
+      async function save(target: string) {
+        const e = S.editing;
+        if (!e.title.trim()) { toast('Scrivi almeno il titolo prima di salvare.', 'err'); document.getElementById('f-title')?.focus(); return; }
+        if (!e.slug) e.slug = slugify(e.title);
+        const content = (e.content || []).map((b: Any) => b.type === 'list' ? { ...b, items: (b.items || []).map((x: string) => x.trim()).filter(Boolean) } : b)
+          .filter((b: Any) => !(b.type === 'paragraph' && !String(b.text || '').trim()));
+        let published_at = e.published_at || null;
+        if (target === 'published' && !published_at) published_at = new Date().toISOString();
+        const future = published_at && Date.parse(published_at) > Date.now();
+        const row: Any = {
+          title: e.title.trim(), slug: e.slug, subtitle: e.subtitle || '', cover_image: e.cover_image || '', cover_alt: e.cover_alt || '',
+          content, author_id: e.author_id || null, category_id: e.category_id || null,
+          status: target, published_at, scheduled_at: target === 'published' && future ? published_at : null,
+          seo_title: e.seo_title || '', meta_description: e.meta_description || '', focus_keyword: e.focus_keyword || '',
+          canonical_url: (e.canonical_url || '').trim() || null, reading_time: readingTime(content), featured: !!e.featured,
+          updated_at: new Date().toISOString(),
+        };
+        if (target === 'published' && isDemo(row)) { if (!confirm('Il titolo o l\'indirizzo iniziano con "[DEMO]"/"demo-": il sito non mostra mai questi articoli. Salvare comunque?')) return; }
+        root.querySelectorAll<HTMLButtonElement>('[data-save]').forEach((b) => b.disabled = true);
+        try {
+          let id = e.id;
+          if (id) { const { error } = await sb.from('journal_articles').update(row).eq('id', id); if (error) throw error; }
+          else { const { data, error } = await sb.from('journal_articles').insert(row).select('id').single(); if (error) throw error; id = data.id; }
+          const d1 = await sb.from('journal_article_tags').delete().eq('article_id', id); if (d1.error) throw d1.error;
+          if (e._tags.length) { const d2 = await sb.from('journal_article_tags').insert(e._tags.map((t: string) => ({ article_id: id, tag_id: t }))); if (d2.error) throw d2.error; }
+          await loadAll();
+          if (S.editing !== e) { toast(target === 'draft' ? 'Bozza salvata' : 'Articolo salvato', 'ok'); if (!S.editing) renderList(); return; }
+          const fresh = S.articles.find((a: Any) => a.id === id) || { ...row, id };
+          S.editing = { ...fresh, content: Array.isArray(fresh.content) ? fresh.content : [], _tags: tagIdsOf(id), _slugTouched: true };
+          S.dirty = false;
+          toast(target === 'draft' ? 'Bozza salvata' : target === 'archived' ? 'Articolo archiviato: sparirà dal sito al prossimo aggiornamento' : future ? `Programmato per ${fmtDateTime(published_at)}` : 'Pubblicato: sarà online sul sito entro circa 15 minuti', 'ok');
+          renderEditor();
+        } catch (err) {
+          toast(errMsg(err), 'err');
+          if (S.editing !== e) return;
+          root.querySelectorAll<HTMLButtonElement>('[data-save]').forEach((b) => b.disabled = false);
+        }
+      }
+
+      /* ---------------- avvio ---------------- */
+      window.addEventListener('beforeunload', (ev) => { if (S.editing && S.dirty) { ev.preventDefault(); ev.returnValue = ''; } });
+      document.addEventListener('keydown', (ev) => {
+        if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 's' && S.editing) {
+          ev.preventDefault(); const st = articleStatus(S.editing).key;
+          save(st === 'published' || st === 'scheduled' ? 'published' : st === 'archived' ? 'archived' : 'draft');
+        }
+      });
+      logoutBtn.onclick = async () => { if (S.editing && S.dirty && !confirm('Ci sono modifiche non salvate. Uscire comunque?')) return; await sb.auth.signOut(); };
+
+      let entered = false;
+      sb.auth.onAuthStateChange((_ev, session) => {
+        const user = session?.user || null;
+        if (user && !entered) { entered = true; S.user = user; enter(); }
+        else if (!user) { entered = false; S.user = null; viewLogin(); }
+      });
+    </script>
+
+    <style is:global>
+      .adm { min-height: 100svh; }
+      .adm-top { position: sticky; top: 0; z-index: 30; background: rgba(246, 246, 244, 0.86); -webkit-backdrop-filter: saturate(1.6) blur(14px); backdrop-filter: saturate(1.6) blur(14px); border-bottom: 1px solid var(--border); }
+      .adm-top__in { max-width: 88rem; margin: 0 auto; padding: 0.7rem var(--margin); display: flex; align-items: center; gap: 0.9rem; }
+      .adm-brand { display: block; width: 7.25rem; flex: none; }
+      .adm-top__title { font-family: var(--font-head); font-weight: 600; font-size: 0.95rem; padding-left: 0.9rem; border-left: 1px solid var(--border-strong); }
+      .adm-top__link { font-size: 0.9rem; font-weight: 500; text-decoration: none; padding: 0.45rem 0.8rem; border-radius: 999px; }
+      .adm-top__link:hover { background: rgba(15, 15, 18, 0.05); }
+      .adm-top__user { font-size: 0.85rem; color: var(--muted); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .adm-spacer { flex: 1; }
+      .adm-main { max-width: 88rem; margin: 0 auto; padding: clamp(1.5rem, 3vw, 2.5rem) var(--margin) 6rem; }
+      .adm-boot { display: flex; align-items: center; gap: 0.7rem; color: var(--muted); padding: 4rem 0; justify-content: center; }
+      .adm-spin { width: 1rem; height: 1rem; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: adm-spin 0.7s linear infinite; }
+      @keyframes adm-spin { to { transform: rotate(360deg); } }
+
+      .adm-h1 { font-family: var(--font-head); font-size: clamp(2rem, 1.4rem + 1.8vw, 2.75rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.08; }
+      .adm-h2 { font-family: var(--font-head); font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; }
+      .adm-h3 { font-family: var(--font-head); font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
+      .adm-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 1px 2px rgba(15, 15, 18, 0.03); }
+      .adm-empty { padding: 3rem 1.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+      .adm-hint { font-size: 0.8125rem; color: var(--muted); line-height: 1.45; }
+      .adm-err { color: #b42318; font-size: 0.9rem; min-height: 1.3em; }
+      .adm-nums { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+      /* campi */
+      .adm-field { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; border: 0; padding: 0; margin: 0; }
+      .adm-field > label, .adm-field > legend { font-size: 0.8125rem; font-weight: 600; color: #34343a; display: flex; align-items: baseline; gap: 0.5rem; padding: 0; }
+      .adm input:not([type='checkbox']), .adm select, .adm textarea { width: 100%; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 0.65rem 0.85rem; font-size: 0.95rem; line-height: 1.45; transition: border-color 150ms ease, box-shadow 150ms ease; }
+      .adm input:not([type='checkbox']):hover, .adm select:hover, .adm textarea:hover { border-color: #b9b9c0; }
+      .adm input:not([type='checkbox']):focus, .adm select:focus, .adm textarea:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+      .adm textarea { resize: vertical; }
+      .adm input[type='checkbox'] { width: 1.05rem; height: 1.05rem; accent-color: var(--ink); flex: none; }
+      .adm-check { display: flex; align-items: center; gap: 0.55rem; font-size: 0.9rem; cursor: pointer; }
+      .adm-row { display: flex; gap: 0.6rem; align-items: flex-end; }
+      .adm-row > .adm-field { flex: 1; }
+      .adm-grow { flex: 1; min-width: 0; }
+      .adm-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.875rem !important; }
+      .adm-count { margin-left: auto; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .adm-count.over { color: #b42318; }
+
+      /* login */
+      .adm-login { max-width: 28rem; margin: clamp(2rem, 8vh, 6rem) auto 0; display: flex; flex-direction: column; gap: 1rem; }
+      .adm-login .lead { margin-bottom: 0.75rem; }
+      .adm-login__form { padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; }
+      .adm-login__form .button { width: 100%; }
+
+      /* intestazione + schede */
+      .adm-head { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+      .adm-head .muted { margin-top: 0.35rem; }
+      .adm-tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; overflow-x: auto; }
+      .adm-tab { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 0.95rem; font-weight: 600; font-size: 0.95rem; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 150ms ease; }
+      .adm-tab:hover { color: var(--ink); }
+      .adm-tab.on { color: var(--ink); border-bottom-color: var(--accent); }
+      .adm-tab__n { font-size: 0.75rem; min-width: 1.4rem; height: 1.4rem; padding: 0 0.4rem; border-radius: 999px; background: var(--surface-2); display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+      .adm-tab.on .adm-tab__n { background: var(--accent-soft); color: var(--accent-text); }
+
+      .adm-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .adm-search { flex: 1; min-width: 14rem; position: relative; }
+      .adm-search svg { position: absolute; left: 0.85rem; top: 50%; width: 1rem; height: 1rem; transform: translateY(-50%); color: var(--muted); }
+      .adm .adm-search input { padding-left: 2.4rem; border-radius: 999px; }
+      .adm-seg { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 0.2rem; gap: 0.15rem; flex-wrap: wrap; }
+      .adm-seg__b { padding: 0.45rem 0.9rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; color: var(--muted); transition: background-color 150ms ease, color 150ms ease; }
+      .adm-seg__b:hover { color: var(--ink); }
+      .adm-seg__b.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 15, 18, 0.1); }
+
+      /* tabella articoli */
+      .adm-tablewrap { overflow-x: auto; }
+      .adm-table { width: 100%; border-collapse: collapse; font-size: 0.925rem; }
+      .adm-table th { text-align: left; font-size: 0.8rem; font-weight: 600; color: var(--muted); padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+      .adm-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+      .adm-table tr:last-child td { border-bottom: 0; }
+      .adm-table tbody tr { cursor: pointer; transition: background-color 120ms ease; }
+      .adm-table tbody tr:hover { background: #fafaf8; }
+      .adm-t-title { min-width: 18rem; }
+      .adm-linkbtn { text-align: left; font-family: var(--font-head); font-weight: 600; font-size: 1rem; letter-spacing: -0.01em; line-height: 1.3; }
+      .adm-t-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+      .adm-feat { color: var(--accent-text); font-weight: 600; }
+      .adm-demo { color: #6941c6; font-weight: 600; }
+      .adm-t-act { text-align: right; white-space: nowrap; }
+      .adm-t-act > * { vertical-align: middle; }
+      .adm-pill { display: inline-flex; align-items: center; gap: 0.4rem; height: 1.6rem; padding: 0 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+      .adm-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+      .adm-pill.draft { background: var(--surface-2); color: #4b4b52; }
+      .adm-pill.published { background: var(--ok-soft); color: #17703f; }
+      .adm-pill.scheduled { background: #e8efff; color: #2a4fb8; }
+      .adm-pill.archived { background: var(--surface-2); color: var(--muted); }
+      .adm-mini { font-size: 0.85rem; font-weight: 600; padding: 0.4rem 0.7rem; border-radius: 999px; color: #34343a; transition: background-color 120ms ease; }
+      .adm-mini:hover { background: var(--surface-2); }
+      .adm-mini:disabled { opacity: 0.4; cursor: default; background: none; }
+      .adm-mini.danger { color: #b42318; }
+      .adm-mini.danger:hover { background: #fdecea; }
+      .adm-iconbtn { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 999px; color: #4b4b52; transition: background-color 120ms ease; }
+      .adm-iconbtn:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+      .adm-iconbtn:disabled { opacity: 0.3; cursor: default; }
+      .adm-iconbtn svg { width: 1rem; height: 1rem; }
+
+      /* categorie, tag, autori */
+      .adm-taxadd { display: flex; gap: 0.75rem; align-items: flex-end; padding: 1.1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+      .adm-taxadd > .adm-field:first-child { width: 16rem; }
+      .adm-taxlist { padding: 0.35rem 0; }
+      .adm-taxrow { display: flex; gap: 0.6rem; align-items: center; padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+      .adm-taxrow:last-child { border-bottom: 0; }
+      .adm-taxrow > .adm-field:first-child { width: 16rem; }
+      .adm-taxuse { margin: 0 0.5rem; white-space: nowrap; }
+
+      /* editor */
+      .adm-edhead { position: sticky; top: 3.85rem; z-index: 20; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: -0.5rem calc(-1 * var(--margin)) 1.25rem; padding: 0.75rem var(--margin); background: rgba(246, 246, 244, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+      .adm-edhead__act { display: flex; gap: 0.5rem; }
+      .adm-ed { display: grid; grid-template-columns: minmax(0, 1fr) 21rem; gap: 1.5rem; align-items: start; }
+      .adm-ed__main { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+      .adm-ed__side { display: flex; flex-direction: column; gap: 1rem; }
+      .adm-side { padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+      .adm-side__act { display: flex; }
+      .adm-side__del { align-self: flex-start; }
+      .adm-ed__title { padding: 1.5rem 1.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+      .adm .adm-titleinput { border: 0; padding: 0; font-family: var(--font-head); font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.12; resize: none; overflow: hidden; box-shadow: none !important; }
+      .adm .adm-subinput { border: 0; padding: 0; font-size: 1.15rem; color: var(--muted); resize: none; overflow: hidden; box-shadow: none !important; }
+      .adm-blocks { display: flex; flex-direction: column; gap: 0.75rem; }
+      .adm-block { padding: 0.9rem 1.1rem 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; transition: border-color 150ms ease; }
+      .adm-block:focus-within { border-color: #c9c9cf; }
+      .adm-block__h { display: flex; align-items: center; gap: 0.15rem; margin: -0.2rem -0.4rem 0 0; }
+      .adm-block__t { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+      .adm .adm-prose { font-size: 1.0625rem; line-height: 1.65; overflow: hidden; resize: none; }
+      .adm .adm-hinput { font-family: var(--font-head); font-weight: 600; font-size: 1.2rem; }
+      .adm-row select { width: auto; flex: none; }
+      .adm-addblock { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; padding: 1rem 0.25rem; }
+      .adm-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.85rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-strong); font-size: 0.85rem; font-weight: 600; transition: border-color 150ms ease, background-color 150ms ease; }
+      .adm-chip svg { width: 0.85rem; height: 0.85rem; }
+      .adm-chip:hover { border-color: var(--ink); }
+      .adm-imgpick { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 1rem; align-items: start; }
+      .adm-imgpick > img, .adm-imgph { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
+      .adm-imgph { display: flex; align-items: center; justify-content: center; color: #a3a3ab; }
+      .adm-imgph svg { width: 1.75rem; height: 1.75rem; }
+      .adm-imgpick__f { display: flex; flex-direction: column; gap: 0.6rem; }
+      .adm-gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.75rem; }
+      .adm-gal:empty { display: none; }
+      .adm-gal__it { position: relative; display: flex; flex-direction: column; gap: 0.4rem; }
+      .adm-gal__it img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: var(--surface-2); }
+      .adm .adm-gal__it input { font-size: 0.85rem; padding: 0.45rem 0.65rem; }
+      .adm-gal__it .adm-iconbtn { position: absolute; top: 0.35rem; right: 0.35rem; background: rgba(255, 255, 255, 0.92); }
+      .adm-cover img, .adm-cover .adm-imgph { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
+      .adm-tagpick { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .adm-tagopt { cursor: pointer; }
+      .adm-tagopt input { position: absolute; opacity: 0; pointer-events: none; }
+      .adm-tagopt span { display: inline-flex; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid var(--border-strong); font-size: 0.85rem; font-weight: 500; transition: background-color 120ms ease, border-color 120ms ease; }
+      .adm-tagopt input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+      .adm-tagopt input:focus-visible + span { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+      .adm-slug { display: flex; align-items: center; border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; background: var(--surface-2); }
+      .adm-slug span { padding: 0 0 0 0.75rem; font-size: 0.85rem; color: var(--muted); }
+      .adm .adm-slug input { border: 0; border-radius: 0; padding-left: 0.2rem; }
+      .adm-slug:focus-within { border-color: var(--accent-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+      .adm .adm-slug input:focus { box-shadow: none; }
+
+      /* anteprima (stessa tipografia della pagina articolo) */
+      .adm-pvwrap { padding: clamp(1.5rem, 4vw, 3rem); }
+      .pv { display: flex; flex-direction: column; gap: 1.1rem; max-width: 46rem; }
+      .pv-cover { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; border-radius: 14px; margin-top: 0.75rem; }
+      .pv-body { display: flex; flex-direction: column; gap: 1.25rem; font-size: 1.1875rem; line-height: 1.65; margin-top: 1rem; max-width: 42rem; }
+      .pv-h2 { margin-top: 1.25rem; }
+      .pv-body ol { padding-left: 1.25em; }
+      .pv-body blockquote { padding-left: 1.25rem; border-left: 6px solid var(--accent); }
+      .pv-body figure img { width: 100%; border-radius: 12px; }
+      .pv-gal { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .pv-table { overflow-x: auto; }
+      .pv-table table { border-collapse: collapse; width: 100%; font-size: 1rem; }
+      .pv-table th, .pv-table td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border-strong); }
+      .pv-video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; }
+      .pv-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; padding: 1.5rem; background: var(--surface-2); border-radius: 16px; }
+
+      /* avvisi */
+      .adm-toasts { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 80; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; pointer-events: none; width: max-content; max-width: calc(100vw - 2rem); }
+      .adm-toast { background: var(--ink); color: #fff; padding: 0.75rem 1.2rem 0.75rem 1rem; border-radius: 999px; font-size: 0.925rem; font-weight: 500; display: flex; align-items: center; gap: 0.65rem; box-shadow: var(--shadow-float); animation: adm-in 260ms var(--ease-out); transition: opacity 220ms ease, transform 220ms ease; }
+      .adm-toast::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+      .adm-toast.ok::before { background: #4ade80; }
+      .adm-toast.err::before { background: #ff6a5c; }
+      .adm-toast.out { opacity: 0; transform: translateY(6px); }
+      @keyframes adm-in { from { opacity: 0; transform: translateY(8px); } }
+
+      @media (max-width: 1080px) {
+        .adm-ed { grid-template-columns: 1fr; }
+        .adm-edhead { top: 3.6rem; }
+      }
+      @media (max-width: 720px) {
+        .adm-top__title, .adm-top__user { display: none; }
+        .adm-imgpick { grid-template-columns: 1fr; }
+        .adm-table th:nth-child(2), .adm-table td:nth-child(2), .adm-table th:nth-child(4), .adm-table td:nth-child(4) { display: none; }
+        .adm-t-title { min-width: 12rem; }
+        .adm-taxadd > .adm-field:first-child, .adm-taxrow > .adm-field:first-child { width: 100%; }
+        .adm-row { flex-wrap: wrap; }
+        .adm-edhead { gap: 0.5rem; position: static; margin: 0 0 1rem; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+        .adm-edhead .adm-saved { display: none; }
+        .adm-edhead__act { width: 100%; }
+        .adm-edhead__act .button { flex: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) { .adm-toast, .adm-spin { animation: none; } }
+    </style>
+  </body>
+</html>

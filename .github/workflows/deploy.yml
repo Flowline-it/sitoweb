@@ -7,21 +7,35 @@ on:
   # Lanciato da Supabase/n8n quando si pubblica un articolo del Journal
   repository_dispatch:
     types: [journal-update]
-  # Rete di sicurezza: ricostruzione notturna (articoli programmati)
+  # Ogni 15 minuti: se nel Journal c'è qualcosa di nuovo (articolo pubblicato, modificato,
+  # programmato che arriva alla sua data, archiviato), ricostruisce il sito. Altrimenti non fa nulla.
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '*/15 * * * *'
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
+  check:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.journal.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: journal
+        run: node scripts/journal-check.mjs
+        env:
+          LIVE_URL: ${{ vars.LIVE_URL || 'https://flowline-it.github.io/sitoweb' }}
+
   build:
+    needs: check
+    if: ${{ always() && (github.event_name != 'schedule' || needs.check.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,9 +53,14 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # una pubblicazione alla volta; quella in corso non viene mai interrotta
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

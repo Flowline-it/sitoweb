@@ -3,6 +3,7 @@
 import { SITE } from '../data/site.js';
 
 let cache;
+export let journalFetchFailed = false;
 
 export async function getArticles() {
   if (cache) return cache;
@@ -22,6 +23,9 @@ export async function getArticles() {
         tags: (a.journal_article_tags || []).map((t) => t.journal_tags).filter(Boolean),
       }));
   } catch (err) {
+    journalFetchFailed = true;
+    // Su GitHub Actions meglio fermare la pubblicazione che mettere online un Journal vuoto.
+    if (process.env.CI) throw new Error(`[journal] articoli non letti da Supabase: ${err.message}`);
     console.warn('[journal] articoli non letti:', err.message);
     cache = [];
   }
