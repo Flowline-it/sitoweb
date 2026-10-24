@@ -30,7 +30,7 @@ const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
       ) : (
         <>
           <article class="jfeat" data-reveal>
-            {featured.cover_image && <img class="jfeat__img" src={featured.cover_image} alt={featured.cover_alt || ''} loading="eager" width="1600" height="900" onerror="this.remove()" />}
+            {featured.cover_image && <img class="jfeat__img" src={featured.cover_image} alt={featured.cover_alt || ''} loading="eager" width="1200" height="630" onerror="this.remove()" />}
             <div class="jfeat__text">
               <p class="small muted">{featured.category?.name} · <time datetime={featured.published_at}>{fmtDate(featured.published_at)}</time></p>
               <h2 class="head"><a href={p(`/journal/${featured.slug}`)}>{featured.title}</a></h2>
@@ -59,7 +59,7 @@ const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
   .journal__empty { margin-top: clamp(3rem, 7vw, 6rem); display: flex; flex-direction: column; gap: 1.25rem; max-width: 44rem; }
   .journal__line { display: block; width: min(100%, 22rem); height: 10px; background: var(--orange); border-radius: 0 5px 5px 0; }
   .jfeat { margin-top: clamp(3rem, 6vw, 5rem); display: grid; grid-template-columns: 7fr 5fr; gap: var(--gutter); align-items: end; }
-  .jfeat__img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+  .jfeat__img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
   .jfeat__text { display: flex; flex-direction: column; gap: 1rem; }
   .jfeat a, .jlist a { text-decoration: none; }
   @media (hover: hover) and (pointer: fine) { .jfeat h2 a:hover, .jlist h2 a:hover { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 0.15em; text-decoration-thickness: 0.08em; } }

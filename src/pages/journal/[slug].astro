@@ -43,7 +43,7 @@ const jsonld = [
       <p class="small muted" data-rise style="--i:2">{a.author?.name && <>{a.author.name} · </>}<time datetime={a.published_at}>{fmtDate(a.published_at)}</time> · {a.reading_time || 1} min di lettura</p>
     </header>
     {a.cover_image && (
-      <figure class="wrap post__cover"><img src={a.cover_image} alt={a.cover_alt || ''} width="1600" height="900" onerror="this.parentElement.remove()" /></figure>
+      <figure class="wrap post__cover"><img src={a.cover_image} alt={a.cover_alt || ''} width="1200" height="630" onerror="this.parentElement.remove()" /></figure>
     )}
     <div class="wrap">
       <div class="post__body">
@@ -86,7 +86,7 @@ const jsonld = [
   .post__head { display: flex; flex-direction: column; gap: 1.25rem; max-width: 62rem; margin-inline: 0; }
   .post__head .lead { font-weight: 400; max-width: 40ch; }
   .post__cover { margin-top: clamp(2.5rem, 5vw, 4rem); }
-  .post__cover img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; }
+  .post__cover img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
   .post__body { max-width: 42rem; margin-top: clamp(2.5rem, 5vw, 4rem); display: flex; flex-direction: column; gap: 1.25rem; font-size: 1.1875rem; line-height: 1.65; }
   .post__body p + p { margin-top: 0; }
   .post__h2 { margin-top: 1.5rem; }
