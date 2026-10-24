@@ -13,10 +13,11 @@ export const SITE = {
   vat: 'IT02110530850',
   linkedin: 'https://www.linkedin.com/company/flowline-it/',
   instagram: 'https://www.instagram.com/flowline.it/',
-  supabaseUrl: 'https://ujzdbpviqnaovtokonsc.supabase.co',
-  // Chiave pubblica "anon": era già nel codice del sito Horizons. Può solo fare ciò che le policy RLS permettono.
+  supabaseUrl: 'https://dwsdrhqsqofublntmyma.supabase.co',
+  // Progetto Supabase "FLOWLINE JOURNAL" (non più quello di Hostinger Horizons).
+  // Chiave pubblica "anon": può solo fare ciò che le policy RLS permettono.
   supabaseAnonKey:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqemRicHZpcW5hb3Z0b2tvbnNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4Mjg3NTUsImV4cCI6MjA4NDQwNDc1NX0.JgL3GboJPYtgfz_WN7CQF1jc-IYNRa7BfPlvRgaWAZ4',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3c2RyaHFzcW9mdWJsbnRteW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NDMxMDcsImV4cCI6MjEwODQxOTEwN30.-mCxe4HJ_Ookc6-KAcBGes1isW89k7termKc837DGkc',
 };
 
 export const HOME_META = {

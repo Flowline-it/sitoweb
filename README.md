@@ -30,7 +30,11 @@ npm run build    # genera dist/
 
 Su `/journal/admin` si accede con email e password dell'account Supabase del Journal. Da lì si scrivono gli articoli a blocchi (paragrafi, titoletti, elenchi, citazioni, immagini, gallerie, tabelle, video, inviti all'azione), si caricano le immagini (bucket `journal-media`), si gestiscono categorie, tag e autori, si compilano i campi SEO, si salva in bozza, si pubblica subito o si programma una data.
 
-La pagina usa la chiave pubblica `anon`: **cosa può fare un utente lo decidono le policy RLS del database**. Le tabelle `journal_*` devono permettere la scrittura solo agli account della redazione, e le iscrizioni libere (sign-up) vanno disattivate in Supabase.
+La pagina usa la chiave pubblica `anon`: **cosa può fare un utente lo decidono le policy RLS del database**.
+
+Database: progetto Supabase **FLOWLINE JOURNAL** (`dwsdrhqsqofublntmyma`), che sostituisce quello creato da Hostinger Horizons. Scrivono nel Journal (articoli, categorie, tag, autori, immagini nel bucket `journal-media`) e leggono le richieste del form solo gli account il cui indirizzo è nella tabella `journal_editors`. Per aggiungere una persona alla redazione: crea l'utente in Supabase (Authentication → Users) e aggiungi la sua email a `journal_editors`. Le iscrizioni libere conviene comunque tenerle disattivate.
+
+Pubblicazione da n8n: funzione `publish-article` dello stesso progetto, con l'intestazione `x-api-key` uguale al secret `JOURNAL_API_KEY`. Copia la copertina nello storage del Journal e crea categorie e tag mancanti.
 
 ## Pubblicazione
 
