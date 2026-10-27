@@ -304,10 +304,10 @@ const jsonld = [
   .hero__trust li { display: inline-flex; align-items: center; gap: 0.4rem; }
   .hero__trust li::before { content: ''; width: 16px; height: 16px; border-radius: 50%; background: var(--ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e8a52' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 10px no-repeat; }
   .hero__stage { position: relative; max-width: 66rem; margin-top: clamp(3rem, 6vw, 4.5rem); padding-bottom: clamp(4rem, 8vw, 6rem); }
-  .hero__glow2 { width: 90%; height: 70%; left: 5%; top: 12%; background: radial-gradient(closest-side, rgba(255, 153, 0, 0.32), rgba(255, 153, 0, 0.1) 60%, transparent); filter: blur(30px); }
+  .hero__glow2 { width: 90%; height: 70%; left: 5%; top: 12%; background: radial-gradient(closest-side, rgba(255, 153, 0, 0.26), rgba(255, 153, 0, 0.1) 50%, rgba(255, 153, 0, 0.03) 75%, transparent); }
   .hero__stage :global(.mock) { position: relative; z-index: 1; }
 
-  .float { position: absolute; z-index: 2; display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: rgba(255, 255, 255, 0.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-float); font-size: 0.8rem; text-align: left; }
+  .float { position: absolute; z-index: 2; display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-float); font-size: 0.8rem; text-align: left; }
   .float b { display: block; font-weight: 600; font-size: 0.85rem; }
   .float small { display: block; color: var(--muted); font-size: 0.74rem; }
   .hero__stage { --pb: clamp(4rem, 8vw, 6rem); }
@@ -320,7 +320,7 @@ const jsonld = [
   .hero__stage[data-view='gestionale'] .float__swap .v-gest { transition-delay: 0s; }
 
   /* selettore degli esempi sopra il pannello */
-  .examples { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 0.35rem; width: max-content; max-width: 100%; margin: 0 auto 1.25rem; padding: 0.3rem; border-radius: 999px; background: rgba(255, 255, 255, 0.8); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 15, 18, 0.04); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .examples { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 0.35rem; width: max-content; max-width: 100%; margin: 0 auto 1.25rem; padding: 0.3rem; border-radius: 999px; background: #fff; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 15, 18, 0.04); }
   .examples__label { padding: 0 0.4rem 0 0.7rem; font-size: 0.82rem; color: var(--muted); font-weight: 500; }
   .examples__btn { min-height: 2.25rem; padding: 0 0.95rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; color: #4a4a52; transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease; }
   .examples__btn[aria-pressed='true'] { background: var(--ink); color: #fff; box-shadow: 0 2px 6px rgba(15, 15, 18, 0.18); }
