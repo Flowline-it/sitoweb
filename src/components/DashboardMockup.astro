@@ -1,65 +1,124 @@
 ---
-// Mockup illustrativo di un pannello di automazioni (HTML, nessuna immagine).
-// I numeri sono quelli del sito (20h/settimana, 99,9%); il resto è un'interfaccia d'esempio.
+// Mockup illustrativo (HTML, nessuna immagine) con due esempi che si alternano:
+//  - "automazioni": pannello delle automazioni (numeri del sito: 20h/settimana, 99,9%);
+//  - "gestionale": gestionale su misura per magazzino e ordini.
+// Nomi, codici e quantità sono d'esempio. Quale esempio è visibile lo decide data-view sul contenitore .hero__stage.
 const flows = [
   { name: 'Fatture fornitori → gestionale', meta: 'Email · OCR · ERP', status: 'Attivo', tone: 'ok' },
   { name: 'Richieste dal sito → CRM', meta: 'Form · CRM · Notifica', status: 'Attivo', tone: 'ok' },
   { name: 'Preventivi da email', meta: 'Agente AI · Bozza', status: 'In corso', tone: 'run' },
   { name: 'Report settimanale', meta: 'Dati · PDF · Email', status: 'Lunedì 8:00', tone: 'plan' },
 ];
+const stock = [
+  { code: 'PNL-120', name: 'Pannello 120×60', qty: 126, pct: 84, tone: 'ok' },
+  { code: 'PRF-300', name: 'Profilo alluminio 3 m', qty: 48, pct: 52, tone: 'ok' },
+  { code: 'GRN-08', name: 'Guarnizione EPDM', qty: 9, pct: 12, tone: 'low' },
+  { code: 'VTM-08', name: 'Viteria M8, conf. 100', qty: 0, pct: 0, tone: 'out' },
+];
+const orders = [
+  { id: 'ORD-1187', who: 'Rossi Srl', status: 'Evaso', tone: 'ok' },
+  { id: 'ORD-1188', who: 'Bianchi Spa', status: 'In preparazione', tone: 'run' },
+  { id: 'ORD-1189', who: 'Verdi Snc', status: 'Da confermare', tone: 'plan' },
+];
 const icon = {
   home: '<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  box: '<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>',
   flow: '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H14a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8"/>',
-  bot: '<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01"/>',
-  plug: '<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+  doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
   chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
 };
 ---
 <div class="mock" aria-hidden="true">
   <div class="mock__bar">
     <span class="mock__dots"><i></i><i></i><i></i></span>
-    <span class="mock__title">Flowline · Pannello automazioni</span>
+    <span class="mock__title"><span class="v-auto">Flowline · Pannello automazioni</span><span class="v-gest">Gestionale · Magazzino e ordini</span></span>
     <span class="mock__live"><i></i> Live</span>
+    <span class="mock__spacer"></span>
   </div>
   <div class="mock__body">
     <aside class="mock__side">
-      {Object.entries(icon).map(([k, d], i) => (
-        <span class:list={['mock__nav', i === 0 && 'is-on']}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={d} /></span>
+      {Object.entries(icon).map(([k]) => (
+        <span class:list={['mock__nav', `nav-${k}`]}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={icon[k as keyof typeof icon]} /></span>
       ))}
     </aside>
-    <div class="mock__main">
-      <div class="mock__head">
-        <div>
-          <p class="mock__h">Panoramica</p>
-          <p class="mock__sub">Questa settimana</p>
+
+    <div class="mock__views">
+      <!-- esempio 1: automazioni -->
+      <div class="mock__main mock__view v-auto">
+        <div class="mock__head">
+          <div>
+            <p class="mock__h">Panoramica</p>
+            <p class="mock__sub">Questa settimana</p>
+          </div>
+          <span class="mock__pill">Tutti i reparti</span>
         </div>
-        <span class="mock__pill">Tutti i reparti</span>
-      </div>
-      <div class="mock__kpis">
-        <div class="mock__kpi"><span>Ore risparmiate</span><b>20h</b><em class="up">+ questa settimana</em></div>
-        <div class="mock__kpi"><span>Flussi attivi</span><b>12</b><em>3 reparti</em></div>
-        <div class="mock__kpi"><span>Uptime</span><b>99,9%</b><em class="up">stabile</em></div>
-      </div>
-      <div class="mock__grid">
-        <div class="mock__card mock__chart">
-          <p class="mock__label">Ore risparmiate</p>
-          <svg viewBox="0 0 320 120" preserveAspectRatio="none">
-            <path class="mock__area" d="M0 104 C30 98 50 92 80 86 S130 70 160 64 S215 50 240 38 S290 22 320 14 V120 H0Z" />
-            <path class="mock__line" d="M0 104 C30 98 50 92 80 86 S130 70 160 64 S215 50 240 38 S290 22 320 14" pathLength="1" />
-            <circle class="mock__pt" cx="320" cy="14" r="4" />
-          </svg>
-          <div class="mock__axis"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span></div>
+        <div class="mock__kpis">
+          <div class="mock__kpi"><span>Ore risparmiate</span><b>20h</b><em class="up">+ questa settimana</em></div>
+          <div class="mock__kpi"><span>Flussi attivi</span><b>12</b><em>3 reparti</em></div>
+          <div class="mock__kpi"><span>Uptime</span><b>99,9%</b><em class="up">stabile</em></div>
         </div>
-        <div class="mock__card mock__flows">
-          <p class="mock__label">Automazioni</p>
-          <ul>
-            {flows.map((f) => (
-              <li>
-                <span class="mock__fname">{f.name}<small>{f.meta}</small></span>
-                <span class:list={['mock__status', `is-${f.tone}`]}>{f.status}</span>
-              </li>
-            ))}
-          </ul>
+        <div class="mock__grid">
+          <div class="mock__card mock__chart">
+            <p class="mock__label">Ore risparmiate</p>
+            <svg viewBox="0 0 320 120" preserveAspectRatio="none">
+              <path class="mock__area" d="M0 104 C30 98 50 92 80 86 S130 70 160 64 S215 50 240 38 S290 22 320 14 V120 H0Z" />
+              <path class="mock__line" d="M0 104 C30 98 50 92 80 86 S130 70 160 64 S215 50 240 38 S290 22 320 14" pathLength="1" />
+              <circle class="mock__pt" cx="320" cy="14" r="4" />
+            </svg>
+            <div class="mock__axis"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span></div>
+          </div>
+          <div class="mock__card mock__flows">
+            <p class="mock__label">Automazioni</p>
+            <ul>
+              {flows.map((f) => (
+                <li>
+                  <span class="mock__fname">{f.name}<small>{f.meta}</small></span>
+                  <span class:list={['mock__status', `is-${f.tone}`]}>{f.status}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- esempio 2: gestionale su misura -->
+      <div class="mock__main mock__view v-gest">
+        <div class="mock__head">
+          <div>
+            <p class="mock__h">Magazzino</p>
+            <p class="mock__sub">Oggi</p>
+          </div>
+          <span class="mock__pill">+ Nuovo ordine</span>
+        </div>
+        <div class="mock__kpis">
+          <div class="mock__kpi"><span>Ordini aperti</span><b>38</b><em>9 in consegna oggi</em></div>
+          <div class="mock__kpi"><span>Sotto scorta</span><b>4</b><em class="warn">riordino suggerito</em></div>
+          <div class="mock__kpi"><span>Preventivi</span><b>7</b><em class="up">2 accettati oggi</em></div>
+        </div>
+        <div class="mock__grid">
+          <div class="mock__card mock__stock">
+            <p class="mock__label">Giacenze</p>
+            <ul>
+              {stock.map((s, i) => (
+                <li style={`--n:${i}`}>
+                  <span class="mock__fname">{s.name}<small>{s.code}</small></span>
+                  <span class="stock__bar"><i class={`is-${s.tone}`} style={`--w:${Math.max(s.pct, 3)}%`}></i></span>
+                  <span class:list={['stock__qty', `is-${s.tone}`]}>{s.qty}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="mock__card mock__flows">
+            <p class="mock__label">Ordini di oggi</p>
+            <ul>
+              {orders.map((o) => (
+                <li>
+                  <span class="mock__fname">{o.id}<small>{o.who}</small></span>
+                  <span class:list={['mock__status', `is-${o.tone}`]}>{o.status}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -71,25 +130,40 @@ const icon = {
   .mock__bar { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--border); background: #fbfbfa; font-size: 0.8rem; }
   .mock__dots { display: flex; gap: 6px; }
   .mock__dots i { width: 10px; height: 10px; border-radius: 50%; background: #e2e2e6; }
-  .mock__title { color: var(--muted); font-weight: 500; flex: 1; }
+  .mock__title { display: grid; color: var(--muted); font-weight: 500; min-width: 0; }
+  .mock__spacer { flex: 1; }
+  .mock__title > span { grid-area: 1 / 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mock__live { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; color: var(--ok); }
   .mock__live i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(30, 138, 82, 0.5); animation: pulse 2s infinite; }
   .mock__body { display: grid; grid-template-columns: 64px 1fr; min-height: 420px; }
   .mock__side { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; padding: 1rem 0; border-right: 1px solid var(--border); background: #fcfcfb; }
-  .mock__nav { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; color: #8a8a93; }
+  .mock__nav { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; color: #8a8a93; transition: background-color 300ms ease, color 300ms ease; }
   .mock__nav svg { width: 19px; height: 19px; }
-  .mock__nav.is-on { background: var(--accent-soft); color: var(--accent-text); }
+
+  /* i due esempi stanno uno sopra l'altro: l'altezza non salta quando si cambia */
+  .mock__views { display: grid; min-width: 0; }
+  .mock__view { grid-area: 1 / 1; }
   .mock__main { padding: 1.25rem 1.4rem 1.4rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+  .v-auto, .v-gest { transition: opacity 420ms var(--ease-out), transform 520ms var(--ease-out), visibility 0s linear 420ms; }
+  :global(.hero__stage:not([data-view='gestionale'])) .v-gest,
+  :global(.hero__stage[data-view='gestionale']) .v-auto { opacity: 0; visibility: hidden; transform: translateY(8px); }
+  :global(.hero__stage:not([data-view='gestionale'])) .v-auto,
+  :global(.hero__stage[data-view='gestionale']) .v-gest { transition-delay: 0s; }
+  :global(.hero__stage:not([data-view='gestionale'])) .nav-home,
+  :global(.hero__stage[data-view='gestionale']) .nav-box { background: var(--accent-soft); color: var(--accent-text); }
+
   .mock__head { display: flex; justify-content: space-between; align-items: center; }
   .mock__h { font-family: var(--font-head); font-weight: 600; font-size: 1.15rem; letter-spacing: -0.02em; }
   .mock__sub { font-size: 0.78rem; color: var(--muted); }
   .mock__pill { font-size: 0.75rem; padding: 0.35rem 0.75rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); }
+  .v-gest .mock__pill { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 600; }
   .mock__kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
   .mock__kpi { border: 1px solid var(--border); border-radius: 14px; padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.15rem; }
   .mock__kpi span { font-size: 0.72rem; color: var(--muted); }
   .mock__kpi b { font-family: var(--font-head); font-size: 1.45rem; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .mock__kpi em { font-style: normal; font-size: 0.7rem; color: var(--muted); }
   .mock__kpi em.up { color: var(--ok); }
+  .mock__kpi em.warn { color: var(--accent-text); }
   .mock__grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 0.75rem; flex: 1; }
   .mock__card { border: 1px solid var(--border); border-radius: 14px; padding: 0.9rem 1rem; min-width: 0; }
   .mock__label { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.5rem; }
@@ -98,7 +172,7 @@ const icon = {
   .mock__line { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
   .mock__pt { fill: var(--surface); stroke: var(--accent); stroke-width: 3; vector-effect: non-scaling-stroke; }
   .mock__axis { display: flex; justify-content: space-between; font-size: 0.68rem; color: #9a9aa2; margin-top: 0.4rem; }
-  .mock__flows ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+  .mock__flows ul, .mock__stock ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
   .mock__flows li { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 10px; background: #fafaf9; }
   .mock__fname { display: flex; flex-direction: column; font-size: 0.76rem; font-weight: 600; line-height: 1.3; min-width: 0; }
   .mock__fname small { font-weight: 400; color: var(--muted); font-size: 0.68rem; }
@@ -106,15 +180,29 @@ const icon = {
   .mock__status.is-ok { background: var(--ok-soft); color: var(--ok); }
   .mock__status.is-run { background: var(--accent-soft); color: var(--accent-text); }
   .mock__status.is-plan { background: #eef0f6; color: #4a5470; }
+
+  /* giacenze */
+  .mock__stock li { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 2.2rem; align-items: center; gap: 0.6rem; padding: 0.45rem 0.6rem; border-radius: 10px; background: #fafaf9; }
+  .stock__bar { height: 6px; border-radius: 3px; background: #ececef; overflow: hidden; }
+  .stock__bar i { display: block; height: 100%; width: var(--w); border-radius: 3px; background: var(--ok); transform-origin: left; }
+  .stock__bar i.is-low { background: var(--accent); }
+  .stock__bar i.is-out { background: #d14b3c; }
+  .stock__qty { font-size: 0.78rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .stock__qty.is-low { color: var(--accent-text); }
+  .stock__qty.is-out { color: #b8382a; }
+
   @media (prefers-reduced-motion: no-preference) {
     .mock__line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.2s var(--ease-out) 0.6s forwards; }
     .mock__area { opacity: 0; animation: fadein 1s ease 1.6s forwards; }
     .mock__pt { opacity: 0; animation: fadein 0.4s ease 2.5s forwards; }
     .mock__status.is-run { animation: blink 1.6s ease-in-out infinite; }
+    /* le barre delle giacenze si riempiono ogni volta che il gestionale entra in scena */
+    :global(.hero__stage[data-view='gestionale']) .stock__bar i { animation: fill 900ms var(--ease-out) both; animation-delay: calc(var(--n) * 90ms + 150ms); }
   }
   @keyframes draw { to { stroke-dashoffset: 0; } }
   @keyframes fadein { to { opacity: 1; } }
   @keyframes blink { 50% { opacity: 0.55; } }
+  @keyframes fill { from { transform: scaleX(0); } to { transform: none; } }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(30, 138, 82, 0.45); } 70% { box-shadow: 0 0 0 7px rgba(30, 138, 82, 0); } 100% { box-shadow: 0 0 0 0 rgba(30, 138, 82, 0); } }
   @media (max-width: 760px) {
     .mock__body { grid-template-columns: 1fr; min-height: 0; }
@@ -123,8 +211,9 @@ const icon = {
     .mock__kpis { gap: 0.5rem; }
     .mock__kpi { padding: 0.6rem; }
     .mock__kpi b { font-size: 1.15rem; }
+    .mock__kpi em { display: none; }
     .mock__grid { grid-template-columns: 1fr; }
     .mock__flows li:nth-child(n + 3) { display: none; }
-    .mock__title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mock__stock li:nth-child(n + 4) { display: none; }
   }
 </style>

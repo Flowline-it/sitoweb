@@ -1,0 +1,84 @@
+---
+// Sezione "Servizi": consulenza strategica e formazione team, con i testi originali del sito.
+import { SERVICES } from '../data/site.js';
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>';
+const consulenza = SERVICES.items.find((s) => s.id === 'consulenza')!;
+const formazione = SERVICES.items.find((s) => s.id === 'formazione')!;
+const days = Array.from({ length: 35 }, (_, i) => i - 2);
+const workshop = [8, 15, 22];
+---
+<section id="servizi" class="section services" aria-labelledby="services-title">
+  <div class="wrap">
+    <header class="section-head">
+      <span class="eyebrow" data-reveal><span class="dot"></span>Servizi</span>
+      <h2 id="services-title" class="h2" data-reveal style="--i:1">Consulenza e formazione</h2>
+      <p class="lead" data-reveal style="--i:2">Oltre a costruire le soluzioni, ti aiutiamo a scegliere le tecnologie giuste e a rendere il tuo team autonomo nell'usarle.</p>
+    </header>
+
+    <div class="services__grid">
+      {[consulenza, formazione].map((s, k) => (
+        <article class="card card--hover svc" data-reveal style={`--i:${k}`}>
+          <div class="svc__ui" aria-hidden="true">
+            {s.id === 'consulenza' ? (
+              <ul class="ui--list">
+                {s.points.map((t, i) => <li style={`--n:${i}`}><span class="box" set:html={tick} />{t}</li>)}
+              </ul>
+            ) : (
+              <div class="ui--cal">
+                <div class="cal__head"><span>Workshop</span><span>3 sessioni</span></div>
+                <div class="cal__grid">
+                  {days.map((d) => <i class:list={[d < 1 || d > 30 ? 'is-off' : '', workshop.includes(d) && 'is-on']}>{d >= 1 && d <= 30 ? d : ''}</i>)}
+                </div>
+              </div>
+            )}
+          </div>
+          <div class="svc__text">
+            <h3>{s.name}</h3>
+            <p class="svc__lead">{s.text}</p>
+            <p class="muted">{s.quote}</p>
+            <ul class="checks">{s.points.map((pt) => <li>{pt}</li>)}</ul>
+            <a class="link svc__link" href="#contatti">{SERVICES.link} <Fragment set:html={arrow} /></a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .services__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .svc { display: flex; flex-direction: column; gap: 1.75rem; }
+  .svc__ui { display: flex; align-items: center; justify-content: center; min-height: 15rem; padding: 1.5rem; border-radius: 18px; background: radial-gradient(80% 90% at 50% 0%, rgba(255, 153, 0, 0.1), transparent 70%), #fafaf8; border: 1px solid var(--border); }
+  .svc__text { display: flex; flex-direction: column; gap: 0.75rem; }
+  .svc__text h3 { font-size: 1.5rem; }
+  .svc__lead { font-weight: 500; }
+  .svc .checks { margin-top: 0.25rem; font-size: 0.975rem; }
+  .svc__link { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; text-decoration: none; }
+  .svc__link :global(svg) { width: 1em; height: 1em; transition: transform 180ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .svc__link:hover :global(svg) { transform: translateX(3px); } }
+
+  /* checklist */
+  .ui--list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.55rem; width: min(100%, 19rem); }
+  .ui--list li { display: flex; align-items: center; gap: 0.65rem; font-size: 0.92rem; font-weight: 500; padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .ui--list .box { width: 20px; height: 20px; flex: none; border-radius: 6px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; color: #fff; }
+  .ui--list .box :global(svg) { width: 12px; height: 12px; }
+
+  /* calendario */
+  .ui--cal { width: min(100%, 17rem); padding: 0.9rem; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+  .cal__head { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.55rem; }
+  .cal__head span:last-child { color: var(--accent-text); }
+  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal__grid i { font-style: normal; aspect-ratio: 1; display: grid; place-items: center; font-size: 0.68rem; color: #6f6f78; border-radius: 6px; background: #fafaf8; }
+  .cal__grid i.is-off { background: transparent; }
+  .cal__grid i.is-on { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .svc.is-in .ui--list .box { animation: check 4.5s ease infinite; animation-delay: calc(var(--n) * 0.7s + 0.4s); }
+    .svc.is-in .cal__grid i.is-on { animation: pop 3s ease-in-out infinite; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ui--list .box { background: var(--ok); border-color: var(--ok); } }
+  @keyframes check { 0%, 8% { background: transparent; border-color: var(--border-strong); } 14%, 80% { background: var(--ok); border-color: var(--ok); } 92%, 100% { background: transparent; border-color: var(--border-strong); } }
+  @keyframes pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  @media (max-width: 860px) { .services__grid { grid-template-columns: 1fr; } .svc__ui { min-height: 0; } }
+</style>

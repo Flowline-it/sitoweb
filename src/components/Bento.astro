@@ -3,8 +3,13 @@ import { WHY } from '../data/site.js';
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>';
 const steps = ['Email in arrivo', 'Estrae i dati della fattura', 'Registra nel gestionale', 'Avvisa il team'];
-const days = Array.from({ length: 35 }, (_, i) => i - 2);
-const workshop = [8, 15, 22];
+// esempio d'interfaccia per la tessera dei gestionali: nomi e percentuali illustrativi
+const modules = ['Ordini', 'Preventivi', 'Commesse'];
+const jobs = [
+  { name: 'Uffici via Roma', code: 'COM-031', pct: 72 },
+  { name: 'Capannone B', code: 'COM-034', pct: 45 },
+  { name: 'Sede centrale', code: 'COM-036', pct: 18 },
+];
 const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 99, 86, 100, 99, 100, 98, 100, 99, 100];
 ---
 <div class="bento">
@@ -55,8 +60,30 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
     </div>
   </article>
 
+  <!-- 2x1: gestionali su misura -->
+  <article class="tile tile--h card card--hover" data-reveal style="--i:3">
+    <div class="tile__text">
+      <h3>Gestionali su misura</h3>
+      <p class="muted">Software gestionali costruiti ad hoc per la tua azienda: magazzino, ordini, preventivi e commesse in un unico posto.</p>
+    </div>
+    <div class="ui ui--app" aria-hidden="true">
+      <div class="app__tabs">
+        {modules.map((m, i) => <span style={`--n:${i}`}>{m}</span>)}
+      </div>
+      <ul class="app__rows">
+        {jobs.map((j, i) => (
+          <li style={`--n:${i}`}>
+            <span class="app__name">{j.name}<small>{j.code}</small></span>
+            <span class="app__bar"><i style={`--w:${j.pct}%`}></i></span>
+            <span class="app__pct">{j.pct}%</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </article>
+
   <!-- 1x1: supporto -->
-  <article class="tile tile--d card card--hover" data-reveal style="--i:3">
+  <article class="tile tile--d card card--hover" data-reveal style="--i:4">
     <div class="ui ui--uptime" aria-hidden="true">
       <p class="uptime__fig">99,9%</p>
       <div class="uptime__bars">{bars.map((h, i) => <i style={`--h:${h}%;--n:${i}`}></i>)}</div>
@@ -67,35 +94,8 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
     </div>
   </article>
 
-  <!-- 1x1: consulenza -->
-  <article class="tile tile--e card card--hover" data-reveal style="--i:4">
-    <ul class="ui ui--list" aria-hidden="true">
-      {['Roadmap digitale', 'Studio di fattibilità', 'Selezione vendor'].map((t, i) => (
-        <li style={`--n:${i}`}><span class="box" set:html={tick} />{t}</li>
-      ))}
-    </ul>
-    <div class="tile__text">
-      <h3>Consulenza strategica</h3>
-      <p class="muted">Le tecnologie giuste per il tuo business, senza sprechi.</p>
-    </div>
-  </article>
-
-  <!-- 1x1: formazione -->
-  <article class="tile tile--f card card--hover" data-reveal style="--i:5">
-    <div class="ui ui--cal" aria-hidden="true">
-      <div class="cal__head"><span>Workshop</span><span>3 sessioni</span></div>
-      <div class="cal__grid">
-        {days.map((d) => <i class:list={[d < 1 || d > 30 ? 'is-off' : '', workshop.includes(d) && 'is-on']}>{d >= 1 && d <= 30 ? d : ''}</i>)}
-      </div>
-    </div>
-    <div class="tile__text">
-      <h3>Formazione team</h3>
-      <p class="muted">Workshop pratici per rendere il tuo team autonomo con l'AI.</p>
-    </div>
-  </article>
-
   <!-- 1x1: chiamata -->
-  <article class="tile tile--g card" data-reveal style="--i:6">
+  <article class="tile tile--g card" data-reveal style="--i:5">
     <div class="tile__text">
       <h3>{WHY.cta.title}</h3>
       <p>{WHY.cta.text}</p>
@@ -111,7 +111,8 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
   .tile__text p { font-size: 0.975rem; }
   .tile--a { grid-column: span 2; grid-row: span 2; justify-content: space-between; }
   .tile--b, .tile--c { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; gap: 1.5rem; }
-  .tile--d, .tile--e, .tile--f, .tile--g { justify-content: space-between; }
+  .tile--d, .tile--g { justify-content: space-between; }
+  .tile--h { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); align-items: center; gap: 1.5rem; }
   .tile--g { background: var(--accent-soft); border-color: #ffe0b3; }
   .tile--g .button { align-self: flex-start; }
   .tile__chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
@@ -149,20 +150,18 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
   .uptime__bars i { height: var(--h); border-radius: 3px; background: var(--ok); opacity: 0.85; transform-origin: bottom; }
   .uptime__bars i:nth-child(17) { background: var(--accent); }
 
-  /* checklist */
-  .ui--list { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
-  .ui--list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; font-weight: 500; padding: 0.55rem 0.7rem; border: 1px solid var(--border); border-radius: 12px; background: #fafaf8; }
-  .ui--list .box { width: 20px; height: 20px; flex: none; border-radius: 6px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; color: #fff; transition: background-color 200ms ease, border-color 200ms ease; }
-  .ui--list .box :global(svg) { width: 12px; height: 12px; }
-
-  /* calendario */
-  .cal__head { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.5rem; }
-  .cal__head span:last-child { color: var(--accent-text); }
-  .ui--cal { max-width: 17rem; }
-  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-  .cal__grid i { font-style: normal; aspect-ratio: 1; display: grid; place-items: center; font-size: 0.66rem; color: #6f6f78; border-radius: 6px; background: #fafaf8; }
-  .cal__grid i.is-off { background: transparent; }
-  .cal__grid i.is-on { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  /* mini gestionale */
+  .ui--app { padding: 0.9rem; background: #fafaf8; border: 1px solid var(--border); border-radius: 18px; display: grid; gap: 0.7rem; }
+  .app__tabs { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+  .app__tabs span { font-size: 0.7rem; font-weight: 600; padding: 0.28rem 0.5rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: #55555d; }
+  .app__tabs span:last-child { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .app__rows { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+  .app__rows li { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.8fr) 2.3rem; align-items: center; gap: 0.6rem; padding: 0.5rem 0.65rem; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+  .app__name { display: flex; flex-direction: column; font-size: 0.8rem; font-weight: 600; line-height: 1.3; min-width: 0; }
+  .app__name small { font-weight: 400; color: var(--muted); font-size: 0.7rem; }
+  .app__bar { height: 6px; border-radius: 3px; background: #ececef; overflow: hidden; }
+  .app__bar i { display: block; height: 100%; width: var(--w); border-radius: 3px; background: var(--accent); transform-origin: left; }
+  .app__pct { font-size: 0.78rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 
   /* micro-animazioni: partono quando la tessera entra nello schermo */
   @media (prefers-reduced-motion: no-preference) {
@@ -180,12 +179,8 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
     .tile.is-in .sync__wire--rev i { animation-direction: reverse; animation-delay: 1.2s; }
     .tile .uptime__bars i { transform: scaleY(0.08); }
     .tile.is-in .uptime__bars i { animation: grow 900ms var(--ease-out) forwards; animation-delay: calc(var(--n) * 35ms + 200ms); }
-    .tile.is-in .ui--list li .box { animation: check 4.5s ease infinite; animation-delay: calc(var(--n) * 0.7s + 0.4s); }
-    .tile.is-in .cal__grid i.is-on { animation: pop 3s ease-in-out infinite; }
-    .tile.is-in .cal__grid i.is-on:nth-of-type(n) { animation-delay: calc(var(--d, 0) * 1s); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ui--list .box { background: var(--ok); border-color: var(--ok); }
+    .tile .app__bar i { transform: scaleX(0); }
+    .tile.is-in .app__bar i { animation: fillx 6s var(--ease-out) infinite; animation-delay: calc(var(--n) * 160ms + 200ms); }
   }
   @keyframes travel { 0% { top: 0; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { top: calc(100% - 10px); opacity: 0; } }
   @keyframes tick { 0%, 4% { transform: scale(0); } 12%, 85% { transform: scale(1); } 95%, 100% { transform: scale(0); } }
@@ -195,17 +190,16 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
   @keyframes dots { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-3px); opacity: 1; } }
   @keyframes wire { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 8px); opacity: 0; } }
   @keyframes grow { to { transform: scaleY(1); } }
-  @keyframes check { 0%, 8% { background: transparent; border-color: var(--border-strong); } 14%, 80% { background: var(--ok); border-color: var(--ok); } 92%, 100% { background: transparent; border-color: var(--border-strong); } }
-  @keyframes pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  @keyframes fillx { 0% { transform: scaleX(0); } 22%, 88% { transform: none; } 100% { transform: scaleX(0); } }
 
   @media (max-width: 1024px) {
     .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .tile--a { grid-column: span 2; grid-row: auto; }
-    .tile--b, .tile--c { grid-column: span 2; }
+    .tile--b, .tile--c, .tile--h { grid-column: span 2; }
   }
   @media (max-width: 640px) {
     .bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
-    .tile--a, .tile--b, .tile--c { grid-column: auto; }
-    .tile--b, .tile--c { grid-template-columns: 1fr; }
+    .tile--a, .tile--b, .tile--c, .tile--h { grid-column: auto; }
+    .tile--b, .tile--c, .tile--h { grid-template-columns: 1fr; }
   }
 </style>

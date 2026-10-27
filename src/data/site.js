@@ -62,6 +62,7 @@ export const WHY = {
   text: 'Siamo il partner tecnologico ideale per le aziende strutturate che cercano affidabilità, competenza e un approccio consulenziale serio.',
   items: [
     { name: 'Analisi preliminare gratuita', text: 'Non vendiamo "scatole chiuse". Iniziamo sempre ascoltando le tue esigenze per capire se e come possiamo aiutarti realmente.' },
+    { name: 'Una demo prima di firmare', text: 'Prima di farti firmare qualsiasi contratto ti facciamo vedere una demo, così sai esattamente cosa riceverai.' },
     { name: 'Preventivo trasparente e su misura', text: 'Riceverai una proposta dettagliata con costi, tempi e deliverable chiari. Nessuna sorpresa, solo chiarezza professionale.' },
     { name: 'Team esperto in automazioni e AI', text: 'Mettiamo a tua disposizione competenze verticali su integrazioni complesse, AI engineering e process optimization.' },
     { name: 'Supporto continuativo post-implementazione', text: 'Non ti lasciamo solo dopo la consegna. Offriamo piani di manutenzione per garantire che i sistemi evolvano con la tua azienda.' },
@@ -93,6 +94,7 @@ export const SERVICES = {
   items: [
     { id: 'automazioni', name: 'Automazioni processi', text: 'Workflow automatici per e-mail, fatturazione, data-entry e molto altro.', quote: 'Analizziamo i tuoi flussi operativi attuali e progettiamo automazioni custom per eliminare le inefficienze.', points: ['Analisi processi', 'Sviluppo custom', 'Integrazione sistemi'] },
     { id: 'agenti', name: 'Agenti AI personalizzati', text: 'Bot addestrati sui tuoi dati per customer service, analisi e molto altro.', quote: 'Non vendiamo un software standard, ma creiamo assistenti intelligenti basati sulla tua specifica base di conoscenza aziendale.', points: ['Training su dati proprietari', 'Configurazione su misura', 'Ottimizzazione continua'], focus: 'Focus AI' },
+    { id: 'gestionali', name: 'Gestionali su misura', text: 'Software gestionali costruiti ad hoc per la tua azienda: magazzino, ordini, preventivi e commesse.', quote: 'Non adattiamo la tua azienda a un programma: costruiamo il gestionale intorno ai tuoi processi.', points: ['Analisi dei processi', 'Sviluppo su misura', 'Integrazione con gli strumenti esistenti'] },
     { id: 'consulenza', name: 'Consulenza strategica', text: 'Analisi dei flussi di lavoro e piano di trasformazione digitale.', quote: 'Ti guidiamo nella scelta delle tecnologie giuste per il tuo business, evitando sprechi e soluzioni non adatte.', points: ['Roadmap digitale', 'Studio di fattibilità', 'Selezione vendor'] },
     { id: 'formazione', name: 'Formazione team', text: "Workshop pratici per rendere il tuo team autonomo con l'AI.", quote: "Formiamo il tuo personale per utilizzare al meglio i nuovi strumenti e massimizzare il ritorno sull'investimento.", points: ['Sessioni dedicate', 'Materiale didattico', "Supporto all'adozione"] },
   ],

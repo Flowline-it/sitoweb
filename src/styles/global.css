@@ -146,7 +146,7 @@ p { text-wrap: pretty; }
 .menu-toggle[aria-expanded='true'] span { background: transparent; }
 .menu-toggle[aria-expanded='true'] span::before { transform: rotate(45deg); }
 .menu-toggle[aria-expanded='true'] span::after { transform: rotate(-45deg); }
-@media (max-width: 960px) {
+@media (max-width: 1120px) {
   .nav, .nav-actions .text-link { display: none; }
   .menu-toggle { display: inline-flex; }
   .nav.is-open { display: flex; flex-direction: column; align-items: stretch; position: absolute; left: var(--margin); right: var(--margin); top: calc(100% + 0.5rem); padding: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-float); }
@@ -164,7 +164,7 @@ p { text-wrap: pretty; }
 
 /* ---------- footer ---------- */
 .site-footer { padding-block: clamp(3.5rem, 7vw, 5rem) 2rem; border-top: 1px solid var(--border); background: var(--surface); }
-.footer-top { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr)); gap: 2.5rem; }
+.footer-top { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr)); gap: 2rem; }
 .footer-brand { display: flex; flex-direction: column; gap: 1rem; }
 .footer-brand img { width: 9rem; }
 .footer-brand p { color: var(--muted); max-width: 22rem; font-size: 0.95rem; }
@@ -173,4 +173,5 @@ p { text-wrap: pretty; }
 .footer-col a { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
 @media (hover: hover) and (pointer: fine) { .footer-col a:hover { color: var(--ink); } }
 .footer-legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem; margin-top: clamp(3rem, 6vw, 4rem); padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
-@media (max-width: 960px) { .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); } .footer-brand { grid-column: 1 / -1; } }
+@media (max-width: 1100px) { .footer-top { grid-template-columns: repeat(3, minmax(0, 1fr)); } .footer-brand { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

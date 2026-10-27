@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import DashboardMockup from '../components/DashboardMockup.astro';
 import Bento from '../components/Bento.astro';
+import Services from '../components/Services.astro';
 import ContactForm from '../components/ContactForm.astro';
 import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, SERVICES, WHY, ABOUT, METHOD, METRICS, TOOLS, PLANS, FAQ, FAQ_EXTRA, FINAL, SITE } from '../data/site.js';
 
@@ -38,13 +39,22 @@ const jsonld = [
       </ul>
     </div>
 
-    <div class="wrap hero__stage" data-rise style="--i:5">
+    <div class="wrap hero__stage" data-view="automazioni" data-rise style="--i:5">
       <span class="glow hero__glow2" aria-hidden="true"></span>
+      <div class="examples" role="group" aria-label="Esempi di quello che costruiamo">
+        <span class="examples__label">Esempi:</span>
+        <button type="button" class="examples__btn" data-example="automazioni" aria-pressed="true">Automazioni</button>
+        <button type="button" class="examples__btn" data-example="gestionale" aria-pressed="false">Gestionale su misura</button>
+      </div>
+      <p class="sr-only" aria-live="polite" id="example-desc">Esempio mostrato: pannello delle automazioni.</p>
       <DashboardMockup />
       <!-- card flottanti -->
       <div class="float float--note" aria-hidden="true">
         <span class="float__icon float__icon--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5l4 4 8-9"/></svg></span>
-        <span><b>Fattura n. 2481 registrata</b><small>Dal tuo inbox al gestionale, in automatico</small></span>
+        <span class="float__swap">
+          <span class="v-auto"><b>Fattura n. 2481 registrata</b><small>Dal tuo inbox al gestionale, in automatico</small></span>
+          <span class="v-gest"><b>Ordine ORD-1187 evaso</b><small>Giacenze aggiornate, cliente avvisato</small></span>
+        </span>
       </div>
       <div class="float float--stat" aria-hidden="true">
         <small>Ore risparmiate</small>
@@ -108,6 +118,9 @@ const jsonld = [
       <p class="solutions__note" data-reveal>{SERVICES.note} {SERVICES.closing}</p>
     </div>
   </section>
+
+  <!-- ================= SERVIZI ================= -->
+  <Services />
 
   <!-- ================= METODO ================= -->
   <section id="metodo" class="section method" aria-labelledby="method-title">
@@ -231,6 +244,32 @@ const jsonld = [
 </Base>
 
 <script>
+  // hero: due esempi nel pannello. Ruotano da soli ogni 7 s; si fermano se l'utente sceglie, passa sopra o
+  // il pannello esce dallo schermo. Con "riduci movimento" non ruotano mai.
+  const stage = document.querySelector<HTMLElement>('.hero__stage');
+  const btns = [...document.querySelectorAll<HTMLButtonElement>('.examples__btn')];
+  const desc = document.getElementById('example-desc');
+  const labels: Record<string, string> = { automazioni: 'pannello delle automazioni', gestionale: 'gestionale su misura per magazzino e ordini' };
+  if (stage && btns.length) {
+    const order = btns.map((b) => b.dataset.example!);
+    const show = (v: string, announce = false) => {
+      stage.dataset.view = v;
+      btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.example === v)));
+      if (announce && desc) desc.textContent = `Esempio mostrato: ${labels[v]}.`;
+    };
+    let timer: number | undefined, stopped = false, visible = true, hovering = false;
+    const tick = () => { if (!stopped && visible && !hovering && !document.hidden) show(order[(order.indexOf(stage.dataset.view!) + 1) % order.length]); };
+    btns.forEach((b) => b.addEventListener('click', () => { stopped = true; show(b.dataset.example!, true); }));
+    stage.addEventListener('pointerenter', () => (hovering = true));
+    stage.addEventListener('pointerleave', () => (hovering = false));
+    stage.addEventListener('focusin', () => (hovering = true));
+    stage.addEventListener('focusout', () => (hovering = false));
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.3 }).observe(stage);
+      timer = window.setInterval(tick, 7000);
+    }
+  }
+
   // contatori: da 0 al valore quando entrano nello schermo
   const counters = document.querySelectorAll<HTMLElement>('[data-count]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -271,17 +310,32 @@ const jsonld = [
   .float { position: absolute; z-index: 2; display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; background: rgba(255, 255, 255, 0.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-float); font-size: 0.8rem; text-align: left; }
   .float b { display: block; font-weight: 600; font-size: 0.85rem; }
   .float small { display: block; color: var(--muted); font-size: 0.74rem; }
-  .float--note { left: -3.25rem; top: 46%; }
+  .hero__stage { --pb: clamp(4rem, 8vw, 6rem); }
+  .float--note { left: -2rem; bottom: calc(var(--pb) - 2.4rem); }
+  .float__swap { display: grid; }
+  .float__swap > span { grid-area: 1 / 1; transition: opacity 420ms var(--ease-out), visibility 0s linear 420ms; }
+  .hero__stage:not([data-view='gestionale']) .float__swap .v-gest,
+  .hero__stage[data-view='gestionale'] .float__swap .v-auto { opacity: 0; visibility: hidden; }
+  .hero__stage:not([data-view='gestionale']) .float__swap .v-auto,
+  .hero__stage[data-view='gestionale'] .float__swap .v-gest { transition-delay: 0s; }
+
+  /* selettore degli esempi sopra il pannello */
+  .examples { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 0.35rem; width: max-content; max-width: 100%; margin: 0 auto 1.25rem; padding: 0.3rem; border-radius: 999px; background: rgba(255, 255, 255, 0.8); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 15, 18, 0.04); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .examples__label { padding: 0 0.4rem 0 0.7rem; font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+  .examples__btn { min-height: 2.25rem; padding: 0 0.95rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; color: #4a4a52; transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease; }
+  .examples__btn[aria-pressed='true'] { background: var(--ink); color: #fff; box-shadow: 0 2px 6px rgba(15, 15, 18, 0.18); }
+  @media (hover: hover) and (pointer: fine) { .examples__btn[aria-pressed='false']:hover { background: rgba(15, 15, 18, 0.06); color: var(--ink); } }
+  @media (max-width: 460px) { .examples__label { display: none; } .examples__btn { padding: 0 0.8rem; font-size: 0.82rem; } }
   .float__icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; }
   .float__icon svg { width: 16px; height: 16px; }
   .float__icon--ok { background: var(--ok-soft); color: var(--ok); }
-  .float--stat { right: -3rem; top: -2.25rem; flex-direction: column; align-items: flex-start; gap: 0.2rem; padding: 0.9rem 1.1rem; }
+  .float--stat { right: -8.5rem; top: 17rem; flex-direction: column; align-items: flex-start; gap: 0.2rem; padding: 0.9rem 1.1rem; }
   .float--stat b { font-family: var(--font-head); font-size: 1.6rem; letter-spacing: -0.03em; }
   .float--stat em { font-style: normal; font-size: 0.8rem; color: var(--muted); font-weight: 500; letter-spacing: 0; }
   .float__bars { display: flex; align-items: end; gap: 4px; height: 30px; margin-top: 0.35rem; }
   .float__bars i { width: 9px; height: var(--h); border-radius: 3px; background: var(--accent-soft); }
   .float__bars i:last-child { background: var(--accent); }
-  .float--team { right: 9%; bottom: 2.25rem; }
+  .float--team { right: 9%; bottom: calc(var(--pb) - 2.4rem); }
   .avatars { display: flex; }
   .avatars i { width: 30px; height: 30px; margin-left: -8px; border-radius: 50%; border: 2px solid #fff; background: var(--c); display: grid; place-items: center; font-style: normal; font-size: 0.66rem; font-weight: 700; color: #3a3a40; }
   .avatars i:first-child { margin-left: 0; }
@@ -291,19 +345,17 @@ const jsonld = [
     .float--team { animation: bob 9s ease-in-out -4s infinite; }
   }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-  @media (max-width: 1180px) {
-    .float--note { left: -0.75rem; }
-    .float--stat { right: -0.5rem; }
-  }
+  @media (max-width: 1320px) { .float--stat { right: -4rem; } }
+  @media (max-width: 1150px) { .float--note { left: -0.5rem; } .float--stat { display: none; } }
   @media (max-width: 960px) {
-    .float--note { left: 0.25rem; top: -1.25rem; }
-    .float--stat { right: 0.25rem; top: auto; bottom: 1.25rem; }
+    .float--note { left: 0.25rem; }
+    .float--stat { display: flex; right: 0.25rem; top: auto; bottom: 1.25rem; }
     .float--team { display: none; }
   }
   @media (max-width: 640px) {
     .hero h1 { font-size: clamp(2.5rem, 11vw, 3rem); }
     .hero__ctas .button { width: 100%; }
-    .float--note { left: 0.75rem; right: 0.75rem; top: -1.6rem; }
+    .float--note { left: 0.75rem; right: 0.75rem; }
     .float--stat { display: none; }
   }
 
