@@ -7,6 +7,7 @@ export async function GET() {
   const urls = [
     { loc: `${SITE.url}/`, lastmod: today },
     { loc: `${SITE.url}/metodo`, lastmod: '2026-10-28' },
+    { loc: `${SITE.url}/prodotti`, lastmod: '2026-10-28' },
     { loc: `${SITE.url}/privacy-policy`, lastmod: '2026-02-12' },
   ];
   if (articles.length) {

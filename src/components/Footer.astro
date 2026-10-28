@@ -1,6 +1,6 @@
 ---
 import { p, isHome } from '../lib/paths.js';
-import { SITE } from '../data/site.js';
+import { SITE, CTA } from '../data/site.js';
 const onHome = isHome(Astro.url);
 const base = onHome ? '' : p('/');
 const year = new Date().getFullYear();
@@ -9,7 +9,7 @@ const year = new Date().getFullYear();
   <div class="wrap">
     <div class="footer-top">
       <div class="footer-brand">
-        <img src={p('/brand/flowline-logo-dark.png')} alt="Flowline" width="1600" height="320" loading="lazy" />
+        <img src={p('/brand/flowline-logo-dark-400.png')} alt="Flowline" width="400" height="80" loading="lazy" />
         <p>Automazioni e agenti AI su misura per le aziende. Niente teoria, solo automazioni che funzionano.</p>
       </div>
       <nav class="footer-col" aria-labelledby="f-sol">
@@ -33,6 +33,7 @@ const year = new Date().getFullYear();
         <ul>
           <li><a href={`${base}#chi-siamo`}>Chi siamo</a></li>
           <li><a href={p('/metodo')}>Metodo</a></li>
+          <li><a href={p('/prodotti')}>Prodotti</a></li>
           <li><a href={`${base}#formule`}>Formule</a></li>
           <li><a href={`${base}#faq`}>FAQ</a></li>
         </ul>
@@ -47,7 +48,7 @@ const year = new Date().getFullYear();
       <nav class="footer-col" aria-labelledby="f-con">
         <h2 id="f-con">Contatti</h2>
         <ul>
-          <li><a href={`${base}#contatti`}>Prenota una consulenza</a></li>
+          <li><a href={`${base}#contatti`}>{CTA}</a></li>
           <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
           <li><a href={SITE.linkedin} rel="noopener">LinkedIn</a></li>
           <li><a href={SITE.instagram} rel="noopener">Instagram</a></li>
@@ -59,4 +60,7 @@ const year = new Date().getFullYear();
       <p><a href={p('/privacy-policy')} class="link" style="color:inherit;font-weight:500">Privacy Policy</a></p>
     </div>
   </div>
+  <a class="to-top" href="#" aria-label="Torna all'inizio della pagina">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+  </a>
 </footer>

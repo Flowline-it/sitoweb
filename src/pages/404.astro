@@ -1,6 +1,7 @@
 ---
 import { p, isHome } from '../lib/paths.js';
 import Base from '../layouts/Base.astro';
+import { CTA } from '../data/site.js';
 ---
 <Base title="Pagina non trovata | Flowline" description="La pagina che cercavi non esiste o è stata spostata." path="/404" noindex>
   <section class="section nf">
@@ -10,7 +11,7 @@ import Base from '../layouts/Base.astro';
       <ul class="dash nf__links" role="list">
         <li><a class="link" href={p('/')}>Torna alla home</a></li>
         <li><a class="link" href={p('/#soluzioni')}>Scopri le soluzioni</a></li>
-        <li><a class="link" href={p('/#contatti')}>Prenota una consulenza gratuita</a></li>
+        <li><a class="link" href={p('/#contatti')}>{CTA}</a></li>
       </ul>
     </div>
     <span class="nf__line nf__line--a" aria-hidden="true"></span>
@@ -23,6 +24,7 @@ import Base from '../layouts/Base.astro';
   .nf .wrap { display: flex; flex-direction: column; gap: 1.5rem; }
   .nf h1 { max-width: 14ch; }
   .nf__links { display: grid; gap: 0.6rem; }
+  .nf__links a { display: inline-block; min-height: 24px; line-height: 24px; }
   .nf__line { position: absolute; bottom: 14%; height: clamp(24px, 3.4vw, 48px); background: var(--orange); }
   .nf__line--a { left: 0; width: 40%; border-radius: 0 999px 999px 0; }
   .nf__line--b { right: 0; width: 34%; border-radius: 999px 0 0 999px; }

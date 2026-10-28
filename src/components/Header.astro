@@ -1,5 +1,6 @@
 ---
 import { p, isHome } from '../lib/paths.js';
+import { CTA } from '../data/site.js';
 const onHome = isHome(Astro.url);
 const base = onHome ? '' : p('/');
 ---
@@ -7,20 +8,19 @@ const base = onHome ? '' : p('/');
   <div class="wrap">
     <div class="nav-shell">
       <a class="brand" href={p('/')} aria-label="Flowline, home">
-        <img src={p('/brand/flowline-logo-dark.png')} alt="Flowline" width="1600" height="320" />
+        <img src={p('/brand/flowline-logo-dark-400.png')} alt="Flowline" width="400" height="80" />
       </a>
       <nav class="nav" id="nav" aria-label="Principale">
         <a href={`${base}#soluzioni`}>Soluzioni</a>
         <a href={`${base}#servizi`}>Servizi</a>
+        <a href={p('/prodotti')}>Prodotti</a>
         <a href={`${base}#metodo`}>Metodo</a>
         <a href={`${base}#formule`}>Formule</a>
         <a href={`${base}#chi-siamo`}>Chi siamo</a>
-        <a href={`${base}#faq`}>FAQ</a>
         <a href={p('/journal')}>Journal</a>
       </nav>
       <div class="nav-actions">
-        <a class="text-link" href="mailto:info@flowline.it">Scrivici</a>
-        <a class="button button--ink button--sm" href={`${base}#contatti`}>Prenota una call</a>
+        <a class="button button--ink button--sm" href={`${base}#contatti`}>{CTA}</a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Apri il menu"><span></span></button>
       </div>
     </div>
