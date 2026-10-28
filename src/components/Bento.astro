@@ -18,7 +18,6 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
     <div class="tile__text">
       <h3>Automazioni processi</h3>
       <p class="muted">Workflow automatici per e-mail, fatturazione, data-entry e molto altro, attivi 24/7.</p>
-      <p class="tile__chips"><span>ROI 300% in 6 mesi</span><span>Implementazione: 2 settimane</span></p>
     </div>
     <div class="ui ui--flow" aria-hidden="true">
       <span class="ui-flow__track"><i></i></span>
@@ -49,7 +48,7 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
   <article class="tile tile--c card card--hover" data-reveal style="--i:2">
     <div class="tile__text">
       <h3>Integrazione totale</h3>
-      <p class="muted">Connessione fluida tra CRM, ERP e strumenti di marketing: 20 ore risparmiate a settimana.</p>
+      <p class="muted">Connessione fluida tra CRM, ERP e strumenti di marketing, senza copiare dati a mano.</p>
     </div>
     <div class="ui ui--sync" aria-hidden="true">
       <span class="sync__node">CRM</span>
@@ -85,7 +84,7 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
   <!-- 1x1: supporto -->
   <article class="tile tile--d card card--hover" data-reveal style="--i:4">
     <div class="ui ui--uptime" aria-hidden="true">
-      <p class="uptime__fig">99,9%</p>
+      <p class="uptime__status"><span></span>Tutti i sistemi attivi</p>
       <div class="uptime__bars">{bars.map((h, i) => <i style={`--h:${h}%;--n:${i}`}></i>)}</div>
     </div>
     <div class="tile__text">
@@ -145,7 +144,8 @@ const bars = [96, 98, 100, 97, 99, 100, 98, 100, 99, 97, 100, 99, 98, 100, 100, 
   .sync__wire i { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 
   /* uptime */
-  .uptime__fig { font-family: var(--font-head); font-weight: 600; font-size: 2.25rem; letter-spacing: -0.03em; line-height: 1; }
+  .uptime__status { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.95rem; }
+  .uptime__status span { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px var(--ok-soft); }
   .uptime__bars { margin-top: 0.85rem; display: grid; grid-template-columns: repeat(24, 1fr); align-items: end; gap: 3px; height: 3.25rem; }
   .uptime__bars i { height: var(--h); border-radius: 3px; background: var(--ok); opacity: 0.85; transform-origin: bottom; }
   .uptime__bars i:nth-child(17) { background: var(--accent); }

@@ -3,9 +3,10 @@ import Base from '../layouts/Base.astro';
 import DashboardMockup from '../components/DashboardMockup.astro';
 import Bento from '../components/Bento.astro';
 import Services from '../components/Services.astro';
+import MethodFlow from '../components/MethodFlow.astro';
 import ContactForm from '../components/ContactForm.astro';
 import { p } from '../lib/paths.js';
-import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, SERVICES, WHY, ABOUT, METHOD, METRICS, TOOLS, PLANS, FAQ, FINAL, SITE } from '../data/site.js';
+import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, SERVICES, WHY, ABOUT, METHOD, TOOLS, PLANS, FAQ, FINAL, SITE } from '../data/site.js';
 
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const faqs = FAQ.items;
@@ -54,11 +55,6 @@ const jsonld = [
           <span class="v-gest"><b>Ordine ORD-1187 evaso</b><small>Giacenze aggiornate, cliente avvisato</small></span>
         </span>
       </div>
-      <div class="float float--stat" aria-hidden="true">
-        <small>Ore risparmiate</small>
-        <b>20h <em>/ settimana</em></b>
-        <span class="float__bars"><i style="--h:40%"></i><i style="--h:55%"></i><i style="--h:48%"></i><i style="--h:70%"></i><i style="--h:82%"></i><i style="--h:100%"></i></span>
-      </div>
       <div class="float float--team" aria-hidden="true">
         <span class="avatars"><i style="--c:#ffd7a1">AM</i><i style="--c:#d6e4ff">LR</i><i style="--c:#d8f1e2">SB</i><i style="--c:#ececf0">+4</i></span>
         <span><b>Il tuo team</b><small>Libero dai task ripetitivi</small></span>
@@ -96,7 +92,6 @@ const jsonld = [
             <span class="cost__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={costIcons[i]} aria-hidden="true" /></span>
             <h3>{r.name}</h3>
             <p class="muted">{r.text}</p>
-            <p class="cost__fig"><b>{r.value}</b> {r.unit}</p>
           </li>
         ))}
       </ul>
@@ -128,32 +123,7 @@ const jsonld = [
         <h2 id="method-title" class="h2" data-reveal style="--i:1">{METHOD.title}</h2>
         <p class="lead" data-reveal style="--i:2">Dall'analisi al monitoraggio, in quattro passi. {METHOD.note}</p>
       </header>
-      <ol class="steps" role="list">
-        <li class="steps__line" role="presentation" aria-hidden="true"><i></i></li>
-        {METHOD.steps.map((s, i) => (
-          <li class="step" data-reveal style={`--i:${i}`}>
-            <span class="step__num">{i + 1}</span>
-            <p class="step__when">{s.when}</p>
-            <h3>{s.name}</h3>
-            <p class="muted">{s.text}</p>
-            <p class="step__out">Output: {s.output}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <!-- ================= NUMERI ================= -->
-  <section class="metrics" aria-label="Risultati">
-    <div class="wrap">
-      <ul class="metrics__band card" role="list" data-reveal>
-        {METRICS.map((m) => (
-          <li>
-            <p class="metric__fig nums"><span>{m.prefix}</span><span data-count={m.value} data-decimals={m.decimals || 0}>{String(m.value).replace('.', ',')}</span><span>{m.suffix}</span></p>
-            <p class="muted">{m.label}</p>
-          </li>
-        ))}
-      </ul>
+      <MethodFlow />
     </div>
   </section>
 
@@ -191,15 +161,15 @@ const jsonld = [
         <p class="lead" data-reveal style="--i:2">{PLANS.text}</p>
       </header>
       <div class="plans__grid">
-        {PLANS.items.map((p, i) => (
-          <article class:list={['card', 'card--hover', 'plan', p.featured && 'plan--featured']} data-reveal style={`--i:${i}`}>
-            {p.featured && <span class="badge plan__badge">Consigliato</span>}
-            <h3>{p.name}</h3>
-            <p class="plan__price">{p.price}</p>
-            <p class="plan__note">{p.note}</p>
-            <p class="muted">{p.text}</p>
-            <ul class="checks">{p.points.map((pt) => <li>{pt}</li>)}</ul>
-            <a class:list={['button', !p.featured && 'button--ghost']} href="#contatti">{p.cta} <Fragment set:html={arrow} /></a>
+        {PLANS.items.map((pl, i) => (
+          <article class:list={['card', 'card--hover', 'plan', pl.featured && 'plan--featured']} data-reveal style={`--i:${i}`}>
+            {pl.badge && <span class="badge plan__badge">{pl.badge}</span>}
+            <p class="plan__note">{pl.note}</p>
+            <h3>{pl.name}</h3>
+            <p class="plan__price">{pl.price}</p>
+            <p class="muted">{pl.text}</p>
+            <ul class="checks">{pl.points.map((pt) => <li>{pt}</li>)}</ul>
+            <a class:list={['button', !pl.featured && 'button--ghost']} href="#contatti">{pl.cta} <Fragment set:html={arrow} /></a>
           </article>
         ))}
       </div>
@@ -268,25 +238,6 @@ const jsonld = [
     }
   }
 
-  // contatori: da 0 al valore quando entrano nello schermo
-  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fmt = (v: number, d: number) => v.toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
-  if (counters.length && !reduce && 'IntersectionObserver' in window) {
-    counters.forEach((el) => (el.textContent = fmt(0, Number(el.dataset.decimals))));
-    const io = new IntersectionObserver((es) => es.forEach((e) => {
-      if (!e.isIntersecting) return;
-      const el = e.target as HTMLElement; io.unobserve(el);
-      const to = Number(el.dataset.count), d = Number(el.dataset.decimals), t0 = performance.now(), dur = 1600;
-      const step = (t: number) => {
-        const k = Math.min(1, (t - t0) / dur), ease = 1 - Math.pow(1 - k, 3);
-        el.textContent = fmt(to * ease, d);
-        if (k < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }), { threshold: 0.5 });
-    counters.forEach((el) => io.observe(el));
-  }
 </script>
 
 <style>
@@ -329,34 +280,24 @@ const jsonld = [
   .float__icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; }
   .float__icon svg { width: 16px; height: 16px; }
   .float__icon--ok { background: var(--ok-soft); color: var(--ok); }
-  .float--stat { right: -8.5rem; top: 17rem; flex-direction: column; align-items: flex-start; gap: 0.2rem; padding: 0.9rem 1.1rem; }
-  .float--stat b { font-family: var(--font-head); font-size: 1.6rem; letter-spacing: -0.03em; }
-  .float--stat em { font-style: normal; font-size: 0.8rem; color: var(--muted); font-weight: 500; letter-spacing: 0; }
-  .float__bars { display: flex; align-items: end; gap: 4px; height: 30px; margin-top: 0.35rem; }
-  .float__bars i { width: 9px; height: var(--h); border-radius: 3px; background: var(--accent-soft); }
-  .float__bars i:last-child { background: var(--accent); }
   .float--team { right: 9%; bottom: calc(var(--pb) - 2.4rem); }
   .avatars { display: flex; }
   .avatars i { width: 30px; height: 30px; margin-left: -8px; border-radius: 50%; border: 2px solid #fff; background: var(--c); display: grid; place-items: center; font-style: normal; font-size: 0.66rem; font-weight: 700; color: #3a3a40; }
   .avatars i:first-child { margin-left: 0; }
   @media (prefers-reduced-motion: no-preference) {
     .float--note { animation: bob 7s ease-in-out infinite; }
-    .float--stat { animation: bob 8s ease-in-out -2s infinite; }
     .float--team { animation: bob 9s ease-in-out -4s infinite; }
   }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-  @media (max-width: 1320px) { .float--stat { right: -4rem; } }
-  @media (max-width: 1150px) { .float--note { left: -0.5rem; } .float--stat { display: none; } }
+  @media (max-width: 1150px) { .float--note { left: -0.5rem; } }
   @media (max-width: 960px) {
     .float--note { left: 0.25rem; }
-    .float--stat { display: flex; right: 0.25rem; top: auto; bottom: 1.25rem; }
     .float--team { display: none; }
   }
   @media (max-width: 640px) {
     .hero h1 { font-size: clamp(2.5rem, 11vw, 3rem); }
     .hero__ctas .button { width: 100%; }
     .float--note { left: 0.75rem; right: 0.75rem; }
-    .float--stat { display: none; }
   }
 
   /* ---------- strumenti ---------- */
@@ -376,8 +317,6 @@ const jsonld = [
   .cost__icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #fdeeec; color: #c0392b; margin-bottom: 0.5rem; }
   .cost__icon svg { width: 21px; height: 21px; }
   .cost p.muted { font-size: 0.95rem; }
-  .cost__fig { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
-  .cost__fig b { display: block; font-family: var(--font-head); font-size: 1.75rem; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); line-height: 1.1; }
   @media (max-width: 1024px) { .costs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 560px) { .costs__grid { grid-template-columns: 1fr; } }
 
@@ -387,38 +326,6 @@ const jsonld = [
   .solutions .wrap { position: relative; z-index: 1; }
   .solutions__note { text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.95rem; }
 
-  /* ---------- metodo ---------- */
-  .steps { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
-  .steps__line { position: absolute; left: 12.5%; right: 12.5%; top: 1.4rem; height: 2px; background: var(--border-strong); border-radius: 2px; overflow: hidden; }
-  .steps__line i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; }
-  @media (prefers-reduced-motion: no-preference) {
-    .js .steps__line i { transform: scaleX(0); transition: transform 1.6s var(--ease-in-out) 0.3s; }
-    .js .steps:has(.step.is-in) .steps__line i { transform: none; }
-  }
-  .step { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; }
-  .step__num { width: 2.8rem; height: 2.8rem; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); font-family: var(--font-head); font-weight: 600; margin-bottom: 0.75rem; position: relative; z-index: 1; }
-  .step:first-of-type .step__num { background: var(--accent); border-color: var(--accent); }
-  .step__when { font-size: 0.8rem; font-weight: 600; color: var(--accent-text); }
-  .step p.muted { font-size: 0.95rem; max-width: 30ch; }
-  .step__out { margin-top: 0.4rem; font-size: 0.8rem; font-weight: 500; padding: 0.3rem 0.7rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
-  @media (max-width: 860px) {
-    .steps { grid-template-columns: 1fr; gap: 2rem; }
-    .steps__line { left: 1.4rem; right: auto; top: 1.4rem; bottom: 1.4rem; width: 2px; height: auto; }
-    .steps__line i { transform-origin: top; }
-    @media (prefers-reduced-motion: no-preference) { .js .steps__line i { transform: scaleY(0); } }
-    .step { align-items: flex-start; text-align: left; padding-left: 4.25rem; }
-    .step__num { position: absolute; left: 0; top: 0; margin: 0; }
-  }
-
-  /* ---------- numeri ---------- */
-  .metrics { padding-block: clamp(1rem, 3vw, 2rem); }
-  .metrics__band { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: clamp(2rem, 4vw, 3rem) 1rem; background: var(--ink); border-color: var(--ink); color: #fff; overflow: hidden; }
-  .metrics__band::before { content: ''; position: absolute; inset: -40% -10% auto auto; width: 30rem; height: 30rem; background: radial-gradient(closest-side, rgba(255, 153, 0, 0.35), transparent); pointer-events: none; }
-  .metrics__band li { position: relative; text-align: center; padding: 0.5rem 1rem; }
-  .metrics__band li + li { border-left: 1px solid rgba(255, 255, 255, 0.12); }
-  .metric__fig { font-family: var(--font-head); font-weight: 600; font-size: clamp(2.5rem, 1.6rem + 2.8vw, 4rem); letter-spacing: -0.04em; line-height: 1; }
-  .metrics__band .muted { color: #a9a9b2; margin-top: 0.5rem; font-size: 0.95rem; }
-  @media (max-width: 860px) { .metrics__band { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; } .metrics__band li:nth-child(3) { border-left: 0; } }
 
   /* ---------- chi siamo ---------- */
   .about__grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
@@ -436,7 +343,7 @@ const jsonld = [
   .plans { overflow: hidden; }
   .plans__glow { width: 50rem; height: 36rem; left: 50%; top: 30%; transform: translateX(-50%); }
   .plans .wrap { position: relative; z-index: 1; }
-  .plans__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: stretch; max-width: 54rem; margin-inline: auto; }
+  .plans__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; align-items: stretch; }
   .plan { display: flex; flex-direction: column; gap: 0.6rem; }
   .plan .checks { margin: 0.75rem 0 1.5rem; font-size: 0.95rem; }
   .plan .button { margin-top: auto; }

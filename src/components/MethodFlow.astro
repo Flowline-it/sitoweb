@@ -1,0 +1,119 @@
+---
+// Flusso verticale del Metodo: una linea con un pallino che scende man mano che si scorre la pagina.
+// Ogni tappa si "accende" quando il pallino la raggiunge; in fondo, il traguardo.
+// Senza JavaScript o con "riduci movimento" il flusso è mostrato già completo.
+import { METHOD } from '../data/site.js';
+const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>';
+---
+<div class="flow" data-flow>
+  <div class="flow__track">
+  <div class="flow__rail" aria-hidden="true">
+    <span class="flow__fill"></span>
+    <span class="flow__dot"></span>
+  </div>
+  <ol class="flow__steps" role="list">
+    {METHOD.steps.map((s, i) => (
+      <li class="flow__step" data-flow-step>
+        <span class="flow__node" aria-hidden="true">{i + 1}</span>
+        <div class="flow__card card">
+          <p class="flow__when">{s.when}</p>
+          <h3>{s.name}</h3>
+          <p class="muted">{s.text}</p>
+          <p class="flow__out"><small>Cosa ricevi</small>{s.output}</p>
+        </div>
+      </li>
+    ))}
+    <li class="flow__step flow__step--end" data-flow-step>
+      <span class="flow__node flow__node--end" aria-hidden="true" set:html={check} />
+    </li>
+  </ol>
+  </div>
+  <div class="flow__goal">
+    <h3>{METHOD.goal.title}</h3>
+    <p class="muted">{METHOD.goal.text}</p>
+  </div>
+</div>
+
+<script>
+  // posizione del pallino = quanto la linea ha superato il 55% dello schermo
+  const flows = document.querySelectorAll<HTMLElement>('[data-flow]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  flows.forEach((flow) => {
+    if (reduce) return; // resta il flusso completo
+    const rail = flow.querySelector<HTMLElement>('.flow__rail')!;
+    const nodes = [...flow.querySelectorAll<HTMLElement>('.flow__node')];
+    const steps = [...flow.querySelectorAll<HTMLElement>('[data-flow-step]')];
+    flow.classList.add('is-live');
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const r = rail.getBoundingClientRect();
+      if (!r.height) return;
+      const anchor = innerHeight * 0.55;
+      const p = Math.min(1, Math.max(0, (anchor - r.top) / r.height));
+      flow.style.setProperty('--p', p.toFixed(4));
+      nodes.forEach((n, i) => {
+        const nr = n.getBoundingClientRect();
+        const at = (nr.top + nr.height / 2 - r.top) / r.height;
+        steps[i].classList.toggle('is-reached', p >= at - 0.002);
+      });
+      flow.classList.toggle('is-done', p >= 0.999);
+    };
+    const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+    update();
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+  });
+</script>
+
+<style>
+  .flow { --p: 1; --node: 2.9rem; --end: 3.4rem; position: relative; max-width: 60rem; margin-inline: auto; }
+  .flow__track { position: relative; }
+  .flow__steps { position: relative; display: grid; gap: clamp(2rem, 5vw, 3.5rem); }
+
+  /* linea: va dal centro del primo pallino al centro del traguardo */
+  .flow__rail { position: absolute; left: 50%; top: calc(var(--node) / 2); bottom: calc(var(--end) / 2); width: 3px; transform: translateX(-50%); border-radius: 3px; background: var(--border-strong); }
+  .flow__fill { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(var(--accent-hover), var(--accent)); transform-origin: top; transform: scaleY(var(--p)); }
+  .flow__dot { position: absolute; left: 50%; top: calc(var(--p) * 100%); width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; transform: translate(-50%, -50%); box-shadow: 0 0 0 6px rgba(255, 153, 0, 0.22), 0 6px 16px -4px rgba(240, 127, 0, 0.6); }
+  .flow.is-done .flow__dot { opacity: 0; transition: opacity 300ms ease; }
+
+  /* tappe: alternate a sinistra e a destra della linea */
+  .flow__step { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) var(--node) minmax(0, 1fr); column-gap: clamp(1.5rem, 4vw, 3rem); align-items: start; }
+  .flow__node { grid-column: 2; grid-row: 1; position: relative; z-index: 1; width: var(--node); height: var(--node); border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); font-family: var(--font-head); font-weight: 600; box-shadow: var(--shadow); transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease, transform 400ms var(--ease-out); }
+  .flow__node svg { width: 18px; height: 18px; }
+  .flow__card, .flow__goal { grid-row: 1; display: grid; gap: 0.45rem; transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out); }
+  .flow__step:nth-child(odd) .flow__card { grid-column: 1; text-align: right; }
+  .flow__step:nth-child(even) .flow__card { grid-column: 3; }
+  .flow__step:nth-child(odd) .flow__out { justify-self: end; }
+  .flow__when { font-size: 0.8rem; font-weight: 600; color: var(--accent-text); }
+  .flow__card .muted { font-size: 0.975rem; }
+  .flow__out { justify-self: start; margin-top: 0.4rem; padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); background: var(--surface-2); font-weight: 600; font-size: 0.9rem; line-height: 1.35; }
+  .flow__out small { display: block; font-size: 0.72rem; font-weight: 500; color: var(--muted); }
+
+  /* traguardo: ultimo pallino al centro, testo sotto */
+  .flow__step--end { grid-template-columns: 1fr; justify-items: center; }
+  .flow__step--end .flow__node { grid-column: 1; }
+  .flow__node--end { width: var(--end); height: var(--end); background: var(--ink); border-color: var(--ink); color: #fff; }
+  .flow__goal { max-width: 30rem; margin: 1.1rem auto 0; text-align: center; }
+  .flow__goal h3 { font-size: clamp(1.35rem, 1.1rem + 0.8vw, 1.75rem); }
+
+  /* con JavaScript: le tappe non ancora raggiunte restano spente */
+  @media (prefers-reduced-motion: no-preference) {
+    .flow.is-live .flow__step:not(.is-reached) .flow__node { background: var(--surface); color: var(--muted); border-color: var(--border-strong); }
+    .flow.is-live .flow__step:not(.is-reached) .flow__card,
+    .flow.is-live:not(.is-done) .flow__goal { opacity: 0.35; transform: translateY(10px); }
+    .flow.is-live .flow__step--end:not(.is-reached) .flow__node { color: var(--muted); }
+    .flow.is-live .flow__step.is-reached .flow__node { transform: scale(1.06); }
+  }
+
+  /* telefono e tablet: linea a sinistra, tutte le tappe a destra */
+  @media (max-width: 860px) {
+    .flow { --end: var(--node); }
+    .flow__rail { left: calc(var(--node) / 2); }
+    .flow__step, .flow__step--end { grid-template-columns: var(--node) minmax(0, 1fr); column-gap: 1.1rem; justify-items: stretch; }
+    .flow__node, .flow__step--end .flow__node { grid-column: 1; }
+    .flow__step:nth-child(n) .flow__card { grid-column: 2; text-align: left; }
+    .flow__step:nth-child(odd) .flow__out { justify-self: start; }
+    .flow__goal { margin: 0.9rem 0 0 calc(var(--node) + 1.1rem); text-align: left; }
+  }
+</style>
