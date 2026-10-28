@@ -41,7 +41,7 @@ Pubblicazione da n8n: funzione `publish-article` dello stesso progetto, con l'in
 Ogni push su `main` fa due build (`.github/workflows/deploy.yml`):
 
 - **prova** su GitHub Pages (flowline-it.github.io/sitoweb), sempre in noindex;
-- **produzione** per flowline.it, salvata già pronta nel branch `produzione` insieme a `deploy/hostinger/.htaccess` (https, niente www, pagina 404, cache, redirect delle vecchie pagine). Il branch si aggiorna solo se la build cambia.
+- **produzione** per flowline.it, salvata già pronta nel branch `produzione` insieme a `deploy/hostinger/.htaccess` (www verso flowline.it, pagina 404, cache, noindex sui domini di anteprima, redirect delle vecchie pagine; il passaggio a https lo fa Hostinger con "Forza HTTPS"). Il branch si aggiorna solo se la build cambia.
 
 Su Hostinger il sito flowline.it è un sito PHP/HTML collegato al branch `produzione` (hPanel → Siti web → Dashboard → Avanzate → Git, cartella `public_html`, auto-deployment attivo). Non serve FTP né build sul server.
 
