@@ -1,0 +1,32 @@
+# flowline.it su Hostinger: copiato nella cartella pubblicata solo dalla build di produzione.
+
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. Sempre https://flowline.it (niente http, niente www)
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} !^flowline\.it$ [NC]
+  RewriteRule ^ https://flowline.it%{REQUEST_URI} [R=301,L]
+
+  # 2. Vecchie pagine del sito precedente → pagine nuove (una riga per indirizzo, da completare)
+  # RewriteRule ^vecchia-pagina/?$ https://flowline.it/nuova-pagina/ [R=301,L]
+
+  # Le pagine sono cartelle: /metodo diventa /metodo/ da solo (comportamento standard del server),
+  # ed è la forma usata da canonical, sitemap e link del sito.
+</IfModule>
+
+# CSS, JS e font hanno il nome versionato (cartella _astro): in cache per un anno; HTML sempre aggiornato
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html|xml|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

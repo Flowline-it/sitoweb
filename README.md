@@ -38,7 +38,16 @@ Pubblicazione da n8n: funzione `publish-article` dello stesso progetto, con l'in
 
 ## Pubblicazione
 
-Ogni push su `main` ricostruisce e pubblica il sito su GitHub Pages (`.github/workflows/deploy.yml`). Il sito si ricostruisce anche:
+Ogni push su `main` fa due build (`.github/workflows/deploy.yml`):
+
+- **prova** su GitHub Pages (flowline-it.github.io/sitoweb), sempre in noindex;
+- **produzione** per flowline.it, salvata già pronta nel branch `produzione` insieme a `deploy/hostinger/.htaccess` (https, niente www, pagina 404, cache, redirect delle vecchie pagine). Il branch si aggiorna solo se la build cambia.
+
+Su Hostinger il sito flowline.it è un sito PHP/HTML collegato al branch `produzione` (hPanel → Siti web → Dashboard → Avanzate → Git, cartella `public_html`, auto-deployment attivo). Non serve FTP né build sul server.
+
+Gli indirizzi delle pagine hanno sempre la barra finale (`/metodo/`): canonical, sitemap e link usano `slash()` di `src/lib/paths.js`. Per aggiungere un redirect da una vecchia pagina: una riga `RewriteRule` nel blocco 2 di `deploy/hostinger/.htaccess`.
+
+Le regole sotto valgono per entrambe le build. Il sito si ricostruisce anche:
 
 - da solo quando cambia il Journal: ogni 15 minuti un controllo confronta gli articoli pubblicati nel database con l'impronta del sito online (`/journal/stato.json`) e ricostruisce solo se c'è una novità (articolo pubblicato, modificato, programmato arrivato alla sua data, archiviato o eliminato). Se il database non risponde, il sito online resta com'è;
 - su richiesta, con un `repository_dispatch` di tipo `journal-update` (da un webhook Supabase o da n8n quando si pubblica un articolo):

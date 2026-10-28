@@ -1,5 +1,6 @@
 import { getArticles, taxonomy } from '../lib/journal.js';
 import { SITE } from '../data/site.js';
+import { slash } from '../lib/paths.js';
 
 export async function GET() {
   const today = new Date().toISOString().slice(0, 10);
@@ -19,6 +20,6 @@ export async function GET() {
     for (const c of categories) urls.push({ loc: `${SITE.url}/journal/categoria/${c.slug}`, lastmod: last((a) => a.category?.slug === c.slug) });
     for (const t of tags.filter((t) => t.count >= 2)) urls.push({ loc: `${SITE.url}/journal/tag/${t.slug}`, lastmod: last((a) => (a.tags || []).some((x) => x.slug === t.slug)) });
   }
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u.loc}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${slash(u.loc)}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`;
   return new Response(xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } });
 }
