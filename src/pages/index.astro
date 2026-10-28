@@ -4,6 +4,7 @@ import DashboardMockup from '../components/DashboardMockup.astro';
 import Bento from '../components/Bento.astro';
 import Services from '../components/Services.astro';
 import ContactForm from '../components/ContactForm.astro';
+import { p } from '../lib/paths.js';
 import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, SERVICES, WHY, ABOUT, METHOD, METRICS, TOOLS, PLANS, FAQ, FAQ_EXTRA, FINAL, SITE } from '../data/site.js';
 
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
@@ -25,17 +26,15 @@ const jsonld = [
   <section class="hero" aria-labelledby="hero-title">
     <span class="glow hero__glow" aria-hidden="true"></span>
     <div class="wrap hero__inner">
-      <a class="eyebrow" href="#formule" data-rise style="--i:0"><span class="badge">Nuovo</span> Pilot 30: il primo processo automatizzato in 30 giorni</a>
-      <h1 id="hero-title" class="display" data-rise style="--i:1">{HERO.title.join(' ')}</h1>
-      <p class="lead hero__lead" data-rise style="--i:2">{HERO.lead} Progettiamo sistemi AI, integrazioni e processi automatici su misura.</p>
+      <a class="eyebrow" href={p('/pilot-30')} data-rise style="--i:0"><span class="badge">Nuovo</span> Pilot 30: il primo processo automatizzato in 30 giorni</a>
+      <h1 id="hero-title" class="display" data-rise style="--i:1"><span class="hero__kicker">{HERO.kicker}<span class="sr-only">: </span></span>{HERO.title.join(' ')}</h1>
+      <p class="lead hero__lead" data-rise style="--i:2">{HERO.subtitle}</p>
       <div class="hero__ctas" data-rise style="--i:3">
         <a class="button" href="#contatti">{CTA} <Fragment set:html={arrow} /></a>
-        <a class="button button--ghost" href="#metodo">Scopri come lavoriamo</a>
+        <a class="button button--ghost" href={p('/metodo')}>Scopri come lavoriamo</a>
       </div>
       <ul class="hero__trust" data-rise style="--i:4" role="list">
-        <li>Analisi preliminare gratuita</li>
-        <li>Preventivo trasparente</li>
-        <li>Supporto 24/7</li>
+        {HERO.trust.map((t) => <li>{t}</li>)}
       </ul>
     </div>
 
@@ -298,7 +297,9 @@ const jsonld = [
   .hero__inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; }
   .hero__inner .eyebrow { text-decoration: none; }
   .hero h1 { max-width: 13ch; }
-  .hero__lead { max-width: 36rem; }
+  /* riga piccola dentro l'H1 con la parola chiave: stessa voce del sottotitolo, sopra lo slogan */
+  .hero__kicker { display: block; margin-bottom: 0.9rem; font-family: var(--font-body); font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.1rem); font-weight: 500; letter-spacing: 0; line-height: 1.4; color: var(--muted); }
+  .hero__lead { max-width: 40rem; }
   .hero__ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 0.25rem; }
   .hero__trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.5rem; list-style: none; padding: 0; font-size: 0.875rem; color: var(--muted); }
   .hero__trust li { display: inline-flex; align-items: center; gap: 0.4rem; }

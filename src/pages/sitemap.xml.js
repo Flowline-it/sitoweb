@@ -6,6 +6,8 @@ export async function GET() {
   const articles = await getArticles();
   const urls = [
     { loc: `${SITE.url}/`, lastmod: today },
+    { loc: `${SITE.url}/metodo`, lastmod: '2026-10-28' },
+    { loc: `${SITE.url}/pilot-30`, lastmod: '2026-10-28' },
     { loc: `${SITE.url}/privacy-policy`, lastmod: '2026-02-12' },
   ];
   if (articles.length) {

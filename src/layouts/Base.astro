@@ -34,6 +34,8 @@ const organization = {
   vatID: SITE.vat,
   address: { '@type': 'PostalAddress', streetAddress: SITE.street, postalCode: SITE.postalCode, addressLocality: SITE.city, addressRegion: SITE.province, addressCountry: 'IT' },
   sameAs: [SITE.linkedin, SITE.instagram],
+  areaServed: { '@type': 'Country', name: 'Italia' },
+  knowsAbout: ['automazione dei processi aziendali', 'intelligenza artificiale', 'agenti AI', 'chatbot', 'integrazioni software', 'gestionali su misura', 'n8n'],
 };
 const graph = { '@context': 'https://schema.org', '@graph': [organization, { '@type': 'WebSite', '@id': `${SITE.url}/#website`, url: SITE.url, name: SITE.name, inLanguage: 'it-IT', publisher: { '@id': `${SITE.url}/#organization` } }, ...jsonld] };
 ---

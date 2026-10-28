@@ -20,17 +20,23 @@ export const SITE = {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3c2RyaHFzcW9mdWJsbnRteW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NDMxMDcsImV4cCI6MjEwODQxOTEwN30.-mCxe4HJ_Ookc6-KAcBGes1isW89k7termKc837DGkc',
 };
 
+// SEO (ottobre 2026): parola chiave principale in title, description e H1 della home.
 export const HOME_META = {
-  title: 'Flowline | Automazioni e Agenti AI per Aziende',
+  title: 'Automazione processi aziendali e agenti AI | Flowline',
   description:
-    'Automatizza i tuoi processi e riduci i costi operativi del 40%. Progettiamo sistemi AI, integrazioni e processi automatici su misura.',
+    'Agenzia italiana di automazione AI: workflow, agenti AI e integrazioni su misura per PMI. Primo processo automatizzato in 30 giorni. Analisi gratuita.',
 };
 
 export const CTA = 'Prenota una consulenza gratuita';
 
 export const HERO = {
+  // kicker: riga piccola dentro l'H1, porta la parola chiave senza toccare lo slogan
+  kicker: 'Agenzia di automazione AI per aziende',
   title: ['Automatizza i tuoi', 'processi'],
-  lead: 'Riduci i costi operativi del 40%.',
+  // sottotitolo del hero
+  subtitle:
+    "Progettiamo automazioni con l'intelligenza artificiale, agenti AI e integrazioni tra i tuoi software (CRM, gestionale, fatturazione) per le PMI italiane. I nostri clienti riducono fino al 40% il tempo speso in attività ripetitive.",
+  trust: ['Analisi preliminare gratuita', 'Preventivo trasparente', 'Referente dedicato'],
   text: 'Progettiamo sistemi AI, integrazioni e processi automatici su misura. Libera il tuo team dai task ripetitivi e scala il tuo business con un partner strategico al tuo fianco.',
 };
 
