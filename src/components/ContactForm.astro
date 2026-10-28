@@ -11,58 +11,36 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
         <span class="eyebrow"><span class="dot"></span>Contatti</span>
         <h2 id="contatti-title" class="h2">{CONTACT.title}</h2>
         <p class="lead">{CONTACT.text}</p>
-        <ul class="checks coupon__list"><li>Prima consulenza gratuita e senza impegno</li><li>Possiamo firmare un NDA prima dell'analisi</li><li>Ti rispondiamo entro 24 ore</li></ul>
+        <ul class="checks coupon__list"><li>Prima consulenza gratuita e senza impegno</li><li>Possiamo firmare un accordo di riservatezza (NDA) prima dell'analisi</li><li>Ti rispondiamo entro 24 ore</li></ul>
+        <div class="coupon__next">
+          <p class="small"><b>Cosa succede dopo</b></p>
+          <ol class="small muted"><li>Ti scriviamo per fissare una chiamata conoscitiva.</li><li>Nella chiamata guardiamo insieme come lavorate oggi.</li><li>Se ha senso, ti mandiamo una proposta con demo e preventivo.</li></ol>
+        </div>
         <p class="small muted coupon__note">{CONTACT.privacy}</p>
         <noscript><p class="small">Il modulo ha bisogno di JavaScript. Puoi scriverci a <a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p></noscript>
       </div>
             <div class="coupon__body">
         <form class="cform" id="cform" novalidate data-endpoint={`${SITE.supabaseUrl}/rest/v1/consultations`} data-key={SITE.supabaseAnonKey}>
-          <div class="cform__progress" aria-hidden="true"><span class="is-on"></span><span></span><span></span></div>
-          <p class="cform__step small" id="cform-step" aria-live="polite">Passo 1 di 3: i tuoi dati</p>
-
-          <fieldset data-step="1">
-            <legend class="sr-only">I tuoi dati</legend>
-            <div class="cform__grid">
-              <div class="field"><label for="f-nome">Nome e cognome <span aria-hidden="true">*</span></label><input id="f-nome" name="nome_cognome" autocomplete="name" placeholder="Mario Rossi" required /><p class="field__err" id="e-nome_cognome"></p></div>
-              <div class="field"><label for="f-email">Email aziendale <span aria-hidden="true">*</span></label><input id="f-email" name="email" type="email" autocomplete="email" placeholder="mario@azienda.it" required /><p class="field__err" id="e-email"></p></div>
-              <div class="field"><label for="f-tel">Numero di telefono <span aria-hidden="true">*</span></label><input id="f-tel" name="telefono" type="tel" autocomplete="tel" placeholder="+39 333 1234567" required /><p class="field__err" id="e-telefono"></p></div>
-              <div class="field"><label for="f-az">Nome azienda <span aria-hidden="true">*</span></label><input id="f-az" name="nome_azienda" autocomplete="organization" placeholder="La Tua Azienda Srl" required /><p class="field__err" id="e-nome_azienda"></p></div>
+          <p class="cform__step small">I campi con * sono obbligatori.</p>
+          <div class="cform__grid">
+            <div class="field"><label for="f-nome">Nome e cognome <span aria-hidden="true">*</span></label><input id="f-nome" name="nome_cognome" autocomplete="name" placeholder="Mario Rossi" required /><p class="field__err" id="e-nome_cognome"></p></div>
+            <div class="field"><label for="f-email">Email aziendale <span aria-hidden="true">*</span></label><input id="f-email" name="email" type="email" autocomplete="email" placeholder="mario@azienda.it" required /><p class="field__err" id="e-email"></p></div>
+            <div class="field"><label for="f-az">Nome azienda <span aria-hidden="true">*</span></label><input id="f-az" name="nome_azienda" autocomplete="organization" placeholder="La Tua Azienda Srl" required /><p class="field__err" id="e-nome_azienda"></p></div>
+            <div class="field"><label for="f-tel">Telefono <span class="field__opt">(facoltativo)</span></label><input id="f-tel" name="telefono" type="tel" autocomplete="tel" placeholder="+39 333 1234567" /><p class="field__err" id="e-telefono"></p></div>
+            <div class="field field--wide"><label for="f-desc">Cosa vorresti semplificare? <span class="field__opt">(facoltativo)</span></label><textarea id="f-desc" name="descrizione_progetto" rows="3" placeholder="Per esempio: registriamo a mano le fatture dei fornitori nel gestionale."></textarea></div>
+            <div class="field field--wide"><label for="f-fonte">Come ci hai conosciuto? <span class="field__opt">(facoltativo)</span></label>
+              <select id="f-fonte" name="come_hai_sentito">
+                <option value="">Seleziona…</option>
+                {CONTACT.sources.map((s) => <option value={s}>{s}</option>)}
+              </select></div>
+            <div class="field field--wide check">
+              <input id="f-privacy" name="privacy" type="checkbox" required />
+              <label for="f-privacy">Accetto la <a class="link" href={p('/privacy-policy')}>Privacy Policy</a> e autorizzo il trattamento dei dati per essere ricontattato. <span aria-hidden="true">*</span></label>
+              <p class="field__err" id="e-privacy"></p>
             </div>
-          </fieldset>
-
-          <fieldset data-step="2" hidden>
-            <legend class="sr-only">Il progetto</legend>
-            <div class="cform__grid">
-              <div class="field"><label for="f-ruolo">Qual è il ruolo nella tua azienda? <span aria-hidden="true">*</span></label><input id="f-ruolo" name="ruolo_azienda" autocomplete="organization-title" placeholder="es. CEO, Marketing Manager, Developer..." required /><p class="field__err" id="e-ruolo_azienda"></p></div>
-              <div class="field"><label for="f-serv">A quale servizio sei interessato? <span aria-hidden="true">*</span></label>
-                <select id="f-serv" name="servizio_interessato" required>
-                  <option value="">Seleziona…</option>
-                  {CONTACT.services.map((s) => <option value={s}>{s}</option>)}
-                </select><p class="field__err" id="e-servizio_interessato"></p></div>
-              <div class="field field--wide"><label for="f-desc">Descrivici in modo specifico il progetto <span aria-hidden="true">*</span></label><textarea id="f-desc" name="descrizione_progetto" rows="4" placeholder="Vorrei automatizzare la fatturazione, migliorare il customer service..." required></textarea><p class="field__err" id="e-descrizione_progetto"></p></div>
-            </div>
-          </fieldset>
-
-          <fieldset data-step="3" hidden>
-            <legend class="sr-only">Ultimo passo</legend>
-            <div class="cform__grid">
-              <div class="field"><label for="f-fonte">Come hai sentito parlare di noi? <span aria-hidden="true">*</span></label>
-                <select id="f-fonte" name="come_hai_sentito" required>
-                  <option value="">Seleziona…</option>
-                  {CONTACT.sources.map((s) => <option value={s}>{s}</option>)}
-                </select><p class="field__err" id="e-come_hai_sentito"></p></div>
-              <div class="field field--wide check">
-                <input id="f-privacy" name="privacy" type="checkbox" required />
-                <label for="f-privacy">Accetto la <a class="link" href={p('/privacy-policy')}>Privacy Policy</a> e autorizzo il trattamento dei dati per essere ricontattato. <span aria-hidden="true">*</span></label>
-                <p class="field__err" id="e-privacy"></p>
-              </div>
-            </div>
-          </fieldset>
-
+          </div>
           <div class="cform__actions">
-            <button type="button" class="button button--quiet" data-back hidden><Fragment set:html={back} /> Indietro</button>
-            <button type="button" class="button" data-next>Continua <Fragment set:html={arrow} /></button>
-            <button type="submit" class="button" data-submit hidden>Invia richiesta <Fragment set:html={arrow} /></button>
+            <button type="submit" class="button" data-submit>Invia la richiesta <Fragment set:html={arrow} /></button>
           </div>
           <p class="cform__status small" role="status" aria-live="polite"></p>
         </form>
@@ -86,6 +64,9 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
   .coupon__note { margin-top: auto; padding-top: 1.5rem; max-width: 36ch; }
   .coupon__body { padding: clamp(2rem, 4vw, 3rem); }
   :global(html:not(.js)) .cform { display: none; }
+  .field label .field__opt { color: var(--muted); font-weight: 400; }
+  .coupon__next { display: grid; gap: 0.4rem; }
+  .coupon__next ol { list-style: decimal; padding-left: 1.2rem; margin: 0; display: grid; gap: 0.25rem; }
   .cform__progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 0.75rem; }
   .cform__progress span { height: 5px; background: var(--surface-2); border-radius: 3px; transition: background-color 240ms ease; }
   .cform__progress span.is-on { background: var(--accent); }
@@ -124,19 +105,13 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 </style>
 
 <script>
+  // Modulo in un solo passaggio. La tabella "consultations" riceve sempre tutte le colonne di prima:
+  // i campi tolti dal modulo partono con un valore neutro, così l'invio non dipende da come sono definite.
   const form = document.getElementById('cform') as HTMLFormElement | null;
   if (form) {
     const done = document.getElementById('cform-done') as HTMLElement;
-    const stepLabel = document.getElementById('cform-step') as HTMLElement;
     const status = form.querySelector('.cform__status') as HTMLElement;
-    const sets = [...form.querySelectorAll<HTMLFieldSetElement>('fieldset[data-step]')];
-    const bars = [...form.querySelectorAll<HTMLElement>('.cform__progress span')];
-    const btnBack = form.querySelector('[data-back]') as HTMLButtonElement;
-    const btnNext = form.querySelector('[data-next]') as HTMLButtonElement;
     const btnSubmit = form.querySelector('[data-submit]') as HTMLButtonElement;
-    const names = ['i tuoi dati', 'il progetto', 'ultimo passo'];
-    let step = 1;
-
     const val = (n: string) => ((form.elements.namedItem(n) as HTMLInputElement)?.value || '').trim();
     const setErr = (n: string, msg: string) => {
       const el = form.elements.namedItem(n) as HTMLElement | null;
@@ -145,59 +120,35 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
       if (el) { el.setAttribute('aria-invalid', msg ? 'true' : 'false'); if (msg) el.setAttribute('aria-describedby', `e-${n}`); else el.removeAttribute('aria-describedby'); }
     };
     const emailOk = (v: string) => /^[^\s@<>()[\]\\.,;:"]+(\.[^\s@<>()[\]\\.,;:"]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(v);
-    const phoneOk = (v: string) => !!v && (v.startsWith('+39') || v.length > 8);
+    const phoneOk = (v: string) => !v || v.replace(/[^0-9]/g, '').length >= 8;
 
-    function validate(s: number) {
+    function validate() {
       const errs: Record<string, string> = {};
-      if (s === 1) {
-        if (!val('nome_cognome')) errs.nome_cognome = 'Nome e cognome richiesto';
-        if (!val('email') || !emailOk(val('email'))) errs.email = 'Email non valida';
-        if (!phoneOk(val('telefono'))) errs.telefono = 'Telefono non valido';
-        if (!val('nome_azienda')) errs.nome_azienda = 'Nome azienda richiesto';
-      }
-      if (s === 2) {
-        if (!val('ruolo_azienda')) errs.ruolo_azienda = 'Ruolo aziendale richiesto';
-        if (!val('servizio_interessato')) errs.servizio_interessato = 'Seleziona un servizio';
-        if (!val('descrizione_progetto')) errs.descrizione_progetto = 'Descrizione richiesta';
-      }
-      if (s === 3) {
-        if (!val('come_hai_sentito')) errs.come_hai_sentito = 'Campo richiesto';
-        if (!(form.elements.namedItem('privacy') as HTMLInputElement).checked) errs.privacy = 'Devi accettare la Privacy Policy per procedere.';
-      }
-      const fields = [...sets[s - 1].querySelectorAll<HTMLInputElement>('[name]')].map((f) => f.name);
-      fields.forEach((n) => setErr(n, errs[n] || ''));
-      const first = fields.find((n) => errs[n]);
+      if (!val('nome_cognome')) errs.nome_cognome = 'Scrivi nome e cognome';
+      if (!val('email') || !emailOk(val('email'))) errs.email = "Controlla l'indirizzo email";
+      if (!val('nome_azienda')) errs.nome_azienda = "Scrivi il nome dell'azienda";
+      if (!phoneOk(val('telefono'))) errs.telefono = 'Il numero sembra incompleto';
+      if (!(form.elements.namedItem('privacy') as HTMLInputElement).checked) errs.privacy = 'Per inviare la richiesta serve il consenso alla Privacy Policy.';
+      const order = ['nome_cognome', 'email', 'nome_azienda', 'telefono', 'privacy'];
+      order.forEach((n) => setErr(n, errs[n] || ''));
+      const first = order.find((n) => errs[n]);
       if (first) (form.elements.namedItem(first) as HTMLElement).focus();
       return !first;
     }
 
-    function show(s: number, focus = true) {
-      step = s;
-      sets.forEach((f, i) => (f.hidden = i !== s - 1));
-      bars.forEach((b, i) => b.classList.toggle('is-on', i < s));
-      stepLabel.textContent = `Passo ${s} di 3: ${names[s - 1]}`;
-      btnBack.hidden = s === 1;
-      btnNext.hidden = s === 3;
-      btnSubmit.hidden = s !== 3;
-      status.textContent = '';
-      if (focus) (sets[s - 1].querySelector('input, select, textarea') as HTMLElement)?.focus();
-    }
-
-    btnNext.addEventListener('click', () => { if (validate(step)) show(step + 1); });
-    btnBack.addEventListener('click', () => show(step - 1));
-    form.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && step < 3 && (e.target as HTMLElement).tagName === 'INPUT') { e.preventDefault(); btnNext.click(); }
-    });
-
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!validate(3)) return;
+      if (!validate()) return;
       btnSubmit.disabled = true;
       btnSubmit.firstChild!.textContent = 'Invio… ';
+      status.textContent = '';
       const body = {
-        nome_cognome: val('nome_cognome'), email: val('email'), telefono: val('telefono'), nome_azienda: val('nome_azienda'),
-        ruolo_azienda: val('ruolo_azienda'), servizio_interessato: val('servizio_interessato'),
-        descrizione_progetto: val('descrizione_progetto'), come_hai_sentito: val('come_hai_sentito'),
+        nome_cognome: val('nome_cognome'), email: val('email'), nome_azienda: val('nome_azienda'),
+        telefono: val('telefono') || 'Non indicato',
+        descrizione_progetto: val('descrizione_progetto') || 'Non indicata',
+        come_hai_sentito: val('come_hai_sentito') || 'Altro',
+        ruolo_azienda: 'Non indicato',
+        servizio_interessato: 'Altro',
       };
       try {
         const key = form.dataset.key!;
@@ -216,12 +167,13 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
         status.textContent = "Si è verificato un errore durante l'invio. Riprova più tardi, oppure scrivici a info@flowline.it.";
       } finally {
         btnSubmit.disabled = false;
-        btnSubmit.firstChild!.textContent = 'Invia richiesta ';
+        btnSubmit.firstChild!.textContent = 'Invia la richiesta ';
       }
     });
 
     done.querySelector('[data-again]')!.addEventListener('click', () => {
-      done.hidden = true; form.hidden = false; show(1);
+      done.hidden = true; form.hidden = false;
+      (form.querySelector('input') as HTMLElement)?.focus();
     });
   }
 </script>
