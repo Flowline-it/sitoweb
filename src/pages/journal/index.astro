@@ -1,69 +1,153 @@
 ---
-import { p, isHome } from '../../lib/paths.js';
+import { p } from '../../lib/paths.js';
 import Base from '../../layouts/Base.astro';
-import { getArticles, fmtDate } from '../../lib/journal.js';
+import { getArticles, fmtShort, excerpt } from '../../lib/journal.js';
 import { CTA } from '../../data/site.js';
+import JournalBar from '../../components/journal/JournalBar.astro';
+import Card from '../../components/journal/Card.astro';
+import Carousel from '../../components/journal/Carousel.astro';
+import Orb from '../../components/journal/Orb.astro';
+import Newsletter from '../../components/journal/Newsletter.astro';
+import { I } from '../../components/journal/icons.js';
+import '../../styles/journal.css';
 
 const articles = await getArticles();
 const empty = articles.length === 0;
-const [featured, ...rest] = [...articles].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+// Distribuzione degli articoli. Le sezioni che hanno bisogno di molti articoli restano nascoste finché non ce ne sono abbastanza.
+const featured = articles.find((a) => a.featured) || articles[0];
+const others = articles.filter((a) => a !== featured);
+const recommended = others.slice(0, 4);
+const teasers = others.slice(4, 7);
+const spotlight = others[0];
+const spotSide = articles.filter((a) => a !== spotlight && a !== featured).slice(0, 2);
+const spotBack = spotSide[0];
+const editorBig = others.find((a) => a.category?.slug !== featured?.category?.slug && a !== spotlight) || others[1];
+const editorList = articles.filter((a) => a !== editorBig).slice(0, 4);
+const showEditors = articles.length >= 5 && editorBig;
+const showAll = articles.length >= 8;
 ---
 <Base
   title="Flowline Journal | Automazione e AI per le aziende"
-  description="Flowline Journal: articoli editoriali su automazione, intelligenza artificiale e trasformazione digitale per le aziende."
+  description="Flowline Journal: articoli su automazione, intelligenza artificiale, normative e casi reali per le PMI italiane."
   path="/journal"
   noindex={empty}
 >
-  <section class="section journal">
-    <div class="wrap">
-      <h1 class="display" data-rise>Flowline Journal</h1>
-      <p class="lead journal__intro" data-rise style="--i:1">Idee, analisi e casi reali su automazione, intelligenza artificiale e processi aziendali. Contenuti curati per chi vuole far crescere la propria impresa.</p>
+  <div class="jr">
+    <JournalBar articles={articles} h1 />
 
-      {empty ? (
-        <div class="journal__empty" data-rise style="--i:2">
-          <span class="journal__line" aria-hidden="true"></span>
-          <p class="lead">I primi articoli sono in preparazione.</p>
-          <p>Nel frattempo, se vuoi capire cosa possiamo automatizzare nella tua azienda, parliamone direttamente.</p>
-          <p><a class="button" href={p('/#contatti')}>{CTA} <Fragment set:html={arrow} /></a></p>
+    {empty ? (
+      <section class="wrap">
+        <div class="jhero__panel" style="display:block">
+          <p class="jlabel">In preparazione</p>
+          <h2 class="jhero__title" style="margin-top:1rem">I primi articoli arrivano a breve</h2>
+          <p class="jhero__sub" style="margin-top:1rem">Nel frattempo, se vuoi capire cosa possiamo automatizzare nella tua azienda, parliamone direttamente.</p>
+          <p style="margin-top:1.5rem"><a class="button" href={p('/#contatti')}>{CTA}</a></p>
         </div>
-      ) : (
-        <>
-          <article class="jfeat" data-reveal>
-            {featured.cover_image && <img class="jfeat__img" src={featured.cover_image} alt={featured.cover_alt || ''} loading="eager" width="1200" height="630" onerror="this.remove()" />}
-            <div class="jfeat__text">
-              <p class="small muted">{featured.category?.name} · <time datetime={featured.published_at}>{fmtDate(featured.published_at)}</time></p>
-              <h2 class="head"><a href={p(`/journal/${featured.slug}`)}>{featured.title}</a></h2>
-              {featured.subtitle && <p class="lead">{featured.subtitle}</p>}
-              <p class="small muted">{featured.reading_time || 1} min di lettura</p>
+      </section>
+    ) : (
+      <>
+        <!-- in evidenza + consigliati -->
+        <section class="wrap jhero" aria-labelledby="feat-title">
+          <div class="jhero__panel">
+            <div class="jhero__main jstretch">
+              <p class="jlabel" data-rise>In evidenza</p>
+              <p class="jmeta" data-rise style="--i:1"><span class="jcat">{featured.category?.name}</span><time datetime={featured.published_at}>{fmtShort(featured.published_at)}</time><span>{featured.reading_time || 1} min di lettura</span></p>
+              <h2 class="jhero__title" id="feat-title" data-split><a class="jlink" href={p(`/journal/${featured.slug}`)}>{featured.title}</a></h2>
+              <p class="jhero__sub" data-rise style="--i:4">{excerpt(featured, 170)}</p>
+              {featured.tags?.length > 0 && <p class="jtags" data-rise style="--i:5">{featured.tags.slice(0, 3).map((t) => <span>{t.name}</span>)}</p>}
+              <span class="jbtn" data-rise style="--i:6" aria-hidden="true">Leggi l'articolo <i><Fragment set:html={I.arrow} /></i></span>
             </div>
-          </article>
-          <ul class="jlist" role="list">
-            {rest.map((a, i) => (
-              <li data-reveal style={`--i:${i % 3}`}>
-                <p class="small muted">{a.category?.name} · <time datetime={a.published_at}>{fmtDate(a.published_at)}</time> · {a.reading_time || 1} min</p>
-                <h2 class="name"><a href={p(`/journal/${a.slug}`)}>{a.title}</a></h2>
-                {a.subtitle && <p>{a.subtitle}</p>}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
-  </section>
+            <div class="jhero__orb"><Orb follow /></div>
+            {teasers.length === 3 && (
+              <ul class="jhero__teasers" role="list">
+                {teasers.map((a) => (
+                  <li class="jstretch">
+                    <p class="jmeta"><span class="jcat">{a.category?.name}</span><time datetime={a.published_at}>{fmtShort(a.published_at)}</time></p>
+                    <h3><a class="jlink" href={p(`/journal/${a.slug}`)}>{a.title}</a></h3>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {recommended.length > 0 && (
+              <aside class="jhero__side" aria-labelledby="rec-title" data-reveal style="--i:2">
+                <div class="jhead"><h2 class="jlabel" id="rec-title">Consigliati</h2></div>
+                <Card a={recommended[0]} eager tags={0} />
+                {recommended.slice(1).map((a) => <Card a={a} variant="row" />)}
+              </aside>
+            )}
+          </div>
+        </section>
+
+        <!-- ultimi articoli -->
+        <section class="wrap jsec" aria-labelledby="latest-title">
+          <div class="jhead"><h2 class="jlabel" id="latest-title">Ultimi articoli</h2></div>
+          <Carousel label="Ultimi articoli">
+            {articles.map((a, i) => <Card a={a} i={i % 4} />)}
+          </Carousel>
+        </section>
+
+        <!-- da non perdere -->
+        {spotlight && (
+          <section class="wrap jsec jspot" aria-labelledby="spot-title">
+            <div class="jspot__frame">
+              <div class="jspot__visual" aria-hidden="true">
+                <div class="jspot__stack" data-in data-tilt>
+                  {spotBack?.cover_image && <img class="jspot__back" src={spotBack.cover_image} alt="" width="1200" height="630" loading="lazy" decoding="async" onerror="this.remove()" />}
+                  {spotlight.cover_image ? <img class="jspot__front" src={spotlight.cover_image} alt="" width="1200" height="630" loading="lazy" decoding="async" onerror="this.remove()" /> : <Orb />}
+                </div>
+              </div>
+              <aside class="jspot__side" aria-label="Leggi anche">
+                <p class="jlabel">Leggi anche</p>
+                {spotSide.map((a) => (
+                  <a href={p(`/journal/${a.slug}`)}><small>{a.category?.name} · {fmtShort(a.published_at)}</small><b>{a.title}</b></a>
+                ))}
+              </aside>
+              <div class="jspot__panel jstretch">
+                <p class="jlabel">Da non perdere</p>
+                <p class="jmeta"><span class="jcat">{spotlight.category?.name}</span><time datetime={spotlight.published_at}>{fmtShort(spotlight.published_at)}</time><span>{spotlight.reading_time || 1} min</span></p>
+                <h2 id="spot-title" data-split><a class="jlink" href={p(`/journal/${spotlight.slug}`)}>{spotlight.title}</a></h2>
+                <span class="jbtn" aria-hidden="true">Leggi l'articolo <i><Fragment set:html={I.arrow} /></i></span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <!-- scelti dalla redazione -->
+        {showEditors && (
+          <section class="wrap jsec" aria-labelledby="ed-title">
+            <div class="jhead"><h2 class="jlabel" id="ed-title">Scelti dalla redazione</h2></div>
+            <div class="jeditor__grid">
+              <article class="jglass jstretch" data-reveal>
+                <span class="jglass__badge">Da leggere</span>
+                <p class="jmeta"><span class="jcat">{editorBig.category?.name}</span><time datetime={editorBig.published_at}>{fmtShort(editorBig.published_at)}</time><span>{editorBig.reading_time || 1} min</span></p>
+                <h3 data-split><a class="jlink" href={p(`/journal/${editorBig.slug}`)}>{editorBig.title}</a></h3>
+                <p class="jsub">{excerpt(editorBig, 150)}</p>
+                {editorBig.tags?.length > 0 && <p class="jtags">{editorBig.tags.slice(0, 3).map((t) => <span>{t.name}</span>)}</p>}
+              </article>
+              <ol class="jeditor__list" role="list" data-rank>
+                {editorList.map((a, i) => <li data-reveal style={`--i:${i}`}><Card a={a} variant="row" /></li>)}
+              </ol>
+            </div>
+          </section>
+        )}
+
+        <!-- tutti gli articoli (quando sono tanti) -->
+        {showAll && (
+          <section class="wrap jsec" aria-labelledby="all-title">
+            <div class="jhead"><h2 class="jlabel" id="all-title">Tutti gli articoli</h2></div>
+            <div class="jposts">
+              {articles.map((a, i) => <Card a={a} variant="post" img i={i % 3} />)}
+            </div>
+          </section>
+        )}
+
+        <Newsletter source="journal-home" />
+      </>
+    )}
+  </div>
 </Base>
 
-<style>
-  .journal { padding-top: clamp(2rem, 6vw, 5rem); min-height: 70svh; }
-  .journal__intro { max-width: 36ch; margin-top: 1.5rem; font-weight: 400; }
-  .journal__empty { margin-top: clamp(3rem, 7vw, 6rem); display: flex; flex-direction: column; gap: 1.25rem; max-width: 44rem; }
-  .journal__line { display: block; width: min(100%, 22rem); height: 10px; background: var(--orange); border-radius: 0 5px 5px 0; }
-  .jfeat { margin-top: clamp(3rem, 6vw, 5rem); display: grid; grid-template-columns: 7fr 5fr; gap: var(--gutter); align-items: end; }
-  .jfeat__img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
-  .jfeat__text { display: flex; flex-direction: column; gap: 1rem; }
-  .jfeat a, .jlist a { text-decoration: none; }
-  @media (hover: hover) and (pointer: fine) { .jfeat h2 a:hover, .jlist h2 a:hover { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 0.15em; text-decoration-thickness: 0.08em; } }
-  .jlist { margin-top: clamp(3rem, 6vw, 5rem); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem var(--gutter); }
-  .jlist li { display: flex; flex-direction: column; gap: 0.7rem; padding-top: 1.25rem; border-top: 6px solid var(--orange); }
-  @media (max-width: 860px) { .jfeat { grid-template-columns: 1fr; } .jlist { grid-template-columns: 1fr; } }
-</style>
+<script>
+  import '../../scripts/journal.ts';
+</script>

@@ -1,0 +1,36 @@
+---
+// Barra del Journal: nome, argomenti (categorie + tag) e ricerca istantanea.
+import { p } from '../../lib/paths.js';
+import { taxonomy, searchIndex } from '../../lib/journal.js';
+import { I } from './icons.js';
+interface Props { articles: any[]; active?: string; h1?: boolean }
+const { articles, active = 'all', h1 = false } = Astro.props;
+const { categories, tags } = taxonomy(articles);
+const Name = h1 ? 'h1' : 'p';
+---
+<div class="wrap jbar">
+  <Name class="jbar__name"><a href={p('/journal')}>Journal</a><span aria-hidden="true"></span></Name>
+  <nav class="jbar__pills" aria-label="Argomenti del Journal">
+    <a class:list={['jpill', active === 'all' && 'is-active']} href={p('/journal')} aria-current={active === 'all' ? 'page' : undefined}>Tutti <small>{articles.length}</small></a>
+    {categories.map((c) => (
+      <a class:list={['jpill', active === `c:${c.slug}` && 'is-active']} href={p(`/journal/categoria/${c.slug}`)} aria-current={active === `c:${c.slug}` ? 'page' : undefined}>{c.name} <small>{c.count}</small></a>
+    ))}
+    {tags.length > 0 && (
+      <details class="jdrop" data-drop>
+        <summary class:list={['jpill', active.startsWith('t:') && 'is-active']}>Temi <Fragment set:html={I.chev} /></summary>
+        <div class="jdrop__panel">
+          {tags.map((t) => <a class:list={['jchip', active === `t:${t.slug}` && 'is-active']} href={p(`/journal/tag/${t.slug}`)}>{t.name}</a>)}
+        </div>
+      </details>
+    )}
+  </nav>
+  <form class="jsearch" role="search" data-search action={p('/journal')} onsubmit="return false">
+    <label class="jsearch__field">
+      <Fragment set:html={I.search} />
+      <span class="sr-only">Cerca nel Journal</span>
+      <input type="search" name="q" placeholder="Cerca articoli, temi, categorie…" autocomplete="off" aria-controls="jsearch-results" aria-autocomplete="list" />
+    </label>
+    <div class="jsearch__results" id="jsearch-results" hidden></div>
+    <script type="application/json" data-index set:html={JSON.stringify(searchIndex(articles))} />
+  </form>
+</div>

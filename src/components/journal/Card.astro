@@ -1,0 +1,52 @@
+---
+// Schede articolo del Journal: v (verticale con immagine), row (riga con miniatura),
+// post (con estratto e contatori), over (testo sopra l'immagine).
+import { p } from '../../lib/paths.js';
+import { fmtShort, excerpt } from '../../lib/journal.js';
+import { I } from './icons.js';
+
+interface Props { a: any; variant?: 'v' | 'row' | 'post' | 'over'; i?: number; tag?: 'h2' | 'h3'; eager?: boolean; tags?: number; img?: boolean }
+const { a, variant = 'v', i = 0, tag = 'h3', eager = false, tags = 2, img = false } = Astro.props;
+const H = tag;
+const href = p(`/journal/${a.slug}`);
+const tagList = (a.tags || []).slice(0, tags);
+const cover = a.cover_image;
+---
+{variant === 'v' && (
+  <article class="jcard jstretch" data-reveal style={`--i:${i}`} data-id={a.id}>
+    <div class:list={['jimg', !cover && 'jimg--empty']}>{cover && <img src={cover} alt="" width="1200" height="630" loading={eager ? 'eager' : 'lazy'} decoding="async" onerror="this.remove()" />}</div>
+    <p class="jmeta"><span class="jcat">{a.category?.name}</span><time datetime={a.published_at}>{fmtShort(a.published_at)}</time></p>
+    <H><a class="jlink" href={href}>{a.title}</a></H>
+    {tagList.length > 0 && <p class="jtags">{tagList.map((t) => <span>{t.name}</span>)}</p>}
+  </article>
+)}
+{variant === 'row' && (
+  <article class="jrow jstretch" data-id={a.id}>
+    <div>
+      <p class="jmeta"><span class="jcat">{a.category?.name}</span><time datetime={a.published_at}>{fmtShort(a.published_at)}</time></p>
+      <H><a class="jlink" href={href}>{a.title}</a></H>
+    </div>
+    <div class:list={['jimg', !cover && 'jimg--empty']}>{cover && <img src={cover} alt="" width="120" height="120" loading="lazy" decoding="async" onerror="this.remove()" />}</div>
+  </article>
+)}
+{variant === 'post' && (
+  <article class:list={['jpost jstretch', img && 'jpost--img']} data-reveal style={`--i:${i}`} data-id={a.id} data-date={a.published_at} data-time={a.reading_time || 1} data-q={`${a.title} ${a.subtitle || ''} ${(a.tags || []).map((t) => t.name).join(' ')}`.toLowerCase()}>
+    {img && <div class:list={['jimg', !cover && 'jimg--empty']}>{cover && <img src={cover} alt="" width="1200" height="630" loading="lazy" decoding="async" onerror="this.remove()" />}</div>}
+    <p class="jmeta"><span class="jcat">{a.category?.name}</span><time datetime={a.published_at}>{fmtShort(a.published_at)}</time><span>{a.reading_time || 1} min di lettura</span></p>
+    <H><a class="jlink" href={href}>{a.title}</a></H>
+    <p class="jpost__ex">{excerpt(a)}</p>
+    {tagList.length > 0 && <p class="jtags">{tagList.map((t) => <span>{t.name}</span>)}</p>}
+    <div class="jpost__foot">
+      <p class="jstats" data-stats={a.id}><span title="Mi piace"><Fragment set:html={I.heart} /><b data-likes>0</b></span><span title="Commenti"><Fragment set:html={I.chat} /><b data-comments>0</b></span></p>
+      <span class="jbtn" aria-hidden="true">Leggi l'articolo <i><Fragment set:html={I.arrow} /></i></span>
+    </div>
+  </article>
+)}
+{variant === 'over' && (
+  <article class="jover jstretch" data-reveal style={`--i:${i}`} data-id={a.id}>
+    <div class:list={['jimg', !cover && 'jimg--empty']}>{cover && <img src={cover} alt="" width="1200" height="630" loading={eager ? 'eager' : 'lazy'} decoding="async" onerror="this.remove()" />}</div>
+    <p class="jmeta"><span class="jcat">{a.category?.name}</span><time datetime={a.published_at}>{fmtShort(a.published_at)}</time></p>
+    <H><a class="jlink" href={href}>{a.title}</a></H>
+    {tagList.length > 0 && <p class="jtags" style="color:rgba(255,255,255,.6)">{tagList.map((t) => <span>{t.name}</span>)}</p>}
+  </article>
+)}

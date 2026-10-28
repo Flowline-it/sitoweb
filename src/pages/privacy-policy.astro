@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 
-// Testo invariato dalla privacy policy pubblicata (ultimo aggiornamento 12 febbraio 2026).
+// Testo della privacy policy pubblicata (12 febbraio 2026) con le aggiunte per commenti e newsletter del Journal (28 ottobre 2026).
 const sections = [
   { t: 'Titolare del trattamento', b: [
     { p: 'Il Titolare del trattamento dei dati è Callforus Agenzia del Digitale di Giuseppe Romano, con sede legale in Via Antonio Pacinotti 13, 93012 Gela (CL), Italia – P.IVA IT02110530850.' },
@@ -12,6 +12,9 @@ const sections = [
     { ul: [
       ['Dati di navigazione:', ' I sistemi informatici e le procedure software preposte al funzionamento di questo sito web acquisiscono, nel corso del loro normale esercizio, alcuni dati personali la cui trasmissione è implicita nell’uso dei protocolli di comunicazione di Internet (es. indirizzi IP, tipo di browser, orari di accesso).'],
       ['Dati forniti volontariamente dall’utente:', ' L’invio facoltativo, esplicito e volontario di posta elettronica agli indirizzi indicati su questo sito o la compilazione di form di contatto comporta la successiva acquisizione dell’indirizzo del mittente, necessario per rispondere alle richieste, nonché degli eventuali altri dati personali inseriti nella missiva o nel form (es. nome, cognome, email, numero di telefono, nome azienda).'],
+      ['Commenti al Journal:', ' chi lascia un commento sotto un articolo fornisce nome, indirizzo email e testo del commento. Il nome e il testo vengono pubblicati dopo l’approvazione della redazione; l’indirizzo email non viene mai pubblicato e serve solo per eventuali comunicazioni sul commento e per prevenire abusi.'],
+      ['Iscrizione alla newsletter del Journal:', ' chi si iscrive fornisce il proprio indirizzo email; registriamo anche la data dell’iscrizione, la pagina da cui è avvenuta e il consenso prestato.'],
+      ['Preferenze salvate nel browser:', ' il pulsante “Mi piace” degli articoli ricorda la scelta solo nella memoria locale del browser dell’utente; il conteggio salvato sui nostri sistemi è anonimo.'],
     ] },
   ] },
   { t: 'Finalità del trattamento', b: [
@@ -20,6 +23,7 @@ const sections = [
       ['', 'Rispondere alle richieste di informazioni, preventivi o consulenza inviate tramite il form di contatto o via email.'],
       ['', 'Fornire i servizi richiesti e gestire i rapporti amministrativi e commerciali con i clienti.'],
       ['', 'Inviare comunicazioni informative e promozionali relative ai nostri servizi (newsletter), solo previo consenso esplicito e revocabile in qualsiasi momento.'],
+      ['', 'Pubblicare e moderare i commenti agli articoli del Journal.'],
       ['', 'Adempiere agli obblighi di legge, contabili e fiscali.'],
       ['', 'Manutenzione e sicurezza del sito web, per prevenire o scoprire attività fraudolente o abusi dannosi per il sito.'],
     ] },
@@ -30,7 +34,7 @@ const sections = [
       ['Esecuzione di un contratto o misure precontrattuali (Art. 6.1.b GDPR):', ' per rispondere alle richieste dell’utente o fornire i servizi contrattualizzati.'],
       ['Adempimento di un obbligo legale (Art. 6.1.c GDPR):', ' per rispettare normative fiscali, amministrative o ordini dell’autorità giudiziaria.'],
       ['Legittimo interesse del Titolare (Art. 6.1.f GDPR):', ' per garantire la sicurezza del sito e migliorare i servizi offerti.'],
-      ['Consenso (Art. 6.1.a GDPR):', ' per l’invio di comunicazioni di marketing o newsletter. Il consenso è facoltativo e revocabile in ogni momento.'],
+      ['Consenso (Art. 6.1.a GDPR):', ' per l’invio di comunicazioni di marketing o newsletter e per la pubblicazione dei commenti al Journal. Il consenso è facoltativo e revocabile in ogni momento.'],
     ] },
   ] },
   { t: 'Modalità di trattamento e sicurezza', b: [
@@ -41,12 +45,13 @@ const sections = [
     { ul: [
       ['', 'I dati per finalità di contatto e precontrattuali saranno conservati per il tempo necessario a gestire la richiesta.'],
       ['', 'I dati amministrativi e contabili saranno conservati per 10 anni come previsto dalla legge.'],
-      ['', 'I dati per finalità di marketing saranno conservati fino alla revoca del consenso da parte dell’utente (opt-out).'],
+      ['', 'I dati per finalità di marketing, compresa la newsletter del Journal, saranno conservati fino alla revoca del consenso da parte dell’utente (opt-out).'],
+      ['', 'I commenti al Journal restano pubblicati finché l’articolo è online o fino alla richiesta di cancellazione dell’autore; i commenti non approvati vengono cancellati periodicamente.'],
     ] },
   ] },
   { t: 'Destinatari dei dati', b: [
     { p: 'I dati non saranno diffusi indiscriminatamente. Potranno essere comunicati a soggetti terzi nominati, se necessario, Responsabili del Trattamento (art. 28 GDPR), quali:' },
-    { ul: [['', 'Fornitori di servizi tecnici e hosting provider.'], ['', 'Consulenti fiscali, legali e amministrativi.'], ['', 'Autorità pubbliche, se richiesto dalla legge.']] },
+    { ul: [['', 'Fornitori di servizi tecnici e hosting provider (tra cui Supabase, che ospita il database del Journal con commenti e iscrizioni alla newsletter).'], ['', 'Consulenti fiscali, legali e amministrativi.'], ['', 'Autorità pubbliche, se richiesto dalla legge.']] },
   ] },
   { t: 'Trasferimento dei dati extra UE', b: [
     { p: 'I dati personali sono conservati su server ubicati all’interno dell’Unione Europea. Qualora per questioni di natura tecnica e/o operativa si renda necessario avvalersi di soggetti ubicati al di fuori dell’Unione Europea, tali soggetti saranno nominati Responsabili del Trattamento e il trasferimento dei dati avverrà in conformità alle disposizioni di legge (artt. 44 e ss. GDPR), garantendo un livello di protezione adeguato.' },
@@ -68,7 +73,7 @@ const withMail = (p: string) => p.replace('info@flowline.it', '<a class="link" h
     <div class="wrap legal__grid">
       <header class="legal__head">
         <h1 class="display">Privacy Policy</h1>
-        <p class="small muted">Ultimo aggiornamento: 12 febbraio 2026</p>
+        <p class="small muted">Ultimo aggiornamento: 28 ottobre 2026</p>
         <p>La presente Privacy Policy descrive le modalità di gestione del sito web flowline.it in riferimento al trattamento dei dati personali degli utenti che lo consultano, ai sensi del Regolamento UE 2016/679 (GDPR).</p>
       </header>
       <nav class="legal__toc" aria-label="Indice">

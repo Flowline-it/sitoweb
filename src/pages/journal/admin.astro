@@ -91,7 +91,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       }
 
       /* ---------------- stato ---------------- */
-      const S: Any = { user: null, tab: 'articles', filter: 'all', q: '', articles: [], categories: [], tags: [], authors: [], links: [], editing: null, dirty: false, preview: false };
+      const S: Any = { user: null, tab: 'articles', filter: 'all', q: '', cfilter: 'pending', nq: '', comments: [], subscribers: [], articles: [], categories: [], tags: [], authors: [], links: [], editing: null, dirty: false, preview: false };
 
       function articleStatus(a: Any): { key: string; label: string } {
         if (a.status === 'draft') return { key: 'draft', label: 'Bozza' };
@@ -110,15 +110,19 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
       /* ---------------- dati ---------------- */
       async function loadAll() {
-        const [a, c, t, au, l] = await Promise.all([
+        const [a, c, t, au, l, cm, nl] = await Promise.all([
           sb.from('journal_articles').select('*').order('created_at', { ascending: false }),
           sb.from('journal_categories').select('*').order('name'),
           sb.from('journal_tags').select('*').order('name'),
           sb.from('journal_authors').select('*').order('name'),
           sb.from('journal_article_tags').select('article_id,tag_id'),
+          sb.from('journal_comments').select('*').order('created_at', { ascending: false }),
+          sb.from('journal_newsletter').select('*').order('created_at', { ascending: false }),
         ]);
         for (const r of [a, c, t, au, l]) if (r.error) throw r.error;
         S.articles = a.data || []; S.categories = c.data || []; S.tags = t.data || []; S.authors = au.data || []; S.links = l.data || [];
+        // commenti e newsletter: se le tabelle non rispondono, il resto dell'area funziona lo stesso
+        S.comments = cm.error ? [] : cm.data || []; S.subscribers = nl.error ? [] : nl.data || [];
       }
       const tagIdsOf = (id: string) => S.links.filter((x: Any) => x.article_id === id).map((x: Any) => x.tag_id);
 
@@ -176,7 +180,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       }
 
       function tabsHtml() {
-        const tabs = [['articles', 'Articoli', S.articles.length], ['categories', 'Categorie', S.categories.length], ['tags', 'Tag', S.tags.length], ['authors', 'Autori', S.authors.length]];
+        const pending = S.comments.filter((c: Any) => c.status === 'pending').length;
+        const subs = S.subscribers.filter((x: Any) => !x.unsubscribed_at).length;
+        const tabs = [['articles', 'Articoli', S.articles.length], ['comments', 'Commenti', pending], ['newsletter', 'Newsletter', subs], ['categories', 'Categorie', S.categories.length], ['tags', 'Tag', S.tags.length], ['authors', 'Autori', S.authors.length]];
         return `<nav class="adm-tabs" aria-label="Sezioni">${tabs.map(([k, l, n]) => `<button type="button" class="adm-tab${S.tab === k ? ' on' : ''}" data-tab="${k}" aria-current="${S.tab === k}">${l}<span class="adm-tab__n">${n}</span></button>`).join('')}</nav>`;
       }
 
@@ -184,6 +190,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         S.editing = null; S.dirty = false;
         let body = '';
         if (S.tab === 'articles') body = articlesHtml();
+        else if (S.tab === 'comments') body = commentsHtml();
+        else if (S.tab === 'newsletter') body = newsletterHtml();
         else body = taxonomyHtml(S.tab);
         root.innerHTML = `
           <div class="adm-head">
@@ -195,7 +203,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           ${body}`;
         root.querySelectorAll<HTMLElement>('[data-tab]').forEach((b) => b.onclick = () => { S.tab = b.dataset.tab; renderList(); });
         document.getElementById('newArt')!.onclick = () => openEditor(null);
-        if (S.tab === 'articles') bindArticles(); else bindTaxonomy(S.tab);
+        if (S.tab === 'articles') bindArticles();
+        else if (S.tab === 'comments') bindComments();
+        else if (S.tab === 'newsletter') bindNewsletter();
+        else bindTaxonomy(S.tab);
       }
 
       function articlesHtml() {
@@ -296,6 +307,126 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             if (error) return toast(errMsg(error), 'err');
             toast('Eliminato', 'ok'); await loadAll(); renderList();
           };
+        });
+      }
+
+      /* ---------------- commenti (moderazione) ---------------- */
+      function commentsHtml() {
+        const filters = [['pending', 'Da approvare'], ['approved', 'Approvati'], ['rejected', 'Rifiutati'], ['all', 'Tutti']];
+        const count = (k: string) => k === 'all' ? S.comments.length : S.comments.filter((c: Any) => c.status === k).length;
+        const rows = S.comments.filter((c: Any) => S.cfilter === 'all' || c.status === S.cfilter);
+        const art = (id: string) => S.articles.find((a: Any) => a.id === id);
+        const byId = (id: string) => S.comments.find((c: Any) => c.id === id);
+        const label: Any = { pending: 'Da approvare', approved: 'Approvato', rejected: 'Rifiutato' };
+        return `
+          <div class="adm-filters">
+            <div class="adm-seg" role="group" aria-label="Filtra i commenti">${filters.map(([k, l]) => `<button type="button" class="adm-seg__b${S.cfilter === k ? ' on' : ''}" data-cf="${k}" aria-pressed="${S.cfilter === k}">${l} · ${count(k)}</button>`).join('')}</div>
+            <p class="adm-hint" style="align-self:center">Sul sito compaiono solo i commenti approvati. L'email non è mai pubblica.</p>
+          </div>
+          ${rows.length ? `<div class="adm-comments">${rows.map((c: Any) => { const a = art(c.article_id); const parent = c.parent_id ? byId(c.parent_id) : null; return `
+            <article class="adm-card adm-cm" data-cm="${c.id}">
+              <div class="adm-cm__top">
+                <span class="adm-cm__av" aria-hidden="true">${esc((c.author_name || '?').trim()[0]?.toUpperCase())}</span>
+                <div class="adm-grow"><b>${esc(c.author_name)}</b> <a class="adm-t-sub" href="mailto:${esc(c.author_email)}">${esc(c.author_email)}</a>
+                  <div class="adm-t-sub">${fmtDateTime(c.created_at)} · su ${a ? `<a href="${sitePath('/journal/' + a.slug)}#commenti" target="_blank" rel="noopener">${esc(a.title)}</a>` : 'articolo eliminato'}${parent ? ` · in risposta a <b>${esc(parent.author_name)}</b>` : ''}</div></div>
+                <span class="adm-pill ${c.status === 'approved' ? 'published' : c.status === 'pending' ? 'scheduled' : 'archived'}">${label[c.status] || c.status}</span>
+              </div>
+              <p class="adm-cm__body">${esc(c.body)}</p>
+              <div class="adm-cm__acts">
+                ${c.status !== 'approved' ? `<button type="button" class="adm-mini ok" data-cact="approved">Approva</button>` : ''}
+                ${c.status !== 'rejected' ? `<button type="button" class="adm-mini" data-cact="rejected">Rifiuta</button>` : ''}
+                ${c.status === 'approved' ? `<button type="button" class="adm-mini" data-creply>Rispondi come redazione</button>` : ''}
+                <span class="adm-spacer"></span>
+                <button type="button" class="adm-mini danger" data-cact="delete">Elimina</button>
+              </div>
+              <form class="adm-cm__reply" hidden>
+                <div class="adm-field"><label for="r-${c.id}">Risposta della redazione (pubblicata subito)</label><textarea id="r-${c.id}" rows="3" maxlength="3000" required></textarea></div>
+                <div class="adm-cm__acts"><button class="button button--ink button--sm" type="submit">Pubblica risposta</button><button class="adm-mini" type="button" data-rcancel>Annulla</button></div>
+              </form>
+            </article>`; }).join('')}</div>`
+          : `<div class="adm-card adm-empty"><h2 class="adm-h2">${S.cfilter === 'pending' ? 'Nessun commento da approvare' : 'Nessun commento qui'}</h2><p class="muted">I nuovi commenti dei lettori arrivano qui in attesa di approvazione.</p></div>`}`;
+      }
+      function bindComments() {
+        root.querySelectorAll<HTMLElement>('[data-cf]').forEach((b) => b.onclick = () => { S.cfilter = b.dataset.cf; renderList(); });
+        root.querySelectorAll<HTMLElement>('[data-cm]').forEach((card) => {
+          const id = card.dataset.cm!;
+          card.querySelectorAll<HTMLButtonElement>('[data-cact]').forEach((b) => b.onclick = async () => {
+            const act = b.dataset.cact!;
+            if (act === 'delete') {
+              if (!confirm('Eliminare definitivamente questo commento (e le eventuali risposte)?')) return;
+              const { error } = await sb.from('journal_comments').delete().eq('id', id);
+              if (error) return toast(errMsg(error), 'err');
+              toast('Commento eliminato', 'ok');
+            } else {
+              const { error } = await sb.from('journal_comments').update({ status: act, moderated_at: new Date().toISOString() }).eq('id', id);
+              if (error) return toast(errMsg(error), 'err');
+              toast(act === 'approved' ? 'Commento approvato: è visibile sul sito' : 'Commento rifiutato', 'ok');
+            }
+            await loadAll(); renderList();
+          });
+          const form = card.querySelector<HTMLFormElement>('.adm-cm__reply')!;
+          const open = card.querySelector<HTMLButtonElement>('[data-creply]');
+          if (open) open.onclick = () => { form.hidden = false; form.querySelector('textarea')!.focus(); };
+          card.querySelector<HTMLButtonElement>('[data-rcancel]')!.onclick = () => { form.hidden = true; };
+          form.onsubmit = async (e) => {
+            e.preventDefault();
+            const body = form.querySelector('textarea')!.value.trim(); if (body.length < 3) return toast('La risposta è troppo corta', 'err');
+            const c = S.comments.find((x: Any) => x.id === id);
+            const ins = await sb.from('journal_comments').insert({ article_id: c.article_id, parent_id: id, author_name: 'Redazione Flowline', author_email: S.user.email || 'info@flowline.it', body }).select('id').single();
+            if (ins.error) return toast(errMsg(ins.error), 'err');
+            const up = await sb.from('journal_comments').update({ status: 'approved', moderated_at: new Date().toISOString() }).eq('id', ins.data.id);
+            if (up.error) return toast(errMsg(up.error), 'err');
+            toast('Risposta pubblicata', 'ok'); await loadAll(); renderList();
+          };
+        });
+      }
+
+      /* ---------------- newsletter ---------------- */
+      function newsletterHtml() {
+        const q = S.nq.toLowerCase();
+        const rows = S.subscribers.filter((x: Any) => !q || x.email.toLowerCase().includes(q));
+        const active = S.subscribers.filter((x: Any) => !x.unsubscribed_at).length;
+        return `
+          <div class="adm-filters">
+            <div class="adm-search">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'}<input id="nq" type="search" placeholder="Cerca un indirizzo…" value="${esc(S.nq)}" aria-label="Cerca iscritti" /></div>
+            <button class="button button--ghost button--sm" type="button" id="csv" ${active ? '' : 'disabled'}>Esporta CSV (${active} attivi)</button>
+          </div>
+          ${rows.length ? `<div class="adm-card adm-tablewrap"><table class="adm-table">
+            <thead><tr><th>Email</th><th>Da dove</th><th>Iscritto il</th><th>Stato</th><th><span class="sr-only">Azioni</span></th></tr></thead>
+            <tbody>${rows.map((x: Any) => `<tr data-sub="${x.id}">
+              <td><a href="mailto:${esc(x.email)}">${esc(x.email)}</a></td>
+              <td class="adm-t-sub">${esc(x.source || '—')}</td>
+              <td class="adm-nums">${fmtDateTime(x.created_at)}</td>
+              <td>${x.unsubscribed_at ? `<span class="adm-pill archived">Disiscritto</span>` : `<span class="adm-pill published">Attivo</span>`}</td>
+              <td class="adm-t-act">
+                <button type="button" class="adm-mini" data-sact="${x.unsubscribed_at ? 'on' : 'off'}">${x.unsubscribed_at ? 'Riattiva' : 'Disiscrivi'}</button>
+                <button type="button" class="adm-mini danger" data-sact="del">Elimina</button>
+              </td></tr>`).join('')}</tbody></table></div>`
+          : `<div class="adm-card adm-empty"><h2 class="adm-h2">${S.subscribers.length ? 'Nessun indirizzo trovato' : 'Ancora nessun iscritto'}</h2><p class="muted">Le iscrizioni arrivano dal modulo in fondo alle pagine del Journal, sempre con il consenso spuntato.</p></div>`}`;
+      }
+      function bindNewsletter() {
+        const q = document.getElementById('nq') as HTMLInputElement;
+        q.oninput = () => { S.nq = q.value; const pos = q.selectionStart; renderList(); const n = document.getElementById('nq') as HTMLInputElement; n.focus(); n.setSelectionRange(pos, pos); };
+        const csv = document.getElementById('csv') as HTMLButtonElement;
+        csv.onclick = () => {
+          const rows = S.subscribers.filter((x: Any) => !x.unsubscribed_at);
+          const cell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+          const text = ['email,fonte,iscritto_il', ...rows.map((x: Any) => [x.email, x.source, x.created_at].map(cell).join(','))].join('\r\n');
+          const url = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }));
+          const link = Object.assign(document.createElement('a'), { href: url, download: `newsletter-journal-${new Date().toISOString().slice(0, 10)}.csv` });
+          link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+        };
+        root.querySelectorAll<HTMLElement>('[data-sub]').forEach((tr) => {
+          const id = tr.dataset.sub!;
+          tr.querySelectorAll<HTMLButtonElement>('[data-sact]').forEach((b) => b.onclick = async () => {
+            const act = b.dataset.sact;
+            if (act === 'del' && !confirm('Eliminare questo indirizzo? Usalo per le richieste di cancellazione dei dati.')) return;
+            const { error } = act === 'del'
+              ? await sb.from('journal_newsletter').delete().eq('id', id)
+              : await sb.from('journal_newsletter').update({ unsubscribed_at: act === 'off' ? new Date().toISOString() : null }).eq('id', id);
+            if (error) return toast(errMsg(error), 'err');
+            toast(act === 'del' ? 'Indirizzo eliminato' : act === 'off' ? 'Disiscritto' : 'Riattivato', 'ok'); await loadAll(); renderList();
+          });
         });
       }
 
@@ -619,6 +750,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       .adm-tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; overflow-x: auto; }
       .adm-tab { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 0.95rem; font-weight: 600; font-size: 0.95rem; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 150ms ease; }
       .adm-tab:hover { color: var(--ink); }
+      .adm-comments { display: grid; gap: 0.75rem; }
+      .adm-cm { padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+      .adm-cm__top { display: flex; align-items: flex-start; gap: 0.75rem; }
+      .adm-cm__top a { color: inherit; }
+      .adm-cm__av { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font-weight: 700; flex: none; }
+      .adm-cm__body { white-space: pre-line; line-height: 1.6; overflow-wrap: anywhere; padding: 0.8rem 1rem; border-radius: 12px; background: var(--surface-2); }
+      .adm-cm__acts { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+      .adm-cm__reply { display: flex; flex-direction: column; gap: 0.6rem; }
+      .adm-mini.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
       .adm-tab.on { color: var(--ink); border-bottom-color: var(--accent); }
       .adm-tab__n { font-size: 0.75rem; min-width: 1.4rem; height: 1.4rem; padding: 0 0.4rem; border-radius: 999px; background: var(--surface-2); display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
       .adm-tab.on .adm-tab__n { background: var(--accent-soft); color: var(--accent-text); }

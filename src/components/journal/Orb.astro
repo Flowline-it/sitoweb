@@ -1,0 +1,12 @@
+---
+// Sfera di vetro arancio: solo decorazione, segue appena il mouse.
+interface Props { class?: string; follow?: boolean }
+const { class: cls = '', follow = false } = Astro.props;
+---
+<div class:list={['orb', cls]} aria-hidden="true" data-orb={follow ? '' : undefined}>
+  <div class="orb__float">
+    <div class="orb__sphere"><div class="orb__swirl"></div><div class="orb__swirl2"></div><div class="orb__core"></div></div>
+    <div class="orb__ring"></div>
+  </div>
+  <div class="orb__shadow"></div>
+</div>

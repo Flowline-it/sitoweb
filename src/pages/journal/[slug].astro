@@ -1,29 +1,54 @@
 ---
-import { p, isHome } from '../../lib/paths.js';
+import { p } from '../../lib/paths.js';
 import Base from '../../layouts/Base.astro';
-import { getArticles, fmtDate } from '../../lib/journal.js';
+import { getArticles, fmtDate, fmtShort } from '../../lib/journal.js';
 import { SITE, CTA } from '../../data/site.js';
+import JournalBar from '../../components/journal/JournalBar.astro';
+import Card from '../../components/journal/Card.astro';
+import Carousel from '../../components/journal/Carousel.astro';
+import Newsletter from '../../components/journal/Newsletter.astro';
+import { I } from '../../components/journal/icons.js';
+import '../../styles/journal.css';
 
 export async function getStaticPaths() {
   const articles = await getArticles();
-  return articles.map((a) => ({ params: { slug: a.slug }, props: { article: a, related: articles.filter((b) => b.id !== a.id && b.category_id === a.category_id).slice(0, 2) } }));
+  return articles.map((a, i) => {
+    const sameCat = articles.filter((b) => b.id !== a.id && b.category_id === a.category_id);
+    const rest = articles.filter((b) => b.id !== a.id && b.category_id !== a.category_id);
+    return {
+      params: { slug: a.slug },
+      props: { article: a, all: articles, related: [...sameCat, ...rest].slice(0, 4), newer: articles[i - 1] || null, older: articles[i + 1] || null },
+    };
+  });
 }
-const { article: a, related } = Astro.props;
+const { article: a, all, related, newer, older } = Astro.props;
 const path = `/journal/${a.slug}`;
+const url = `${SITE.url}${path}`;
 const blocks = Array.isArray(a.content) ? a.content : [];
 const ytId = (u = '') => (u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/) || [])[1];
+const author = a.author?.name || 'Redazione Flowline';
+const initials = author.split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const more = all.filter((b) => b.id !== a.id);
+const share = {
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+  x: `https://x.com/intent/post?url=${encodeURIComponent(url)}&text=${encodeURIComponent(a.title)}`,
+  whatsapp: `https://wa.me/?text=${encodeURIComponent(`${a.title} ${url}`)}`,
+};
 const jsonld = [
   {
     '@type': 'BlogPosting', headline: a.title, description: a.meta_description || a.subtitle || '', image: a.cover_image || undefined,
     datePublished: a.published_at, dateModified: a.updated_at || a.published_at, inLanguage: 'it-IT',
     author: { '@type': a.author ? 'Person' : 'Organization', name: a.author?.name || 'Flowline' },
-    publisher: { '@id': `${SITE.url}/#organization` }, mainEntityOfPage: `${SITE.url}${path}`,
+    publisher: { '@id': `${SITE.url}/#organization` }, mainEntityOfPage: url,
+    articleSection: a.category?.name || undefined,
     keywords: (a.tags || []).map((t) => t.name).join(', ') || undefined,
   },
   { '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
     { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal` },
-    { '@type': 'ListItem', position: 3, name: a.title, item: `${SITE.url}${path}` },
+    ...(a.category ? [{ '@type': 'ListItem', position: 3, name: a.category.name, item: `${SITE.url}/journal/categoria/${a.category.slug}` }] : []),
+    { '@type': 'ListItem', position: a.category ? 4 : 3, name: a.title, item: url },
   ] },
 ];
 ---
@@ -35,69 +60,140 @@ const jsonld = [
   ogImage={a.cover_image || '/og.png'}
   jsonld={jsonld}
 >
-  <article class="section post">
-    <header class="wrap post__head">
-      <p class="small"><a class="link" href={p('/journal')}>Journal</a> · {a.category?.name}</p>
-      <h1 class="head" data-rise>{a.title}</h1>
-      {a.subtitle && <p class="lead" data-rise style="--i:1">{a.subtitle}</p>}
-      <p class="small muted" data-rise style="--i:2">{a.author?.name && <>{a.author.name} · </>}<time datetime={a.published_at}>{fmtDate(a.published_at)}</time> · {a.reading_time || 1} min di lettura</p>
-    </header>
-    {a.cover_image && (
-      <figure class="wrap post__cover"><img src={a.cover_image} alt={a.cover_alt || ''} width="1200" height="630" onerror="this.parentElement.remove()" /></figure>
-    )}
-    <div class="wrap">
-      <div class="post__body">
-        {blocks.map((b) => {
-          switch (b.type) {
-            case 'heading': return b.level === 3 ? <h3 class="name">{b.text}</h3> : <h2 class="name post__h2">{b.text}</h2>;
-            case 'paragraph': return <p>{b.text}</p>;
-            case 'list': return b.ordered ? <ol>{(b.items || []).map((it) => <li>{it}</li>)}</ol> : <ul class="dash">{(b.items || []).map((it) => <li>{it}</li>)}</ul>;
-            case 'quote': return <blockquote><p class="lead">{b.text}</p>{b.author && <footer class="small muted">{b.author}</footer>}</blockquote>;
-            case 'image': return <figure class="photo"><img src={b.url} alt={b.alt || ''} loading="lazy" />{b.caption && <figcaption>{b.caption}</figcaption>}</figure>;
-            case 'gallery': return <div class="post__gallery">{(b.images || []).map((im) => <figure class="photo"><img src={im.url} alt={im.alt || ''} loading="lazy" />{im.caption && <figcaption>{im.caption}</figcaption>}</figure>)}</div>;
-            case 'table': return <div class="post__table"><table><thead><tr>{(b.headers || []).map((h) => <th scope="col">{h}</th>)}</tr></thead><tbody>{(b.rows || []).map((r) => <tr>{r.map((c) => <td>{c}</td>)}</tr>)}</tbody></table></div>;
-            case 'video': return ytId(b.url) ? <figure class="post__video"><iframe src={`https://www.youtube-nocookie.com/embed/${ytId(b.url)}`} title={b.caption || 'Video'} loading="lazy" allowfullscreen></iframe>{b.caption && <figcaption class="small muted">{b.caption}</figcaption>}</figure> : <p><a class="link" href={b.url}>{b.caption || 'Guarda il video'}</a></p>;
-            case 'cta': return <p class="post__cta"><span>{b.text}</span><a class="button" href={b.href || '/#contatti'}>{b.buttonLabel || 'Scopri di più'}</a></p>;
-            default: return null;
-          }
-        })}
-        {a.tags?.length > 0 && <p class="small muted post__tags">Tag: {a.tags.map((t) => t.name).join(', ')}</p>}
-      </div>
-    </div>
-  </article>
+  <div class="jr">
+    <JournalBar articles={all} active={a.category ? `c:${a.category.slug}` : 'all'} />
 
-  <section class="section white post__more">
-    <div class="wrap">
-      <h2 class="head">Ti è piaciuto questo articolo?</h2>
-      <p class="lead">Parliamo di come applicare queste idee alla tua azienda.</p>
-      <p><a class="button" href={p('/#contatti')}>{CTA}</a></p>
-      {related.length > 0 && (
-        <div class="post__related">
-          <h3 class="name">Articoli correlati</h3>
-          <ul class="dash">{related.map((r) => <li><a class="link" href={p(`/journal/${r.slug}`)}>{r.title}</a></li>)}</ul>
+    <div class="jread" data-readbar>
+      <div class="wrap jread__in">
+        <a class="jread__back" href={p('/journal')}><Fragment set:html={I.left} /><span>Journal</span></a>
+        <p class="jread__title">{a.title}</p>
+        <div class="jart__acts">
+          <button class="jact jlike" type="button" data-like={a.id} aria-pressed="false" aria-label="Mi piace"><Fragment set:html={I.heart} /><span data-n>0</span></button>
+          <a class="jact" href="#commenti" aria-label="Vai ai commenti"><Fragment set:html={I.chat} /><span data-ccount>0</span></a>
         </div>
-      )}
+      </div>
+      <span class="jread__bar" aria-hidden="true"></span>
     </div>
-  </section>
+
+    <div class="wrap jart jart-hero">
+      <article class="jart__main">
+        <header class="jart__head">
+          <nav class="jcrumb" aria-label="Percorso">
+            <a href={p('/journal')}>Journal</a>
+            {a.category && <><span aria-hidden="true">/</span><a href={p(`/journal/categoria/${a.category.slug}`)}>{a.category.name}</a></>}
+          </nav>
+          <p class="jmeta" data-rise><span class="jcat">{a.category?.name}</span><time datetime={a.published_at}>{fmtDate(a.published_at)}</time><span>{a.reading_time || 1} min di lettura</span></p>
+          <h1 data-split>{a.title}</h1>
+          {a.subtitle && <p class="jart__sub" data-rise style="--i:3">{a.subtitle}</p>}
+          <div class="jart__bar" data-rise style="--i:4">
+            <div class="jauthor"><i aria-hidden="true">{initials}</i><div><b>{author}</b><span>Aggiornato il {fmtShort(a.updated_at || a.published_at)}</span></div></div>
+            <div class="jart__acts">
+              <button class="jact jlike" type="button" data-like={a.id} aria-pressed="false" aria-label="Mi piace"><Fragment set:html={I.heart} /><span data-n>0</span></button>
+              <a class="jact" href="#commenti" aria-label="Commenti"><Fragment set:html={I.chat} /><span data-ccount>0</span></a>
+              <span aria-hidden="true" style="width:1px;height:1.4rem;background:var(--border);margin-inline:.25rem"></span>
+              <a class="jact jact--icon" href={share.linkedin} target="_blank" rel="noopener" aria-label="Condividi su LinkedIn"><Fragment set:html={I.linkedin} /></a>
+              <a class="jact jact--icon" href={share.facebook} target="_blank" rel="noopener" aria-label="Condividi su Facebook"><Fragment set:html={I.facebook} /></a>
+              <a class="jact jact--icon" href={share.whatsapp} target="_blank" rel="noopener" aria-label="Condividi su WhatsApp"><Fragment set:html={I.whatsapp} /></a>
+              <button class="jact jact--icon" type="button" data-copy aria-label="Copia il link"><Fragment set:html={I.link} /></button>
+            </div>
+          </div>
+        </header>
+
+        {a.cover_image && (
+          <figure class="jart__cover" data-zoom><img src={a.cover_image} alt={a.cover_alt || ''} width="1200" height="630" fetchpriority="high" onerror="this.parentElement.remove()" /></figure>
+        )}
+
+        <div class="jbody">
+          {blocks.map((b) => {
+            switch (b.type) {
+              case 'heading': return b.level === 3 ? <h3>{b.text}</h3> : <h2>{b.text}</h2>;
+              case 'paragraph': return <p>{b.text}</p>;
+              case 'list': return b.ordered ? <ol>{(b.items || []).map((it) => <li>{it}</li>)}</ol> : <ul class="dash">{(b.items || []).map((it) => <li>{it}</li>)}</ul>;
+              case 'quote': return <blockquote><p>{b.text}</p>{b.author && <footer>{b.author}</footer>}</blockquote>;
+              case 'image': return <figure><img src={b.url} alt={b.alt || ''} loading="lazy" />{b.caption && <figcaption>{b.caption}</figcaption>}</figure>;
+              case 'gallery': return <div class="jgal">{(b.images || []).map((im) => <figure><img src={im.url} alt={im.alt || ''} loading="lazy" />{im.caption && <figcaption>{im.caption}</figcaption>}</figure>)}</div>;
+              case 'table': return <div class="jtable"><table><thead><tr>{(b.headers || []).map((h) => <th scope="col">{h}</th>)}</tr></thead><tbody>{(b.rows || []).map((r) => <tr>{r.map((c) => <td>{c}</td>)}</tr>)}</tbody></table></div>;
+              case 'video': return ytId(b.url) ? <figure><iframe src={`https://www.youtube-nocookie.com/embed/${ytId(b.url)}`} title={b.caption || 'Video'} loading="lazy" allowfullscreen></iframe>{b.caption && <figcaption>{b.caption}</figcaption>}</figure> : <p><a href={b.url}>{b.caption || 'Guarda il video'}</a></p>;
+              case 'cta': return <p class="jcta"><span>{b.text}</span><a class="button" href={b.href || p('/#contatti')}>{b.buttonLabel || 'Scopri di più'}</a></p>;
+              default: return null;
+            }
+          })}
+        </div>
+
+        <div class="jart__end">
+          {a.tags?.length > 0 && <div class="jchips" aria-label="Temi">{a.tags.map((t) => <a class="jchip" href={p(`/journal/tag/${t.slug}`)}>#{t.name}</a>)}</div>}
+          <div class="jart__like">
+            <p>Ti è stato utile questo articolo?</p>
+            <div class="jart__acts">
+              <button class="jact jlike" type="button" data-like={a.id} aria-pressed="false" aria-label="Mi piace"><Fragment set:html={I.heart} /><span data-n>0</span></button>
+              <a class="jact jact--icon" href={share.linkedin} target="_blank" rel="noopener" aria-label="Condividi su LinkedIn"><Fragment set:html={I.linkedin} /></a>
+              <button class="jact jact--icon" type="button" data-copy aria-label="Copia il link"><Fragment set:html={I.link} /></button>
+            </div>
+          </div>
+        </div>
+
+        {(older || newer) && (
+          <nav class="jpn" aria-label="Altri articoli">
+            {older && <a href={p(`/journal/${older.slug}`)}><small><Fragment set:html={I.left} /> Precedente</small><b>{older.title}</b></a>}
+            {newer && <a class="is-next" href={p(`/journal/${newer.slug}`)}><small>Successivo <Fragment set:html={I.arrow} /></small><b>{newer.title}</b></a>}
+          </nav>
+        )}
+
+        <section class="jcomments" id="commenti" data-thread={a.id} aria-labelledby="comm-title">
+          <h2 id="comm-title">Commenti <span>(<span data-ccount>0</span>)</span></h2>
+          <div class="jclist"><p class="jcempty">Caricamento dei commenti…</p></div>
+          <div>
+            <form class="jcform" novalidate>
+              <div class="jcform__to" hidden><span></span><button type="button">Annulla</button></div>
+              <h3>Lascia un commento</h3>
+              <div class="jcform__two">
+                <label class="jfield">Nome<input name="name" autocomplete="name" maxlength="60" required /></label>
+                <label class="jfield"><span>Email <small>(non viene pubblicata)</small></span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="200" required /></label>
+              </div>
+              <label class="jfield">Commento<textarea name="body" maxlength="3000" required></textarea></label>
+              <div class="jhoney" aria-hidden="true"><label>Lascia vuoto <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+              <label class="jcheck"><input type="checkbox" name="consent" required /><span>Acconsento al trattamento di nome ed email per pubblicare il commento, come descritto nella <a class="link" href={p('/privacy-policy')}>privacy policy</a>. I commenti vengono letti dalla redazione prima di comparire.</span></label>
+              <button class="button button--ink" type="submit">Invia commento</button>
+              <p class="jmsg" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </section>
+      </article>
+
+      <aside class="jart__aside" aria-label="Approfondimenti">
+        {related.length > 0 && (
+          <div class="jside__box">
+            <div class="jhead"><h2 class="jlabel">Consigliati</h2></div>
+            {related.map((r) => <Card a={r} variant="row" />)}
+          </div>
+        )}
+        {a.tags?.length > 0 && (
+          <div class="jside__box">
+            <div class="jhead"><h2 class="jlabel">Temi dell'articolo</h2></div>
+            <div class="jchips">{a.tags.map((t) => <a class="jchip" href={p(`/journal/tag/${t.slug}`)}>{t.name}</a>)}</div>
+          </div>
+        )}
+      </aside>
+    </div>
+
+    <section class="wrap jsec">
+      <div class="jcta-band" data-reveal>
+        <div><h2>Vuoi applicare queste idee alla tua azienda?</h2><p>Mezz'ora per capire cosa si può automatizzare, senza impegno.</p></div>
+        <a class="button" href={p('/#contatti')}>{CTA} <Fragment set:html={I.arrow} /></a>
+      </div>
+    </section>
+
+    {more.length > 0 && (
+      <section class="wrap jsec" aria-labelledby="more-title">
+        <div class="jhead"><h2 class="jlabel" id="more-title">Potrebbe interessarti</h2><a class="jmore" href={p('/journal')}>Tutto il Journal <Fragment set:html={I.arrow} /></a></div>
+        <Carousel label="Altri articoli">{more.map((m, i) => <Card a={m} i={i % 4} />)}</Carousel>
+      </section>
+    )}
+
+    <Newsletter source="journal-articolo" />
+  </div>
 </Base>
 
-<style>
-  .post { padding-top: clamp(2rem, 6vw, 5rem); }
-  .post__head { display: flex; flex-direction: column; gap: 1.25rem; max-width: 62rem; margin-inline: 0; }
-  .post__head .lead { font-weight: 400; max-width: 40ch; }
-  .post__cover { margin-top: clamp(2.5rem, 5vw, 4rem); }
-  .post__cover img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
-  .post__body { max-width: 42rem; margin-top: clamp(2.5rem, 5vw, 4rem); display: flex; flex-direction: column; gap: 1.25rem; font-size: 1.1875rem; line-height: 1.65; }
-  .post__body p + p { margin-top: 0; }
-  .post__h2 { margin-top: 1.5rem; }
-  .post__body ol { padding-left: 1.25em; }
-  .post__body blockquote { margin: 1rem 0; padding-left: 1.25rem; border-left: 6px solid var(--orange); }
-  .post__gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .post__table { overflow-x: auto; }
-  .post__table table { border-collapse: collapse; width: 100%; font-size: 1rem; }
-  .post__table th, .post__table td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid #cbc9c2; }
-  .post__video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; }
-  .post__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; padding: 1.5rem; background: var(--surface); }
-  .post__more .wrap { display: flex; flex-direction: column; gap: 1.25rem; }
-  .post__related { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 1rem; }
-</style>
+<script>
+  import '../../scripts/journal.ts';
+</script>

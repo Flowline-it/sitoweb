@@ -1,0 +1,89 @@
+---
+// Pagina di un argomento (categoria o tema): titolo che si decifra, filtri, ricerca, elenco e consigliati.
+import { p } from '../../lib/paths.js';
+import Base from '../../layouts/Base.astro';
+import { taxonomy } from '../../lib/journal.js';
+import { SITE } from '../../data/site.js';
+import JournalBar from './JournalBar.astro';
+import Card from './Card.astro';
+import Newsletter from './Newsletter.astro';
+import { I } from './icons.js';
+import '../../styles/journal.css';
+
+interface Props { all: any[]; list: any[]; name: string; kind: 'categoria' | 'tag'; slug: string; intro?: string }
+const { all, list, name, kind, slug, intro } = Astro.props;
+const path = `/journal/${kind}/${slug}`;
+const top = list.length >= 3 ? list.slice(0, 3) : [];
+const others = all.filter((a) => !list.includes(a)).slice(0, 4);
+const { tags, categories } = taxonomy(all);
+const label = kind === 'categoria' ? 'Categoria' : 'Tema';
+const description = intro || `${label} ${name}: ${list.length} ${list.length === 1 ? 'articolo' : 'articoli'} del Flowline Journal su automazione e intelligenza artificiale per le aziende.`;
+const jsonld = [
+  { '@type': 'CollectionPage', name: `${name} | Flowline Journal`, url: `${SITE.url}${path}`, inLanguage: 'it-IT', isPartOf: { '@id': `${SITE.url}/#website` } },
+  { '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal` },
+    { '@type': 'ListItem', position: 3, name, item: `${SITE.url}${path}` },
+  ] },
+];
+---
+<Base title={`${name} | Flowline Journal`} description={description} path={path} jsonld={jsonld} noindex={kind === 'tag' && list.length < 2}>
+  <div class="jr">
+    <JournalBar articles={all} active={kind === 'categoria' ? `c:${slug}` : `t:${slug}`} />
+
+    <div class="wrap jcat-page">
+      <div>
+        <header class="jcat-head">
+          <nav class="jcrumb" aria-label="Percorso"><a href={p('/journal')}>Journal</a><span aria-hidden="true">/</span><span>{label}</span></nav>
+          <h1 class="jscramble" data-scramble>{kind === 'tag' ? `#${name}` : name}</h1>
+          <p class="jart__sub" style="font-size:1rem">{list.length} {list.length === 1 ? 'articolo' : 'articoli'}{intro ? ` · ${intro}` : ''}</p>
+          <div class="jcat-tools">
+            <div class="jfilters" data-filters role="group" aria-label="Ordina">
+              <button class="jpill" type="button" data-sort="recent" aria-pressed="true">Più recenti</button>
+              <button class="jpill" type="button" data-sort="liked" aria-pressed="false">Più apprezzati</button>
+              <button class="jpill" type="button" data-sort="quick" aria-pressed="false">Lettura veloce</button>
+            </div>
+            <label class="jcat-search"><Fragment set:html={I.search} /><span class="sr-only">Cerca in {name}</span><input type="search" data-cat-search placeholder={`Cerca in ${name}…`} autocomplete="off" /></label>
+          </div>
+        </header>
+
+        {top.length === 3 && (
+          <div class="jcat-feat">
+            <Card a={top[0]} variant="over" tag="h2" eager />
+            <div class="jcat-feat__side">{top.slice(1).map((a, i) => <Card a={a} i={i + 1} tags={1} />)}</div>
+          </div>
+        )}
+
+        <div class="jposts" data-postlist>
+          {list.map((a, i) => <Card a={a} variant="post" img={top.length !== 3} i={i % 3} tag="h2" />)}
+        </div>
+        <p class="jempty" data-postempty hidden>Nessun articolo corrisponde alla ricerca.</p>
+      </div>
+
+      <aside class="jside" aria-label="Altro dal Journal">
+        {others.length > 0 && (
+          <div class="jside__box">
+            <div class="jhead"><h2 class="jlabel">Consigliati</h2></div>
+            {others.map((a) => <Card a={a} variant="row" />)}
+          </div>
+        )}
+        <div class="jside__box">
+          <div class="jhead"><h2 class="jlabel">Categorie</h2></div>
+          <div class="jchips">{categories.map((c) => <a class:list={['jchip', kind === 'categoria' && c.slug === slug && 'is-active']} href={p(`/journal/categoria/${c.slug}`)}>{c.name} · {c.count}</a>)}</div>
+        </div>
+        {tags.length > 0 && (
+          <div class="jside__box">
+            <div class="jhead"><h2 class="jlabel">Temi</h2></div>
+            <div class="jchips">{tags.slice(0, 18).map((t) => <a class:list={['jchip', kind === 'tag' && t.slug === slug && 'is-active']} href={p(`/journal/tag/${t.slug}`)}>{t.name}</a>)}</div>
+          </div>
+        )}
+      </aside>
+    </div>
+
+    <Newsletter source={`journal-${kind}`} />
+  </div>
+</Base>
+
+<script>
+  import '../../scripts/journal.ts';
+</script>

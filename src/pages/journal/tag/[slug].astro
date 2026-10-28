@@ -1,0 +1,14 @@
+---
+import Listing from '../../../components/journal/Listing.astro';
+import { getArticles, taxonomy } from '../../../lib/journal.js';
+
+export async function getStaticPaths() {
+  const all = await getArticles();
+  return taxonomy(all).tags.map((t) => ({
+    params: { slug: t.slug },
+    props: { all, list: all.filter((a) => (a.tags || []).some((x) => x.slug === t.slug)), name: t.name },
+  }));
+}
+const { all, list, name } = Astro.props;
+---
+<Listing all={all} list={list} name={name} kind="tag" slug={Astro.params.slug} />

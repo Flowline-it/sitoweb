@@ -1,0 +1,12 @@
+---
+import { I } from './icons.js';
+interface Props { label: string }
+const { label } = Astro.props;
+---
+<div class="jcar" data-carousel>
+  <div class="jcar__track" role="region" aria-label={label} tabindex="0"><slot /></div>
+  <div class="jcar__nav" hidden>
+    <button class="jcar__btn" type="button" data-dir="-1" aria-label="Indietro"><Fragment set:html={I.left} /></button>
+    <button class="jcar__btn jcar__btn--ink" type="button" data-dir="1" aria-label="Avanti"><Fragment set:html={I.arrow} /></button>
+  </div>
+</div>

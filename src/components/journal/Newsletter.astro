@@ -1,0 +1,26 @@
+---
+import { p } from '../../lib/paths.js';
+import Orb from './Orb.astro';
+interface Props { source?: string }
+const { source = 'journal' } = Astro.props;
+---
+<section class="wrap jsec" aria-labelledby="nl-title">
+  <div class="jnews" data-reveal>
+    <Orb />
+    <div>
+      <p class="jlabel">Newsletter</p>
+      <h2 id="nl-title">Le novità su AI e automazione, senza rumore</h2>
+      <p class="lead">Una mail quando pubblichiamo qualcosa che vale la pena leggere: casi reali, strumenti nuovi, normative che toccano le aziende.</p>
+    </div>
+    <form class="jform" data-newsletter data-source={source} novalidate>
+      <div class="jform__row">
+        <label class="sr-only" for={`nl-email-${source}`}>La tua email</label>
+        <input id={`nl-email-${source}`} name="email" type="email" inputmode="email" autocomplete="email" placeholder="La tua email di lavoro" required maxlength="200" />
+        <button class="button button--ink" type="submit">Iscriviti</button>
+      </div>
+      <div class="jhoney" aria-hidden="true"><label>Lascia vuoto <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+      <label class="jcheck"><input type="checkbox" name="consent" required /><span>Acconsento a ricevere la newsletter di Flowline. Posso cancellarmi quando voglio. Leggi la <a class="link" href={p('/privacy-policy')}>privacy policy</a>.</span></label>
+      <p class="jmsg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
