@@ -1,0 +1,152 @@
+---
+import Base from '../layouts/Base.astro';
+import { p } from '../lib/paths.js';
+import { CTA, METHOD, WHY, FAQ, SERVICES, SITE } from '../data/site.js';
+
+// Pagina "Metodo": approfondisce la sezione della home. Tutti i testi vengono da site.js.
+const META = {
+  title: 'Il nostro metodo per automatizzare i processi | Flowline',
+  description:
+    "Analisi, progettazione, implementazione e monitoraggio: come automatizziamo i processi aziendali con l'AI, con una demo prima di firmare e un preventivo chiaro.",
+};
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+// domande della home che riguardano il modo di lavorare: tempi, costi, processi che cambiano
+const faqs = [FAQ.items[0], FAQ.items[1], FAQ.items[3]];
+const url = `${SITE.url}/metodo`;
+const jsonld = [
+  { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: META.title, description: META.description, inLanguage: 'it-IT', isPartOf: { '@id': `${SITE.url}/#website` }, about: { '@id': `${SITE.url}/#organization` }, breadcrumb: { '@id': `${url}#breadcrumb` } },
+  { '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`, itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'Metodo', item: url },
+  ] },
+  { '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
+];
+---
+<Base title={META.title} description={META.description} path="/metodo" jsonld={jsonld}>
+  <section class="page-hero" aria-labelledby="page-title">
+    <span class="glow page-hero__glow" aria-hidden="true"></span>
+    <div class="wrap page-hero__inner">
+      <nav class="crumbs" aria-label="Percorso" data-rise style="--i:0">
+        <a href={p('/')}>Home</a><span aria-hidden="true">/</span><span aria-current="page">Metodo</span>
+      </nav>
+      <h1 id="page-title" class="display" data-rise style="--i:1">Il nostro metodo per automatizzare i processi aziendali</h1>
+      <p class="lead" data-rise style="--i:2">Dall'analisi al monitoraggio, in quattro passi. {SERVICES.text.split('. ')[1]}</p>
+      <div class="page-hero__ctas" data-rise style="--i:3">
+        <a class="button" href={p('/#contatti')}>{CTA} <Fragment set:html={arrow} /></a>
+        <a class="button button--ghost" href={p('/#servizi')}>Scopri i servizi</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- i quattro passi, uno sotto l'altro con il loro risultato -->
+  <section class="section" aria-labelledby="steps-title">
+    <div class="wrap">
+      <header class="section-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span>{METHOD.title}</span>
+        <h2 id="steps-title" class="h2" data-reveal style="--i:1">Quattro passi, ognuno con un risultato concreto</h2>
+      </header>
+      <ol class="timeline" role="list">
+        {METHOD.steps.map((s, i) => (
+          <li class="card tl" data-reveal style={`--i:${i}`}>
+            <span class="tl__num" aria-hidden="true">{i + 1}</span>
+            <div class="tl__body">
+              <p class="tl__when">{s.when}</p>
+              <h3>{s.name}</h3>
+              <p class="muted">{s.text}</p>
+            </div>
+            <p class="tl__out"><small>Cosa ricevi</small>{s.output}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- impegni -->
+  <section class="section" aria-labelledby="why-title">
+    <div class="wrap">
+      <header class="section-head">
+        <span class="eyebrow" data-reveal><span class="dot"></span>Come ci comportiamo</span>
+        <h2 id="why-title" class="h2" data-reveal style="--i:1">{WHY.title}</h2>
+        <p class="lead" data-reveal style="--i:2">{WHY.text}</p>
+      </header>
+      <ul class="promises" role="list">
+        {WHY.items.map((w, i) => (
+          <li class="card" data-reveal style={`--i:${i % 3}`}>
+            <span class="promises__tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5l4 4 8-9"/></svg></span>
+            <h3>{w.name}</h3>
+            <p class="muted">{w.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- domande -->
+  <section class="section" aria-labelledby="faq-title">
+    <div class="wrap qa">
+      <h2 id="faq-title" class="h2" data-reveal>Domande sul metodo</h2>
+      <div class="qa__list">
+        {faqs.map((f, i) => (
+          <div class="qa__item" data-reveal style={`--i:${i}`}>
+            <h3>{f.q}</h3>
+            <p class="muted">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="end-title">
+    <div class="wrap">
+      <div class="end card" data-reveal>
+        <h2 id="end-title" class="h2">{WHY.cta.title}</h2>
+        <p class="lead">{WHY.cta.text}</p>
+        <div class="page-hero__ctas">
+          <a class="button button--ink" href={p('/#contatti')}>{CTA} <Fragment set:html={arrow} /></a>
+          <a class="button button--ghost" href={p('/#servizi')}>Scopri i servizi</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-hero { position: relative; padding-block: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 3vw, 2rem); overflow: hidden; }
+  .page-hero__glow { width: min(64rem, 140vw); height: 34rem; left: 50%; top: -14rem; transform: translateX(-50%); }
+  .page-hero__inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.4rem; }
+  .page-hero h1 { max-width: 18ch; }
+  .page-hero .lead { max-width: 40rem; }
+  .page-hero__ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+  .crumbs { display: flex; gap: 0.5rem; font-size: 0.875rem; color: var(--muted); }
+  .crumbs a { color: inherit; text-decoration: none; }
+  .crumbs [aria-current] { color: var(--ink); font-weight: 500; }
+  @media (hover: hover) and (pointer: fine) { .crumbs a:hover { color: var(--ink); } }
+
+  .timeline { display: grid; gap: 1rem; max-width: 54rem; margin-inline: auto; }
+  .tl { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 15rem); gap: 1.25rem 1.5rem; align-items: start; }
+  .tl__num { width: 2.8rem; height: 2.8rem; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-text); font-family: var(--font-head); font-weight: 600; }
+  .tl:first-child .tl__num { background: var(--accent); color: var(--accent-ink); }
+  .tl__body { display: grid; gap: 0.35rem; }
+  .tl__when { font-size: 0.8rem; font-weight: 600; color: var(--accent-text); }
+  .tl__out { padding: 0.85rem 1rem; border-radius: var(--radius-sm); background: var(--surface-2); font-weight: 600; font-size: 0.95rem; line-height: 1.4; }
+  .tl__out small { display: block; font-size: 0.75rem; font-weight: 500; color: var(--muted); margin-bottom: 0.2rem; }
+  @media (max-width: 760px) { .tl { grid-template-columns: auto minmax(0, 1fr); } .tl__out { grid-column: 2; } }
+
+  .promises { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .promises .card { display: flex; flex-direction: column; gap: 0.6rem; }
+  .promises .muted { font-size: 0.95rem; }
+  .promises__tick { width: 30px; height: 30px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-text); display: grid; place-items: center; margin-bottom: 0.4rem; }
+  .promises__tick svg { width: 15px; height: 15px; }
+  @media (max-width: 960px) { .promises { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .promises { grid-template-columns: 1fr; } }
+
+  .qa { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+  .qa__list { display: grid; gap: 1.75rem; }
+  .qa__item { display: grid; gap: 0.5rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+  .qa__item:last-child { border-bottom: 0; padding-bottom: 0; }
+  .qa__item p { max-width: 60ch; }
+  @media (max-width: 860px) { .qa { grid-template-columns: 1fr; } }
+
+  .end { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.1rem; padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3rem); }
+  .end .lead { max-width: 34rem; }
+</style>
