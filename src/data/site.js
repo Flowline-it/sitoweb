@@ -5,7 +5,7 @@
 // L'ID del sito si trova in Umami → Impostazioni → Siti web → Modifica → "ID sito web" (o nel "Codice di monitoraggio").
 // Finché websiteId è vuoto non viene caricato nulla. Sull'indirizzo di prova non si misura mai.
 export const ANALYTICS = {
-  umamiWebsiteId: '',
+  umamiWebsiteId: 'f0067cca-ea7e-4208-9f24-4dcd3ebc04e8',
   umamiSrc: 'https://cloud.umami.is/script.js',
   domains: 'flowline.it,www.flowline.it',
 };
