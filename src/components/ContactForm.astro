@@ -136,6 +136,8 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
       return !first;
     }
 
+    const track = (n: string, d?: Record<string, string>) => (window as any).flTrack?.(n, d);
+    form.addEventListener('focusin', () => track('form-iniziato'), { once: true });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!validate()) return;
@@ -158,12 +160,14 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
           body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error(String(res.status));
+        track('form-inviato', { fonte: body.come_hai_sentito });
         form.reset();
         form.hidden = true;
         done.hidden = false;
         done.focus();
       } catch (err) {
         console.error(err);
+        track('form-errore');
         status.textContent = "Si è verificato un errore durante l'invio. Riprova più tardi, oppure scrivici a info@flowline.it.";
       } finally {
         btnSubmit.disabled = false;

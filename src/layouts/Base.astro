@@ -5,7 +5,7 @@ import fontHead from '../assets/fonts/inter-tight-latin.woff2?url';
 import fontBody from '../assets/fonts/inter-latin.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE } from '../data/site.js';
+import { SITE, ANALYTICS } from '../data/site.js';
 
 interface Props {
   title: string;
@@ -66,7 +66,8 @@ const graph = { '@context': 'https://schema.org', '@graph': [organization, { '@t
     <link rel="apple-touch-icon" href={p('/apple-touch-icon.png')} />
     <link rel="preload" href={fontHead} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={fontBody} as="font" type="font/woff2" crossorigin />
-    <script is:inline>document.documentElement.classList.add('js')</script>
+    <script is:inline>document.documentElement.classList.add('js');window.flTrack=function(n,d){try{window.umami&&window.umami.track(n,d)}catch(e){}}</script>
+    {!staging && ANALYTICS.umamiWebsiteId && <script is:inline defer src={ANALYTICS.umamiSrc} data-website-id={ANALYTICS.umamiWebsiteId} data-domains={ANALYTICS.domains} />}
     <script type="application/ld+json" set:html={JSON.stringify(graph)} />
     <slot name="head" />
   </head>
@@ -78,6 +79,18 @@ const graph = { '@context': 'https://schema.org', '@graph': [organization, { '@t
     </main>
     <Footer />
     <script>
+      // statistiche: clic sugli inviti alla consulenza, email, telefono e link esterni (nessun dato personale)
+      document.addEventListener('click', (e) => {
+        const a = (e.target as HTMLElement).closest('a');
+        if (!a) return;
+        const href = a.getAttribute('href') || '';
+        const zona = a.closest('.site-header') ? 'header' : a.closest('.site-footer') ? 'footer' : a.closest('section[id]')?.id || a.closest('[class]')?.className.split(' ')[0] || 'pagina';
+        const track = (window as any).flTrack;
+        if (href.includes('#contatti')) track('cta-consulenza', { testo: (a.textContent || '').trim().slice(0, 60), zona });
+        else if (href.startsWith('mailto:')) track('email', { zona });
+        else if (href.startsWith('tel:')) track('telefono', { zona });
+        else if (/^https?:/.test(href) && !href.includes(location.hostname)) track('link-esterno', { sito: new URL(href).hostname.replace(/^www\./, ''), zona });
+      }, { capture: true });
       // reveal una volta sola quando l'elemento entra nello schermo; mai contenuti lasciati nascosti
       const targets = document.querySelectorAll('[data-reveal]');
       if (targets.length) {
