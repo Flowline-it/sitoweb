@@ -13,7 +13,7 @@ const META = {
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 // domande della home che riguardano il modo di lavorare: tempi, costi, processi che cambiano
 const faqs = [FAQ.items[0], FAQ.items[1], FAQ.items[3]];
-const url = `${SITE.url}/metodo`;
+const url = `${SITE.url}/metodo/`;
 const jsonld = [
   { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: META.title, description: META.description, inLanguage: 'it-IT', isPartOf: { '@id': `${SITE.url}/#website` }, about: { '@id': `${SITE.url}/#organization` }, breadcrumb: { '@id': `${url}#breadcrumb` } },
   { '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`, itemListElement: [

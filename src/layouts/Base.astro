@@ -1,5 +1,5 @@
 ---
-import { p, isHome } from '../lib/paths.js';
+import { p, isHome, slash } from '../lib/paths.js';
 import '../styles/global.css';
 import fontHead from '../assets/fonts/inter-tight-latin.woff2?url';
 import fontBody from '../assets/fonts/inter-latin.woff2?url';
@@ -18,7 +18,7 @@ interface Props {
   headerTone?: 'light' | 'dark';
 }
 const { title, description, path, noindex = false, ogType = 'website', ogImage = '/og.png', jsonld = [], headerTone = 'light' } = Astro.props;
-const canonical = new URL(path, SITE.url).href;
+const canonical = new URL(slash(path), SITE.url).href;
 const staging = import.meta.env.PUBLIC_STAGING === '1';
 const image = new URL(ogImage, SITE.url).href;
 

@@ -1,4 +1,4 @@
-name: Pubblica il sito (indirizzo di prova su GitHub Pages)
+name: Pubblica il sito (prova su GitHub Pages, produzione per Hostinger)
 
 on:
   push:
@@ -53,6 +53,48 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+  # Produzione: la stessa build, ma per flowline.it, salvata nel branch "produzione".
+  # Hostinger (hPanel → Avanzate → Git, auto-deployment) pubblica quel branch in public_html.
+  produzione:
+    needs: check
+    if: ${{ always() && (github.event_name != 'schedule' || needs.check.outputs.changed == 'true') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: produzione
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          BASE_PATH: /
+          PUBLIC_STAGING: '0'
+          SITE_URL: https://flowline.it
+      - run: cp deploy/hostinger/.htaccess dist/.htaccess
+      - name: Pubblica la build nel branch "produzione"
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist
+          git init -q -b produzione
+          git config user.name "github-actions[bot]"
+          git config user.email "41898099+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Build di produzione da ${GITHUB_SHA::7}"
+          git remote add origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth 1 origin produzione 2>/dev/null && git diff --quiet FETCH_HEAD HEAD; then
+            echo "Nessuna differenza dalla versione online: Hostinger non viene ripubblicato."
+          else
+            git push -q --force origin HEAD:produzione
+            echo "Branch produzione aggiornato: Hostinger ripubblica da solo."
+          fi
 
   deploy:
     needs: build

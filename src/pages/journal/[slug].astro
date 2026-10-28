@@ -1,5 +1,5 @@
 ---
-import { p } from '../../lib/paths.js';
+import { p, slash } from '../../lib/paths.js';
 import Base from '../../layouts/Base.astro';
 import { getArticles, fmtDate, fmtShort } from '../../lib/journal.js';
 import { SITE, CTA } from '../../data/site.js';
@@ -23,7 +23,7 @@ export async function getStaticPaths() {
 }
 const { article: a, all, related, newer, older } = Astro.props;
 const path = `/journal/${a.slug}`;
-const url = `${SITE.url}${path}`;
+const url = `${SITE.url}${slash(path)}`;
 const blocks = Array.isArray(a.content) ? a.content : [];
 const ytId = (u = '') => (u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/) || [])[1];
 const author = a.author?.name || 'Redazione Flowline';
@@ -46,8 +46,8 @@ const jsonld = [
   },
   { '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
-    { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal` },
-    ...(a.category ? [{ '@type': 'ListItem', position: 3, name: a.category.name, item: `${SITE.url}/journal/categoria/${a.category.slug}` }] : []),
+    { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal/` },
+    ...(a.category ? [{ '@type': 'ListItem', position: 3, name: a.category.name, item: `${SITE.url}/journal/categoria/${a.category.slug}/` }] : []),
     { '@type': 'ListItem', position: a.category ? 4 : 3, name: a.title, item: url },
   ] },
 ];

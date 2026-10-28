@@ -149,7 +149,7 @@ for (const form of $$<HTMLFormElement>('[data-search]')) {
     const words = q.split(/\s+/).filter(Boolean);
     const hits = data.filter((_, i) => words.every((w) => hay[i].includes(w))).slice(0, 6);
     box.innerHTML = hits.length
-      ? hits.map((a) => `<a href="${BASE}/journal/${a.s}" role="option">${a.i ? `<img src="${esc(a.i)}" alt="" loading="lazy">` : '<i></i>'}<span><b>${mark(a.t, input.value.trim().split(/\s+/))}</b><span>${esc(a.c)} · ${new Date(a.d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}</span></span></a>`).join('')
+      ? hits.map((a) => `<a href="${BASE}/journal/${a.s}/" role="option">${a.i ? `<img src="${esc(a.i)}" alt="" loading="lazy">` : '<i></i>'}<span><b>${mark(a.t, input.value.trim().split(/\s+/))}</b><span>${esc(a.c)} · ${new Date(a.d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}</span></span></a>`).join('')
       : `<p>Nessun articolo per “${esc(input.value.trim())}”. Prova con un altro tema.</p>`;
     box.hidden = false;
     input.setAttribute('aria-expanded', 'true');

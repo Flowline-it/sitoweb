@@ -1,6 +1,6 @@
 ---
 // Pagina di un argomento (categoria o tema): titolo che si decifra, filtri, ricerca, elenco e consigliati.
-import { p } from '../../lib/paths.js';
+import { p, slash } from '../../lib/paths.js';
 import Base from '../../layouts/Base.astro';
 import { taxonomy } from '../../lib/journal.js';
 import { SITE } from '../../data/site.js';
@@ -19,10 +19,10 @@ const { tags, categories } = taxonomy(all);
 const label = kind === 'categoria' ? 'Categoria' : 'Tema';
 const description = intro || `${label} ${name}: ${list.length} ${list.length === 1 ? 'articolo' : 'articoli'} del Flowline Journal su automazione e intelligenza artificiale per le aziende.`;
 const jsonld = [
-  { '@type': 'CollectionPage', name: `${name} | Flowline Journal`, url: `${SITE.url}${path}`, inLanguage: 'it-IT', isPartOf: { '@id': `${SITE.url}/#website` } },
+  { '@type': 'CollectionPage', name: `${name} | Flowline Journal`, url: `${SITE.url}${slash(path)}`, inLanguage: 'it-IT', isPartOf: { '@id': `${SITE.url}/#website` } },
   { '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
-    { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal` },
+    { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE.url}/journal/` },
     { '@type': 'ListItem', position: 3, name, item: `${SITE.url}${path}` },
   ] },
 ];
