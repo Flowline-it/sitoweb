@@ -10,6 +10,8 @@ import { HOME_META, CTA, HERO, COSTS, SOLUTIONS, SERVICES, WHY, ABOUT, METHOD, T
 
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const faqs = FAQ.items;
+// simbolo di Flowline (lo stesso della favicon), decorativo dentro la pillola del hero
+const mark = '<svg class="hero__mark" viewBox="60 80 1800 1800" aria-hidden="true" focusable="false"><defs><mask id="hero-mark-m"><rect x="0" y="0" width="1932" height="1932" fill="#fff"/><rect x="0" y="730" width="520" height="568" fill="#000"/></mask></defs><path fill="#292929" mask="url(#hero-mark-m)" fill-rule="evenodd" d="M958 83a877 877 0 1 0 0.1 0zM958 320a640 640 0 1 1-0.1 0z"/><circle cx="968" cy="965" r="515" fill="#ff9900"/><rect x="82" y="898" width="400" height="205" fill="#ff9900"/></svg>';
 const costIcons = [
   '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   '<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/>',
@@ -27,7 +29,7 @@ const jsonld = [
   <section class="hero" aria-labelledby="hero-title">
     <span class="glow hero__glow" aria-hidden="true"></span>
     <div class="wrap hero__inner">
-      <h1 id="hero-title" class="display" data-rise style="--i:1"><span class="hero__kicker">{HERO.kicker}<span class="sr-only">: </span></span>{HERO.title.join(' ')}</h1>
+      <h1 id="hero-title" class="display" data-rise style="--i:1"><span class="hero__kicker"><Fragment set:html={mark} />{HERO.kicker}<span class="sr-only">: </span></span>{HERO.title.join(' ')}</h1>
       <p class="lead hero__lead" data-rise style="--i:2">{HERO.subtitle}</p>
       <div class="hero__ctas" data-rise style="--i:3">
         <a class="button" href="#contatti">{CTA} <Fragment set:html={arrow} /></a>
@@ -248,7 +250,8 @@ const jsonld = [
   .hero__inner .eyebrow { text-decoration: none; }
   .hero h1 { max-width: 13ch; }
   /* riga piccola dentro l'H1 con la parola chiave: stessa voce del sottotitolo, sopra lo slogan */
-  .hero__kicker { display: block; margin-bottom: 0.9rem; font-family: var(--font-body); font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.1rem); font-weight: 500; letter-spacing: 0; line-height: 1.4; color: var(--muted); }
+  .hero__kicker { display: flex; align-items: center; gap: 0.6rem; width: max-content; max-width: 100%; margin: 0 auto 1.1rem; padding: 0.4rem 1rem 0.4rem 0.45rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 15, 18, 0.04); font-family: var(--font-body); font-size: clamp(0.875rem, 0.85rem + 0.2vw, 1rem); font-weight: 500; letter-spacing: 0; line-height: 1.35; color: var(--ink); text-align: left; }
+  .hero__kicker :global(.hero__mark) { flex: none; width: 1.6rem; height: 1.6rem; }
   .hero__lead { max-width: 40rem; }
   .hero__ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 0.25rem; }
   .hero__trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.5rem; list-style: none; padding: 0; font-size: 0.875rem; color: var(--muted); }
