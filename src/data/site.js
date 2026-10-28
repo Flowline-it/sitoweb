@@ -1,6 +1,15 @@
 // Tutti i testi del sito. Sono quelli di flowline.it (ottobre 2026), con le sole correzioni
 // indicate nel piano: maiuscole dei titoli, "Qual è", etichette sopra i titoli assorbite o tolte.
 
+// Statistiche delle visite con Umami Cloud: server in UE, nessun cookie, quindi nessun banner.
+// L'ID del sito si trova in Umami → Impostazioni → Siti web → Modifica → "ID sito web" (o nel "Codice di monitoraggio").
+// Finché websiteId è vuoto non viene caricato nulla. Sull'indirizzo di prova non si misura mai.
+export const ANALYTICS = {
+  umamiWebsiteId: '',
+  umamiSrc: 'https://cloud.umami.is/script.js',
+  domains: 'flowline.it,www.flowline.it',
+};
+
 export const SITE = {
   name: 'Flowline',
   url: 'https://flowline.it',

@@ -6,6 +6,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const KEY = SITE.supabaseAnonKey;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const track = (n: string, d?: Record<string, string | number>) => (window as any).flTrack?.(n, d);
 const $$ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) => [...root.querySelectorAll<T>(sel as any)] as T[];
 
 function api(path: string, init: RequestInit = {}) {
@@ -137,6 +138,7 @@ for (const form of $$<HTMLFormElement>('[data-search]')) {
   const data: { s: string; t: string; c: string; i: string; d: string; k: string }[] = JSON.parse(form.querySelector('[data-index]')?.textContent || '[]');
   const hay = data.map((a) => norm(`${a.t} ${a.c} ${a.k}`));
   let sel = -1;
+  let searchTimer: ReturnType<typeof setTimeout>;
   const mark = (t: string, words: string[]) => {
     let out = esc(t);
     for (const w of words) if (w.length > 1) out = out.replace(new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
@@ -153,6 +155,8 @@ for (const form of $$<HTMLFormElement>('[data-search]')) {
       : `<p>Nessun articolo per “${esc(input.value.trim())}”. Prova con un altro tema.</p>`;
     box.hidden = false;
     input.setAttribute('aria-expanded', 'true');
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => track('ricerca-journal', { risultati: hits.length }), 1500);
   };
   input.addEventListener('input', render);
   input.addEventListener('focus', () => { if (input.value.trim()) render(); });
@@ -259,6 +263,7 @@ if (readbar) {
 /* ---------- condividi: copia link ---------- */
 for (const b of $$<HTMLButtonElement>('[data-copy]')) b.addEventListener('click', async () => {
   const url = location.href.split('#')[0];
+  track('condivisione', { canale: 'copia-link' });
   try {
     if (navigator.share && matchMedia('(pointer: coarse)').matches) { await navigator.share({ title: document.title, url }); return; }
     await navigator.clipboard.writeText(url);
@@ -292,7 +297,7 @@ if (likeButtons.length) {
     liked = !liked; count = Math.max(0, count + delta); store.set(k, liked ? '1' : null); paint(liked);
     try {
       const r = await api('rpc/journal_like', { method: 'POST', body: JSON.stringify({ p_article: id, p_delta: delta }) });
-      if (r.ok) { count = await r.json(); paint(); } else throw 0;
+      if (r.ok) { count = await r.json(); paint(); if (delta > 0) track('mi-piace'); } else throw 0;
     } catch {
       liked = !liked; count = Math.max(0, count - delta); store.set(k, liked ? '1' : null); paint();
     } finally { busy = false; }
@@ -368,6 +373,7 @@ if (croot) {
       form.reset();
       msg.className = 'jmsg is-ok';
       msg.textContent = 'Grazie! Il commento sarà visibile appena approvato dalla redazione.';
+      track('commento-inviato', { risposta: replyTo ? 'si' : 'no' });
       replyTo = null; to.hidden = true; home.append(form);
     } catch (err: any) { msg.className = 'jmsg is-err'; msg.textContent = err?.message || 'Errore di rete. Riprova.'; }
     finally { btn.disabled = false; }
@@ -402,6 +408,7 @@ for (const form of $$<HTMLFormElement>('[data-newsletter]')) {
       form.reset();
       msg.className = 'jmsg is-ok';
       msg.textContent = r.status === 409 ? 'Sei già iscritto: a presto nella tua casella.' : 'Iscrizione fatta. Grazie!';
+      if (r.status !== 409) track('newsletter-iscrizione', { pagina: form.dataset.source || 'journal' });
     } catch { msg.className = 'jmsg is-err'; msg.textContent = 'Non siamo riusciti a iscriverti. Riprova tra poco.'; }
     finally { btn.disabled = false; }
   });
