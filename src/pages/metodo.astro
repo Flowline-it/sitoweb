@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { p } from '../lib/paths.js';
+import MethodFlow from '../components/MethodFlow.astro';
 import { CTA, METHOD, WHY, FAQ, SERVICES, SITE } from '../data/site.js';
 
 // Pagina "Metodo": approfondisce la sezione della home. Tutti i testi vengono da site.js.
@@ -45,19 +46,7 @@ const jsonld = [
         <span class="eyebrow" data-reveal><span class="dot"></span>{METHOD.title}</span>
         <h2 id="steps-title" class="h2" data-reveal style="--i:1">Quattro passi, ognuno con un risultato concreto</h2>
       </header>
-      <ol class="timeline" role="list">
-        {METHOD.steps.map((s, i) => (
-          <li class="card tl" data-reveal style={`--i:${i}`}>
-            <span class="tl__num" aria-hidden="true">{i + 1}</span>
-            <div class="tl__body">
-              <p class="tl__when">{s.when}</p>
-              <h3>{s.name}</h3>
-              <p class="muted">{s.text}</p>
-            </div>
-            <p class="tl__out"><small>Cosa ricevi</small>{s.output}</p>
-          </li>
-        ))}
-      </ol>
+      <MethodFlow />
     </div>
   </section>
 
@@ -121,16 +110,6 @@ const jsonld = [
   .crumbs a { color: inherit; text-decoration: none; }
   .crumbs [aria-current] { color: var(--ink); font-weight: 500; }
   @media (hover: hover) and (pointer: fine) { .crumbs a:hover { color: var(--ink); } }
-
-  .timeline { display: grid; gap: 1rem; max-width: 54rem; margin-inline: auto; }
-  .tl { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 15rem); gap: 1.25rem 1.5rem; align-items: start; }
-  .tl__num { width: 2.8rem; height: 2.8rem; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-text); font-family: var(--font-head); font-weight: 600; }
-  .tl:first-child .tl__num { background: var(--accent); color: var(--accent-ink); }
-  .tl__body { display: grid; gap: 0.35rem; }
-  .tl__when { font-size: 0.8rem; font-weight: 600; color: var(--accent-text); }
-  .tl__out { padding: 0.85rem 1rem; border-radius: var(--radius-sm); background: var(--surface-2); font-weight: 600; font-size: 0.95rem; line-height: 1.4; }
-  .tl__out small { display: block; font-size: 0.75rem; font-weight: 500; color: var(--muted); margin-bottom: 0.2rem; }
-  @media (max-width: 760px) { .tl { grid-template-columns: auto minmax(0, 1fr); } .tl__out { grid-column: 2; } }
 
   .promises { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
   .promises .card { display: flex; flex-direction: column; gap: 0.6rem; }

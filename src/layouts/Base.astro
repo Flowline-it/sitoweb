@@ -77,6 +77,9 @@ const graph = { '@context': 'https://schema.org', '@graph': [organization, { '@t
       <slot />
     </main>
     <Footer />
+    <a class="to-top" href="#" aria-label="Torna all'inizio della pagina">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+    </a>
     <script>
       // reveal una volta sola quando l'elemento entra nello schermo; mai contenuti lasciati nascosti
       const targets = document.querySelectorAll('[data-reveal]');
@@ -96,6 +99,18 @@ const graph = { '@context': 'https://schema.org', '@graph': [organization, { '@t
       const header = document.querySelector('.site-header');
       const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
       onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+      // torna su: compare dopo la prima schermata, riporta in cima e rimette il focus sul logo
+      const toTop = document.querySelector<HTMLAnchorElement>('.to-top');
+      if (toTop) {
+        const show = () => toTop.classList.toggle('is-shown', window.scrollY > window.innerHeight * 0.8);
+        show(); window.addEventListener('scroll', show, { passive: true });
+        toTop.addEventListener('click', (e) => {
+          e.preventDefault();
+          const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+          document.querySelector<HTMLElement>('.brand')?.focus({ preventScroll: true });
+        });
+      }
       // menu su telefono
       const toggle = document.querySelector('.menu-toggle');
       const nav = document.getElementById('nav');

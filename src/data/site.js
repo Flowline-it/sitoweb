@@ -35,7 +35,7 @@ export const HERO = {
   title: ['Automatizza i tuoi', 'processi'],
   // sottotitolo del hero
   subtitle:
-    "Progettiamo automazioni con l'intelligenza artificiale, agenti AI e integrazioni tra i tuoi software (CRM, gestionale, fatturazione) per le PMI italiane. I nostri clienti riducono fino al 40% il tempo speso in attività ripetitive.",
+    "Progettiamo automazioni con l'intelligenza artificiale, agenti AI e integrazioni tra i tuoi software (CRM, gestionale, fatturazione) per le PMI italiane. Liberiamo il tuo team dalle attività ripetitive.",
   trust: ['Analisi preliminare gratuita', 'Preventivo trasparente', 'Referente dedicato'],
   text: 'Progettiamo sistemi AI, integrazioni e processi automatici su misura. Libera il tuo team dai task ripetitivi e scala il tuo business con un partner strategico al tuo fianco.',
 };
@@ -45,10 +45,10 @@ export const COSTS = {
   statement: 'La tua azienda perde tempo ogni giorno in attività manuali inutili.',
   text: 'Senza automazione, la tua azienda sta letteralmente bruciando risorse. Ecco cosa ti sta costando non agire ora.',
   rows: [
-    { name: 'Processi manuali', text: 'Attività ripetitive che consumano tempo e risorse preziose.', value: '~€5.000', unit: "di costo l'anno per dipendente" },
-    { name: 'Dati frammentati', text: 'Informazioni sparse tra sistemi diversi e non sincronizzati.', value: 'Rischio', unit: 'di decisioni basate su dati errati' },
-    { name: 'Comunicazioni lente', text: 'Ritardi critici nella condivisione di informazioni tra team.', value: '−20%', unit: 'di produttività del team' },
-    { name: 'Errori umani', text: 'Sbagli costosi dovuti a distrazione in task ripetitivi.', value: '3%', unit: 'di perdita media sul fatturato' },
+    { name: 'Processi manuali', text: 'Attività ripetitive che consumano tempo e risorse preziose.' },
+    { name: 'Dati frammentati', text: 'Informazioni sparse tra sistemi diversi e non sincronizzati.' },
+    { name: 'Comunicazioni lente', text: 'Ritardi critici nella condivisione di informazioni tra team.' },
+    { name: 'Errori umani', text: 'Sbagli costosi dovuti a distrazione in task ripetitivi.' },
   ],
 };
 
@@ -56,10 +56,10 @@ export const SOLUTIONS = {
   title: 'Soluzioni ad alto impatto',
   subtitle: 'Risultati garantiti.',
   items: [
-    { name: 'Automazioni intelligenti', text: 'Sistemi AI che gestiscono task ripetitivi 24/7 con zero errori.', figure: '300%', figureLabel: 'ROI in 6 mesi', time: 'Implementazione: 2 settimane' },
-    { name: 'Integrazione totale', text: 'Connessione fluida tra CRM, ERP e strumenti di marketing.', figure: '20h', figureLabel: 'risparmiate a settimana', time: 'Implementazione: 3 settimane' },
-    { name: 'Agenti AI personalizzati', text: 'Bot addestrati sui tuoi dati per customer service e analisi.', figure: '+45%', figureLabel: 'di produttività', time: 'Implementazione: 4 settimane' },
-    { name: 'Supporto premium', text: 'Assistenza dedicata e monitoraggio proattivo dei sistemi.', figure: '99,9%', figureLabel: 'di uptime garantito', time: 'Attivazione immediata' },
+    { name: 'Automazioni intelligenti', text: 'Sistemi AI che gestiscono task ripetitivi 24/7 con zero errori.' },
+    { name: 'Integrazione totale', text: 'Connessione fluida tra CRM, ERP e strumenti di marketing.' },
+    { name: 'Agenti AI personalizzati', text: 'Bot addestrati sui tuoi dati per customer service e analisi.' },
+    { name: 'Supporto premium', text: 'Assistenza dedicata e monitoraggio proattivo dei sistemi.' },
   ],
 };
 
@@ -86,12 +86,13 @@ export const ABOUT = {
 export const METHOD = {
   title: 'Come lavoriamo',
   steps: [
-    { when: 'Settimana 1', name: 'Analisi profonda', text: 'Mappiamo i tuoi processi attuali per identificare colli di bottiglia e inefficienze nascoste.', output: 'Report audit e roadmap' },
-    { when: 'Settimana 2', name: 'Progettazione', text: "Disegniamo l'architettura della soluzione, selezionando gli strumenti e le integrazioni ideali.", output: 'Design del sistema e prototipo' },
-    { when: 'Settimane 3-4', name: 'Implementazione', text: 'Sviluppiamo, integriamo e testiamo le automazioni in ambiente sicuro.', output: 'Sistema funzionante e testato' },
-    { when: 'Ongoing', name: 'Monitoraggio', text: 'Tracciamo le performance e ottimizziamo continuamente i flussi di lavoro post-lancio.', output: 'Dashboard performance e supporto' },
+    { when: 'Fase 1', name: 'Analisi profonda', text: 'Mappiamo i tuoi processi attuali per identificare colli di bottiglia e inefficienze nascoste.', output: 'Report audit e roadmap' },
+    { when: 'Fase 2', name: 'Progettazione', text: "Disegniamo l'architettura della soluzione, selezionando gli strumenti e le integrazioni ideali.", output: 'Design del sistema e prototipo' },
+    { when: 'Fase 3', name: 'Implementazione', text: 'Sviluppiamo, integriamo e testiamo le automazioni in ambiente sicuro.', output: 'Sistema funzionante e testato' },
+    { when: 'Dopo il lancio', name: 'Monitoraggio', text: 'Tracciamo le performance e ottimizziamo continuamente i flussi di lavoro post-lancio.', output: 'Dashboard performance e supporto' },
   ],
-  note: 'Dopo il lancio restiamo al tuo fianco con monitoraggio e manutenzione.',
+  note: 'Dopo il lancio restiamo al tuo fianco per supporto e manutenzione.',
+  goal: { title: 'Processo automatizzato', text: 'Il sistema lavora al posto tuo e il tuo team torna a dedicarsi al lavoro che conta.' },
 };
 
 export const SERVICES = {
@@ -140,20 +141,14 @@ export const FINAL = {
 // Strumenti che integriamo: solo testo, nessun logo di terzi.
 export const TOOLS = ['Gmail e Google Workspace', 'n8n', 'Supabase', 'WhatsApp Business', 'Fatturazione elettronica', 'CRM', 'ERP e gestionali', 'Excel e Google Sheets', 'Microsoft 365', 'Calendari e agende'];
 
-// Numeri del sito attuale, invariati.
-export const METRICS = [
-  { value: 40, prefix: '−', suffix: '%', label: 'costi operativi' },
-  { value: 300, prefix: '', suffix: '%', label: 'ROI in 6 mesi' },
-  { value: 20, prefix: '', suffix: 'h', label: 'risparmiate a settimana' },
-  { value: 99.9, prefix: '', suffix: '%', label: 'uptime garantito', decimals: 1 },
-];
-
-// Formule di collaborazione: niente cifre, come dicono le FAQ ("non abbiamo listini fissi").
+// Formule di collaborazione: niente cifre né tempistiche ("non abbiamo listini fissi").
+// La manutenzione rientra nel preventivo del progetto; al suo posto la formazione, che si può chiedere anche da sola.
 export const PLANS = {
-  title: 'Scegli come iniziare',
-  text: 'Lavoriamo su preventivo in base alle specifiche esigenze. Ogni progetto parte da una consulenza gratuita e senza impegno.',
+  title: 'Da dove partire',
+  text: 'Il primo passo è sempre una consulenza gratuita e senza impegno. Da lì costruiamo insieme la soluzione giusta per la tua azienda.',
   items: [
-    { name: 'Progetto su misura', price: 'Su preventivo', note: 'Da 2 settimane a 3 mesi', featured: true, text: 'Automazioni, integrazioni e agenti AI progettati sui tuoi processi, con una roadmap precisa.', points: ['Report audit e roadmap', 'Design del sistema e prototipo', 'Sviluppo, integrazione e test', 'Formazione del team inclusa'], cta: 'Richiedi una consulenza' },
-    { name: 'Manutenzione', price: 'Canone su preventivo', note: 'Dopo la consegna', text: 'Monitoriamo e ottimizziamo i sistemi perché evolvano con la tua azienda.', points: ['Referente dedicato', 'Monitoraggio proattivo', 'Adattamenti ai nuovi processi', 'Dashboard delle performance'], cta: 'Parliamone' },
+    { name: 'Consulenza preliminare', price: 'Gratuita', note: 'Senza impegno', badge: 'Inizia da qui', featured: true, text: 'Ci racconti come lavorate oggi: analizziamo i tuoi processi per capire se e come possiamo aiutarti davvero.', points: ['Call conoscitiva senza impegno', 'Analisi dei processi attuali', 'Prime opportunità di automazione', 'Nessun obbligo di proseguire'], cta: 'Prenota la consulenza' },
+    { name: 'Progetto su misura', price: 'Su preventivo', note: 'Dopo la consulenza', text: 'Automazioni, integrazioni e agenti AI progettati sui tuoi processi, con una roadmap precisa.', points: ['Una demo prima di firmare', 'Preventivo chiaro, voce per voce', 'Sviluppo, integrazione e test', 'Formazione e supporto dopo la consegna'], cta: 'Richiedi un preventivo' },
+    { name: 'Formazione AI per il team', price: 'Su preventivo', note: 'Anche senza un progetto', text: "Workshop pratici per rendere il tuo team autonomo con l'AI, con esempi concreti presi dal vostro lavoro quotidiano.", points: ['Sessioni dedicate per ruolo', "Casi d'uso reali della tua azienda", 'Materiale didattico', "Supporto all'adozione"], cta: 'Parliamone' },
   ],
 };
