@@ -24,7 +24,7 @@ export const SITE = {
 export const HOME_META = {
   title: 'Automazione processi aziendali e agenti AI | Flowline',
   description:
-    'Agenzia italiana di automazione AI: workflow, agenti AI e integrazioni su misura per PMI. Primo processo automatizzato in 30 giorni. Analisi gratuita.',
+    'Agenzia italiana di automazione AI: workflow, agenti AI e integrazioni su misura per PMI. Analisi preliminare gratuita e preventivo trasparente.',
 };
 
 export const CTA = 'Prenota una consulenza gratuita';
@@ -59,7 +59,7 @@ export const SOLUTIONS = {
     { name: 'Automazioni intelligenti', text: 'Sistemi AI che gestiscono task ripetitivi 24/7 con zero errori.', figure: '300%', figureLabel: 'ROI in 6 mesi', time: 'Implementazione: 2 settimane' },
     { name: 'Integrazione totale', text: 'Connessione fluida tra CRM, ERP e strumenti di marketing.', figure: '20h', figureLabel: 'risparmiate a settimana', time: 'Implementazione: 3 settimane' },
     { name: 'Agenti AI personalizzati', text: 'Bot addestrati sui tuoi dati per customer service e analisi.', figure: '+45%', figureLabel: 'di produttività', time: 'Implementazione: 4 settimane' },
-    { name: 'Supporto premium', text: 'Assistenza prioritaria 24/7 e monitoraggio proattivo.', figure: '99,9%', figureLabel: 'di uptime garantito', time: 'Attivazione immediata' },
+    { name: 'Supporto premium', text: 'Assistenza dedicata e monitoraggio proattivo dei sistemi.', figure: '99,9%', figureLabel: 'di uptime garantito', time: 'Attivazione immediata' },
   ],
 };
 
@@ -91,7 +91,7 @@ export const METHOD = {
     { when: 'Settimane 3-4', name: 'Implementazione', text: 'Sviluppiamo, integriamo e testiamo le automazioni in ambiente sicuro.', output: 'Sistema funzionante e testato' },
     { when: 'Ongoing', name: 'Monitoraggio', text: 'Tracciamo le performance e ottimizziamo continuamente i flussi di lavoro post-lancio.', output: 'Dashboard performance e supporto' },
   ],
-  note: 'Tutto il processo è coperto dal nostro supporto prioritario 24/7.',
+  note: 'Dopo il lancio restiamo al tuo fianco con monitoraggio e manutenzione.',
 };
 
 export const SERVICES = {
@@ -149,15 +149,11 @@ export const METRICS = [
 ];
 
 // Formule di collaborazione: niente cifre, come dicono le FAQ ("non abbiamo listini fissi").
-// Pilot 30: offerta di ingresso di Flowline, da confermare prima della pubblicazione.
 export const PLANS = {
   title: 'Scegli come iniziare',
   text: 'Lavoriamo su preventivo in base alle specifiche esigenze. Ogni progetto parte da una consulenza gratuita e senza impegno.',
   items: [
-    { name: 'Pilot 30', price: 'Su preventivo', note: '30 giorni, un processo', text: 'Automatizziamo un processo concreto in 30 giorni, per vedere i risultati prima di andare oltre.', points: ['Analisi preliminare gratuita', 'Un processo automatizzato', 'Report con le ore risparmiate', 'Soddisfatti o rimborsati'], cta: 'Parti con il Pilot' },
     { name: 'Progetto su misura', price: 'Su preventivo', note: 'Da 2 settimane a 3 mesi', featured: true, text: 'Automazioni, integrazioni e agenti AI progettati sui tuoi processi, con una roadmap precisa.', points: ['Report audit e roadmap', 'Design del sistema e prototipo', 'Sviluppo, integrazione e test', 'Formazione del team inclusa'], cta: 'Richiedi una consulenza' },
-    { name: 'Manutenzione', price: 'Canone su preventivo', note: 'Dopo la consegna', text: 'Monitoriamo e ottimizziamo i sistemi perché evolvano con la tua azienda.', points: ['Supporto prioritario 24/7', 'Monitoraggio proattivo', 'Adattamenti ai nuovi processi', 'Dashboard delle performance'], cta: 'Parliamone' },
+    { name: 'Manutenzione', price: 'Canone su preventivo', note: 'Dopo la consegna', text: 'Monitoriamo e ottimizziamo i sistemi perché evolvano con la tua azienda.', points: ['Referente dedicato', 'Monitoraggio proattivo', 'Adattamenti ai nuovi processi', 'Dashboard delle performance'], cta: 'Parliamone' },
   ],
 };
-
-export const FAQ_EXTRA = { q: "Cos'è il Pilot 30?", a: "È il modo più semplice per iniziare: in 30 giorni automatizziamo un processo concreto della tua azienda e misuriamo le ore risparmiate. Se il risultato non ti soddisfa, ti rimborsiamo." };
