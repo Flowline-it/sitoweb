@@ -7,10 +7,15 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # 1. Sempre https://flowline.it (niente http, niente www)
-  RewriteCond %{HTTPS} !=on [OR]
-  RewriteCond %{HTTP_HOST} !^flowline\.it$ [NC]
+  # 1. www.flowline.it → https://flowline.it. Il passaggio da http a https lo fa Hostinger
+  #    (hPanel → Sicurezza → SSL → Forza HTTPS): con la CDN attiva una regola qui potrebbe creare un loop.
+  RewriteCond %{HTTP_HOST} ^www\.flowline\.it$ [NC]
   RewriteRule ^ https://flowline.it%{REQUEST_URI} [R=301,L]
+
+  # Qualsiasi altro indirizzo (per esempio il dominio temporaneo di Hostinger) resta visibile come anteprima,
+  # ma fuori dai motori di ricerca (vedi X-Robots-Tag più sotto).
+  RewriteCond %{HTTP_HOST} !^(www\.)?flowline\.it$ [NC]
+  RewriteRule ^ - [E=ANTEPRIMA:1]
 
   # 2. Vecchie pagine del sito precedente → pagine nuove (una riga per indirizzo, da completare)
   # RewriteRule ^vecchia-pagina/?$ https://flowline.it/nuova-pagina/ [R=301,L]
@@ -29,4 +34,7 @@ ErrorDocument 404 /404.html
   </FilesMatch>
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # anteprima su domini diversi da flowline.it: mai in Google
+  Header always set X-Robots-Tag "noindex, nofollow" env=ANTEPRIMA
+  Header always set X-Robots-Tag "noindex, nofollow" env=REDIRECT_ANTEPRIMA
 </IfModule>
