@@ -28,8 +28,11 @@ import { SITE } from '../../data/site.js';
   const text = document.getElementById('u-text')!;
   const btn = document.getElementById('u-btn') as HTMLButtonElement;
   const actions = document.getElementById('u-actions')!;
-  const token = new URLSearchParams(location.search).get('t') || '';
-  const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const qs = new URLSearchParams(location.search);
+  const token = qs.get('t') || '';
+  const campaign = qs.get('c') || '';   // newsletter da cui arriva il link: serve solo a contare le disiscrizioni, in forma anonima
+  const valid = UUID.test(token);
   const done = (h: string, t: string) => { title.textContent = h; text.textContent = t; actions.hidden = true; title.focus(); };
   title.tabIndex = -1;
 
@@ -44,7 +47,7 @@ import { SITE } from '../../data/site.js';
         const r = await fetch(`${NEWSLETTER.supabaseUrl}/rest/v1/rpc/newsletter_unsubscribe`, {
           method: 'POST',
           headers: { apikey: NEWSLETTER.supabaseKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ p_token: token }),
+          body: JSON.stringify(UUID.test(campaign) ? { p_token: token, p_campaign: campaign } : { p_token: token }),
         });
         if (!r.ok) throw new Error(String(r.status));
         const res = await r.json();
