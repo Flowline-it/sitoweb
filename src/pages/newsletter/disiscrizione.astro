@@ -1,0 +1,71 @@
+---
+// Disiscrizione dalla newsletter: il link personale di ogni email porta qui con ?t=<token>.
+// Serve un clic su "Disiscrivimi": alcuni filtri antispam aprono i link da soli e non devono disiscrivere nessuno.
+import Base from '../../layouts/Base.astro';
+import { p } from '../../lib/paths.js';
+import { SITE } from '../../data/site.js';
+---
+<Base title="Disiscrizione dalla newsletter | Flowline" description="Disiscriviti dalla newsletter di Flowline." path="/newsletter/disiscrizione" noindex>
+  <section class="section unsub">
+    <div class="wrap">
+      <div class="card unsub__box" data-rise>
+        <h1 class="h2" id="u-title">Disiscrizione dalla newsletter</h1>
+        <p class="lead" id="u-text">Premi il pulsante per non ricevere più la newsletter di Flowline.</p>
+        <p class="unsub__actions" id="u-actions">
+          <button class="button button--ink" type="button" id="u-btn" disabled>Disiscrivimi</button>
+        </p>
+        <p class="small muted" id="u-help">Problemi? Scrivi a <a class="link" href={`mailto:${SITE.email}?subject=Disiscrizione%20newsletter`}>{SITE.email}</a> e ti togliamo noi dalla lista.</p>
+        <noscript><p class="small">Questa pagina ha bisogno di JavaScript. In alternativa scrivi a <a class="link" href={`mailto:${SITE.email}?subject=Disiscrizione%20newsletter`}>{SITE.email}</a>.</p></noscript>
+      </div>
+      <p class="unsub__back"><a class="link" href={p('/journal')}>Vai al Journal</a> · <a class="link" href={p('/')}>Torna alla home</a></p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { NEWSLETTER } from '../../data/site.js';
+  const title = document.getElementById('u-title')!;
+  const text = document.getElementById('u-text')!;
+  const btn = document.getElementById('u-btn') as HTMLButtonElement;
+  const actions = document.getElementById('u-actions')!;
+  const token = new URLSearchParams(location.search).get('t') || '';
+  const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
+  const done = (h: string, t: string) => { title.textContent = h; text.textContent = t; actions.hidden = true; title.focus(); };
+  title.tabIndex = -1;
+
+  if (!valid) {
+    done('Link non valido', 'Il link di disiscrizione è incompleto. Usa quello in fondo all’ultima newsletter, oppure scrivici e ti togliamo noi dalla lista.');
+  } else {
+    btn.disabled = false;
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Un attimo…';
+      try {
+        const r = await fetch(`${NEWSLETTER.supabaseUrl}/rest/v1/rpc/newsletter_unsubscribe`, {
+          method: 'POST',
+          headers: { apikey: NEWSLETTER.supabaseKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_token: token }),
+        });
+        if (!r.ok) throw new Error(String(r.status));
+        const res = await r.json();
+        if (res === 'ok') done('Fatto, sei disiscritto', 'Non riceverai più la newsletter di Flowline. Se cambi idea, puoi iscriverti di nuovo dal Journal.');
+        else if (res === 'gia_disiscritto') done('Eri già disiscritto', 'Questo indirizzo non riceve più la newsletter di Flowline.');
+        else done('Indirizzo non trovato', 'Non troviamo questo link tra gli iscritti. Se continui a ricevere la newsletter, scrivici e ti togliamo noi dalla lista.');
+        (window as any).flTrack?.('newsletter-disiscrizione', { esito: String(res) });
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Riprova';
+        text.textContent = 'Non siamo riusciti a completare la disiscrizione. Riprova tra poco, oppure scrivici e ti togliamo noi dalla lista.';
+      }
+    });
+  }
+</script>
+
+<style>
+  .unsub { min-height: 60svh; padding-top: clamp(2rem, 7vw, 5rem); }
+  .unsub__box { max-width: 36rem; margin-inline: auto; display: flex; flex-direction: column; gap: 1rem; padding: clamp(1.75rem, 5vw, 2.75rem); }
+  .unsub__box h1:focus { outline: none; }
+  .unsub__actions { margin-top: 0.25rem; }
+  .unsub__back { text-align: center; margin-top: 1.5rem; color: var(--muted); }
+  .unsub__back a { display: inline-block; min-height: 24px; line-height: 24px; }
+</style>

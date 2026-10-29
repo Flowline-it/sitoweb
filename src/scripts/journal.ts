@@ -1,6 +1,6 @@
 // Journal: animazioni, ricerca, caroselli, mi piace, commenti e newsletter.
 // Parla con Supabase solo con la chiave pubblica "anon": le regole RLS decidono cosa si può fare.
-import { SITE } from '../data/site.js';
+import { SITE, NEWSLETTER } from '../data/site.js';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const KEY = SITE.supabaseAnonKey;
@@ -403,12 +403,17 @@ for (const form of $$<HTMLFormElement>('[data-newsletter]')) {
     const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     btn.disabled = true; msg.className = 'jmsg'; msg.textContent = 'Un attimo…';
     try {
-      const r = await api('journal_newsletter', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ email: email.toLowerCase(), consent: true, source: form.dataset.source || 'journal' }) });
-      if (!r.ok && r.status !== 409) throw 0;
+      // database della newsletter (Outbound): la funzione accetta l'iscrizione ma non rivela mai chi è già iscritto
+      const r = await fetch(`${NEWSLETTER.supabaseUrl}/rest/v1/rpc/newsletter_subscribe`, {
+        method: 'POST',
+        headers: { apikey: NEWSLETTER.supabaseKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_email: email.toLowerCase(), p_source: form.dataset.source || 'journal', p_consent: true, p_website: String(fd.get('website') || '') }),
+      });
+      if (!r.ok) throw 0;
       form.reset();
       msg.className = 'jmsg is-ok';
-      msg.textContent = r.status === 409 ? 'Sei già iscritto: a presto nella tua casella.' : 'Iscrizione fatta. Grazie!';
-      if (r.status !== 409) track('newsletter-iscrizione', { pagina: form.dataset.source || 'journal' });
+      msg.textContent = 'Iscrizione fatta. Grazie! Riceverai la prossima newsletter.';
+      track('newsletter-iscrizione', { pagina: form.dataset.source || 'journal' });
     } catch { msg.className = 'jmsg is-err'; msg.textContent = 'Non siamo riusciti a iscriverti. Riprova tra poco.'; }
     finally { btn.disabled = false; }
   });

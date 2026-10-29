@@ -387,6 +387,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         const rows = S.subscribers.filter((x: Any) => !q || x.email.toLowerCase().includes(q));
         const active = S.subscribers.filter((x: Any) => !x.unsubscribed_at).length;
         return `
+          <div class="adm-card" style="margin-bottom:1rem"><p><b>Le nuove iscrizioni arrivano in Outbound → Newsletter</b>, da dove si scrivono e si inviano le newsletter.</p><p class="muted">Qui restano gli iscritti raccolti fino al 29 ottobre 2026: esportali in CSV e importali una volta sola in Outbound (Newsletter → Iscritti → Importa CSV).</p></div>
           <div class="adm-filters">
             <div class="adm-search">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'}<input id="nq" type="search" placeholder="Cerca un indirizzo…" value="${esc(S.nq)}" aria-label="Cerca iscritti" /></div>
             <button class="button button--ghost button--sm" type="button" id="csv" ${active ? '' : 'disabled'}>Esporta CSV (${active} attivi)</button>
