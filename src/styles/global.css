@@ -135,6 +135,18 @@ p { text-wrap: pretty; }
 .nav { display: flex; align-items: center; gap: 0.25rem; }
 .nav a { white-space: nowrap; padding: 0.5rem 0.85rem; border-radius: 999px; font-size: 0.925rem; font-weight: 500; color: #34343a; text-decoration: none; transition: background-color 160ms ease, color 160ms ease; }
 @media (hover: hover) and (pointer: fine) { .nav a:hover { background: rgba(15, 15, 18, 0.05); color: var(--ink); } }
+/* Journal in evidenza: pillola arancio con pallino e "Nuovo" quando c'è un articolo recente */
+.nav__sep { width: 1px; height: 1.25rem; background: var(--border-strong); margin-inline: 0.15rem; flex: none; }
+.nav a.nav-journal, .nav-journal { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.45rem 0.8rem 0.45rem 0.7rem; border-radius: 999px; background: var(--accent-soft); color: #7a3d00; font-weight: 600; font-size: 0.925rem; text-decoration: none; white-space: nowrap; box-shadow: inset 0 0 0 1px rgba(255, 153, 0, 0.3); transition: background-color 160ms ease, box-shadow 160ms ease; }
+.nav-journal[aria-current='page'] { box-shadow: inset 0 0 0 1.5px var(--accent); }
+@media (hover: hover) and (pointer: fine) { .nav a.nav-journal:hover, .nav-journal:hover { background: #ffe6c2; color: #7a3d00; box-shadow: inset 0 0 0 1px rgba(255, 153, 0, 0.55); } }
+.nav-journal__dot { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.nav-journal__new { display: inline-flex; align-items: center; height: 1.15rem; padding: 0 0.4rem; border-radius: 999px; background: var(--accent); color: var(--ink); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.02em; }
+@media (prefers-reduced-motion: no-preference) {
+  .nav-journal__dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--accent); animation: navPulse 2.4s var(--ease-out) infinite; }
+}
+@keyframes navPulse { 0% { transform: scale(1); opacity: 0.7; } 70%, 100% { transform: scale(3); opacity: 0; } }
+.nav-journal--chip { display: none; }
 .nav-actions { display: flex; align-items: center; gap: 0.5rem; }
 .nav-actions .text-link { padding: 0.5rem 0.85rem; font-size: 0.925rem; font-weight: 500; text-decoration: none; border-radius: 999px; }
 @media (hover: hover) and (pointer: fine) { .nav-actions .text-link:hover { background: rgba(15, 15, 18, 0.05); } }
@@ -151,8 +163,12 @@ p { text-wrap: pretty; }
   .menu-toggle { display: inline-flex; }
   .nav.is-open { display: flex; flex-direction: column; align-items: stretch; position: absolute; left: var(--margin); right: var(--margin); top: calc(100% + 0.5rem); padding: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-float); }
   .nav.is-open a { font-size: 1.0625rem; padding: 0.85rem 1rem; }
+  .nav.is-open .nav-journal--menu { order: -1; margin-bottom: 0.35rem; }
+  .nav.is-open .nav__sep { display: none; }
+  .nav-journal--chip { display: inline-flex; height: 2.5rem; }
 }
-@media (max-width: 420px) { .nav-actions .button { display: none; } }
+@media (min-width: 421px) and (max-width: 720px) { .nav-journal--chip { display: none; } }
+@media (max-width: 420px) { .nav-actions .button { display: none; } .nav-journal--chip { height: 2.75rem; padding: 0 0.95rem 0 0.85rem; } .nav-journal--chip .nav-journal__new { display: none; } }
 
 /* ---------- reveal: dissolvenza dal basso, una volta sola ----------
    Animazione (non transizione): quando finisce l'elemento torna ai suoi stili e alle sue transizioni di hover. */
