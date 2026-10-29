@@ -29,6 +29,14 @@ export const SITE = {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3c2RyaHFzcW9mdWJsbnRteW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NDMxMDcsImV4cCI6MjEwODQxOTEwN30.-mCxe4HJ_Ookc6-KAcBGes1isW89k7termKc837DGkc',
 };
 
+// Newsletter: iscritti nel progetto Supabase "Lead Flowline" (lo stesso di Outbound, sezione Newsletter).
+// Chiave pubblicabile: dal sito permette SOLO le funzioni newsletter_subscribe e newsletter_unsubscribe;
+// la lista degli iscritti non è leggibile senza login della redazione.
+export const NEWSLETTER = {
+  supabaseUrl: 'https://adaaubcarnczlmenfwam.supabase.co',
+  supabaseKey: 'sb_publishable_0a_ioaj4iiT3MlzUKR2XyQ_-PYHrQPP',
+};
+
 // SEO (ottobre 2026): parola chiave principale in title, description e H1 della home.
 export const HOME_META = {
   title: 'Automazione processi aziendali e agenti AI | Flowline',
