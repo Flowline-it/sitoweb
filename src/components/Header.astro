@@ -1,8 +1,12 @@
 ---
 import { p, isHome } from '../lib/paths.js';
 import { CTA } from '../data/site.js';
+import { getArticles } from '../lib/journal.js';
 const onHome = isHome(Astro.url);
 const base = onHome ? '' : p('/');
+// Journal in evidenza: pillola arancio; "Nuovo" compare nel browser se l'ultimo articolo ha meno di 7 giorni
+const latest = (await getArticles())[0]?.published_at || '';
+const onJournal = Astro.url.pathname.includes('/journal');
 ---
 <header class:list={['site-header', !onHome && 'is-solid']}>
   <div class="wrap">
@@ -17,12 +21,21 @@ const base = onHome ? '' : p('/');
         <a href={`${base}#metodo`}>Metodo</a>
         <a href={`${base}#formule`}>Formule</a>
         <a href={`${base}#chi-siamo`}>Chi siamo</a>
-        <a href={p('/journal')}>Journal</a>
+        <span class="nav__sep" aria-hidden="true"></span>
+        <a class:list={['nav-journal', 'nav-journal--menu']} href={p('/journal')} data-latest={latest} aria-current={onJournal ? 'page' : undefined}><span class="nav-journal__dot" aria-hidden="true"></span>Journal<span class="nav-journal__new" hidden>Nuovo</span></a>
       </nav>
       <div class="nav-actions">
+        <a class:list={['nav-journal', 'nav-journal--chip']} href={p('/journal')} data-latest={latest} aria-current={onJournal ? 'page' : undefined}><span class="nav-journal__dot" aria-hidden="true"></span>Journal<span class="nav-journal__new" hidden>Nuovo</span></a>
         <a class="button button--ink button--sm" href={`${base}#contatti`}>{CTA}</a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Apri il menu"><span></span></button>
       </div>
     </div>
   </div>
 </header>
+<script>
+  // "Nuovo" accanto a Journal se l'ultimo articolo è uscito negli ultimi 7 giorni
+  document.querySelectorAll<HTMLElement>('.nav-journal[data-latest]').forEach((a) => {
+    const d = Date.parse(a.dataset.latest || '');
+    if (d && Date.now() - d < 7 * 864e5) a.querySelector<HTMLElement>('.nav-journal__new')!.hidden = false;
+  });
+</script>
