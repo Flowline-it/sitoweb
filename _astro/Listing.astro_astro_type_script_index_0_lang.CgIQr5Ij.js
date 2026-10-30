@@ -1,0 +1,1 @@
+import"./journal.B-AD6HFR.js";
