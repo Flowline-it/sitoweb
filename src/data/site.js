@@ -23,7 +23,8 @@ export const SITE = {
   linkedin: 'https://www.linkedin.com/company/flowline-it/',
   instagram: 'https://www.instagram.com/flowline.it/',
   supabaseUrl: 'https://dwsdrhqsqofublntmyma.supabase.co',
-  // Progetto Supabase "FLOWLINE JOURNAL" (non più quello di Hostinger Horizons).
+  // Progetto Supabase "FLOWLINE JOURNAL" (non più quello di Hostinger Horizons): solo il Journal.
+  // Il form contatti scrive in "Lead Flowline", vedi RICHIESTE più sotto.
   // Chiave pubblica "anon": può solo fare ciò che le policy RLS permettono.
   supabaseAnonKey:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3c2RyaHFzcW9mdWJsbnRteW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NDMxMDcsImV4cCI6MjEwODQxOTEwN30.-mCxe4HJ_Ookc6-KAcBGes1isW89k7termKc837DGkc',
@@ -35,6 +36,15 @@ export const SITE = {
 export const NEWSLETTER = {
   supabaseUrl: 'https://adaaubcarnczlmenfwam.supabase.co',
   supabaseKey: 'sb_publishable_0a_ioaj4iiT3MlzUKR2XyQ_-PYHrQPP',
+};
+
+// Form "Prenota la consulenza gratuita": stesso progetto "Lead Flowline", tabella richieste_sito,
+// consultabile dalla FlowLine Suite (area Richieste). Il sito può solo chiamare la funzione
+// richiesta_sito_invia: le richieste non sono leggibili senza il login della redazione.
+// Fino al 2 novembre 2026 il form scriveva in "consultations" del progetto FLOWLINE JOURNAL.
+export const RICHIESTE = {
+  endpoint: `${NEWSLETTER.supabaseUrl}/rest/v1/rpc/richiesta_sito_invia`,
+  supabaseKey: NEWSLETTER.supabaseKey,
 };
 
 // SEO (ottobre 2026): parola chiave principale in title, description e H1 della home.
