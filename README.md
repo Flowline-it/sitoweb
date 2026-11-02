@@ -9,7 +9,7 @@ Sito pubblico di Flowline: HTML statico generato con [Astro](https://astro.build
 | Tutti i testi della home, FAQ, dati societari | `src/data/site.js` |
 | Colori, font, stili comuni | `src/styles/global.css` |
 | Home | `src/pages/index.astro` |
-| Form contatti (scrive in Supabase `consultations`) | `src/components/ContactForm.astro` |
+| Form contatti (scrive in Supabase "Lead Flowline", tabella `richieste_sito`) | `src/components/ContactForm.astro` |
 | Disegno "da sparso a ordinato" del Metodo | `src/components/LineDiagram.astro` |
 | Journal (letto da Supabase alla build) | `src/lib/journal.js`, `src/pages/journal/` |
 | Area riservata del Journal (scrivere e pubblicare articoli) | `src/pages/journal/admin.astro` → indirizzo `/journal/admin` |
@@ -32,7 +32,7 @@ Su `/journal/admin` si accede con email e password dell'account Supabase del Jou
 
 La pagina usa la chiave pubblica `anon`: **cosa può fare un utente lo decidono le policy RLS del database**.
 
-Database: progetto Supabase **FLOWLINE JOURNAL** (`dwsdrhqsqofublntmyma`), che sostituisce quello creato da Hostinger Horizons. Scrivono nel Journal (articoli, categorie, tag, autori, immagini nel bucket `journal-media`) e leggono le richieste del form solo gli account il cui indirizzo è nella tabella `journal_editors`. Per aggiungere una persona alla redazione: crea l'utente in Supabase (Authentication → Users) e aggiungi la sua email a `journal_editors`. Le iscrizioni libere conviene comunque tenerle disattivate.
+Database: progetto Supabase **FLOWLINE JOURNAL** (`dwsdrhqsqofublntmyma`), che sostituisce quello creato da Hostinger Horizons. Scrivono nel Journal (articoli, categorie, tag, autori, immagini nel bucket `journal-media`) e leggevano le vecchie richieste del form (`consultations`) solo gli account il cui indirizzo è nella tabella `journal_editors`. Per aggiungere una persona alla redazione: crea l'utente in Supabase (Authentication → Users) e aggiungi la sua email a `journal_editors`. Le iscrizioni libere conviene comunque tenerle disattivate.
 
 Pubblicazione da n8n: funzione `publish-article` dello stesso progetto, con l'intestazione `x-api-key` uguale al secret `JOURNAL_API_KEY`. Copia la copertina nello storage del Journal e crea categorie e tag mancanti.
 
@@ -59,6 +59,8 @@ curl -X POST https://api.github.com/repos/Flowline-it/sitoweb/dispatches \
   -d '{"event_type":"journal-update"}'
 ```
 
-## Sicurezza del form
+## Form contatti
 
-Il sito usa la chiave pubblica `anon` di Supabase. Sulla tabella `consultations` deve esserci RLS attiva con la sola policy di **inserimento** per `anon`: nessuna policy di lettura, altrimenti i contatti diventano scaricabili da chiunque.
+"Prenota la consulenza gratuita" chiama la funzione `richiesta_sito_invia` del progetto Supabase **Lead Flowline** (lo stesso di Outbound e Newsletter) con la chiave pubblicabile. La funzione controlla i campi, scarta i bot (campo nascosto `website`) e i doppi invii, e scrive in `richieste_sito`. La chiave pubblica non può leggere la tabella: le richieste si consultano nella FlowLine Suite, area **Richieste**, dopo il login della redazione (`newsletter_editors`).
+
+Fino al 2 novembre 2026 il form scriveva nella tabella `consultations` del progetto FLOWLINE JOURNAL; quelle richieste si importano nella Suite con "Importa CSV".

@@ -1,6 +1,6 @@
 ---
 import { p, isHome } from '../lib/paths.js';
-import { CONTACT, SITE } from '../data/site.js';
+import { CONTACT, SITE, RICHIESTE } from '../data/site.js';
 const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 ---
@@ -20,7 +20,7 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
         <noscript><p class="small">Il modulo ha bisogno di JavaScript. Puoi scriverci a <a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p></noscript>
       </div>
             <div class="coupon__body">
-        <form class="cform" id="cform" novalidate data-endpoint={`${SITE.supabaseUrl}/rest/v1/consultations`} data-key={SITE.supabaseAnonKey}>
+        <form class="cform" id="cform" novalidate data-endpoint={RICHIESTE.endpoint} data-key={RICHIESTE.supabaseKey}>
           <p class="cform__step small">I campi con * sono obbligatori.</p>
           <div class="cform__grid">
             <div class="field"><label for="f-nome">Nome e cognome <span aria-hidden="true">*</span></label><input id="f-nome" name="nome_cognome" autocomplete="name" placeholder="Mario Rossi" required /><p class="field__err" id="e-nome_cognome"></p></div>
@@ -33,6 +33,7 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
                 <option value="">Seleziona…</option>
                 {CONTACT.sources.map((s) => <option value={s}>{s}</option>)}
               </select></div>
+            <div class="cform__hp" aria-hidden="true"><label>Lascia vuoto <input name="website" tabindex="-1" autocomplete="off" /></label></div>
             <div class="field field--wide check">
               <input id="f-privacy" name="privacy" type="checkbox" required />
               <label for="f-privacy">Accetto la <a class="link" href={p('/privacy-policy')}>Privacy Policy</a> e autorizzo il trattamento dei dati per essere ricontattato. <span aria-hidden="true">*</span></label>
@@ -65,6 +66,7 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
   .coupon__body { padding: clamp(2rem, 4vw, 3rem); }
   :global(html:not(.js)) .cform { display: none; }
   .field label .field__opt { color: var(--muted); font-weight: 400; }
+  .cform__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .coupon__next { display: grid; gap: 0.4rem; }
   .coupon__next ol { list-style: decimal; padding-left: 1.2rem; margin: 0; display: grid; gap: 0.25rem; }
   .cform__progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 0.75rem; }
@@ -105,8 +107,8 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 </style>
 
 <script>
-  // Modulo in un solo passaggio. La tabella "consultations" riceve sempre tutte le colonne di prima:
-  // i campi tolti dal modulo partono con un valore neutro, così l'invio non dipende da come sono definite.
+  // Modulo in un solo passaggio. Invia alla funzione richiesta_sito_invia del progetto "Lead Flowline":
+  // la richiesta compare nella FlowLine Suite, area Richieste. I campi facoltativi vuoti restano vuoti.
   const form = document.getElementById('cform') as HTMLFormElement | null;
   if (form) {
     const done = document.getElementById('cform-done') as HTMLElement;
@@ -145,22 +147,19 @@ const back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
       btnSubmit.firstChild!.textContent = 'Invio… ';
       status.textContent = '';
       const body = {
-        nome_cognome: val('nome_cognome'), email: val('email'), nome_azienda: val('nome_azienda'),
-        telefono: val('telefono') || 'Non indicato',
-        descrizione_progetto: val('descrizione_progetto') || 'Non indicata',
-        come_hai_sentito: val('come_hai_sentito') || 'Altro',
-        ruolo_azienda: 'Non indicato',
-        servizio_interessato: 'Altro',
+        p_nome_cognome: val('nome_cognome'), p_email: val('email'), p_nome_azienda: val('nome_azienda'),
+        p_telefono: val('telefono'), p_descrizione: val('descrizione_progetto'), p_fonte: val('come_hai_sentito'),
+        p_website: val('website'),
       };
       try {
         const key = form.dataset.key!;
         const res = await fetch(form.dataset.endpoint!, {
           method: 'POST',
-          headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          headers: { apikey: key, 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error(String(res.status));
-        track('form-inviato', { fonte: body.come_hai_sentito });
+        track('form-inviato', { fonte: body.p_fonte || 'Non indicata' });
         form.reset();
         form.hidden = true;
         done.hidden = false;
