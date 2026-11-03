@@ -19,12 +19,6 @@ const featured = articles.find((a) => a.featured) || articles[0];
 const others = articles.filter((a) => a !== featured);
 const recommended = others.slice(0, 4);
 const teasers = others.slice(4, 7);
-const spotlight = others[0];
-const spotSide = articles.filter((a) => a !== spotlight && a !== featured).slice(0, 2);
-const spotBack = spotSide[0];
-const editorBig = others.find((a) => a.category?.slug !== featured?.category?.slug && a !== spotlight) || others[1];
-const editorList = articles.filter((a) => a !== editorBig).slice(0, 4);
-const showEditors = articles.length >= 5 && editorBig;
 const showAll = articles.length >= 8;
 ---
 <Base
@@ -86,51 +80,6 @@ const showAll = articles.length >= 8;
             {articles.map((a, i) => <Card a={a} i={i % 4} />)}
           </Carousel>
         </section>
-
-        <!-- da non perdere -->
-        {spotlight && (
-          <section class="wrap jsec jspot" aria-labelledby="spot-title">
-            <div class="jspot__frame">
-              <div class="jspot__visual" aria-hidden="true">
-                <div class="jspot__stack" data-in data-tilt>
-                  {spotBack?.cover_image && <img class="jspot__back" src={spotBack.cover_image} alt="" width="1200" height="630" loading="lazy" decoding="async" onerror="this.remove()" />}
-                  {spotlight.cover_image ? <img class="jspot__front" src={spotlight.cover_image} alt="" width="1200" height="630" loading="lazy" decoding="async" onerror="this.remove()" /> : <Orb />}
-                </div>
-              </div>
-              <aside class="jspot__side" aria-label="Leggi anche">
-                <p class="jlabel">Leggi anche</p>
-                {spotSide.map((a) => (
-                  <a href={p(`/journal/${a.slug}`)}><small>{a.category?.name} · {fmtShort(a.published_at)}</small><b>{a.title}</b></a>
-                ))}
-              </aside>
-              <div class="jspot__panel jstretch">
-                <p class="jlabel">Da non perdere</p>
-                <p class="jmeta"><span class="jcat">{spotlight.category?.name}</span><time datetime={spotlight.published_at}>{fmtShort(spotlight.published_at)}</time><span>{spotlight.reading_time || 1} min</span></p>
-                <h2 id="spot-title" data-split><a class="jlink" href={p(`/journal/${spotlight.slug}`)}>{spotlight.title}</a></h2>
-                <span class="jbtn" aria-hidden="true">Leggi l'articolo <i><Fragment set:html={I.arrow} /></i></span>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <!-- scelti dalla redazione -->
-        {showEditors && (
-          <section class="wrap jsec" aria-labelledby="ed-title">
-            <div class="jhead"><h2 class="jlabel" id="ed-title">Scelti dalla redazione</h2></div>
-            <div class="jeditor__grid">
-              <article class="jglass jstretch" data-reveal>
-                <span class="jglass__badge">Da leggere</span>
-                <p class="jmeta"><span class="jcat">{editorBig.category?.name}</span><time datetime={editorBig.published_at}>{fmtShort(editorBig.published_at)}</time><span>{editorBig.reading_time || 1} min</span></p>
-                <h3 data-split><a class="jlink" href={p(`/journal/${editorBig.slug}`)}>{editorBig.title}</a></h3>
-                <p class="jsub">{excerpt(editorBig, 150)}</p>
-                {editorBig.tags?.length > 0 && <p class="jtags">{editorBig.tags.slice(0, 3).map((t) => <span>{t.name}</span>)}</p>}
-              </article>
-              <ol class="jeditor__list" role="list" data-rank>
-                {editorList.map((a, i) => <li data-reveal style={`--i:${i}`}><Card a={a} variant="row" /></li>)}
-              </ol>
-            </div>
-          </section>
-        )}
 
         <!-- tutti gli articoli (quando sono tanti) -->
         {showAll && (

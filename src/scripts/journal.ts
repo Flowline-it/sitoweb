@@ -1,6 +1,6 @@
 // Journal: animazioni, ricerca, caroselli, mi piace, commenti e newsletter.
 // Parla con Supabase solo con la chiave pubblica "anon": le regole RLS decidono cosa si può fare.
-import { SITE, NEWSLETTER } from '../data/site.js';
+import { SITE } from '../data/site.js';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const KEY = SITE.supabaseAnonKey;
@@ -49,16 +49,6 @@ const io = 'IntersectionObserver' in window
   : null;
 for (const el of $$('[data-split]')) { if (!reduced) splitWords(el); io ? io.observe(el) : el.classList.add('is-in'); }
 for (const el of $$('[data-zoom], [data-in]')) io ? io.observe(el) : el.classList.add('is-in');
-// copertine in pila che si inclinano appena col mouse
-if (finePointer && !reduced) for (const el of $$('[data-tilt]')) {
-  const zone = el.closest('section') || el.parentElement!;
-  zone.addEventListener('pointermove', (e: PointerEvent) => {
-    const r = zone.getBoundingClientRect();
-    el.style.setProperty('--tx', `${((e.clientX - r.left) / r.width - 0.5) * 18}px`);
-    el.style.setProperty('--ty', `${((e.clientY - r.top) / r.height - 0.5) * 14}px`);
-  });
-  zone.addEventListener('pointerleave', () => { el.style.setProperty('--tx', '0px'); el.style.setProperty('--ty', '0px'); });
-}
 
 /* ---------- titolo che si "decifra" ---------- */
 const GLYPHS = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -184,20 +174,12 @@ function getStats() {
   return statsCache;
 }
 const score = (s?: Stat) => (s ? s.likes + s.comments * 2 : 0);
-if (document.querySelector('[data-stats], [data-rank], [data-filters]')) {
+if (document.querySelector('[data-stats], [data-filters]')) {
   getStats().then((stats) => {
     for (const el of $$('[data-stats]')) {
       const s = stats.get(el.dataset.stats!);
       el.querySelector('[data-likes]')!.textContent = String(s?.likes || 0);
       el.querySelector('[data-comments]')!.textContent = String(s?.comments || 0);
-    }
-    // "scelti dalla redazione": prima i più apprezzati (a parità resta l'ordine per data)
-    for (const list of $$('[data-rank]')) {
-      const items = $$(':scope > li', list);
-      items
-        .map((li, i) => ({ li, i, sc: score(stats.get(li.querySelector<HTMLElement>('[data-id]')?.dataset.id || '')) }))
-        .sort((a, b) => b.sc - a.sc || a.i - b.i)
-        .forEach(({ li }) => list.append(li));
     }
   });
 }
@@ -389,32 +371,5 @@ if (croot) {
     .catch(() => {});
 }
 
-/* ---------- newsletter ---------- */
-for (const form of $$<HTMLFormElement>('[data-newsletter]')) {
-  const msg = form.querySelector<HTMLElement>('.jmsg')!;
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
-    if (fd.get('website')) return;
-    const email = String(fd.get('email') || '').trim();
-    msg.className = 'jmsg is-err';
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Controlla l’indirizzo email.'; return; }
-    if (!fd.get('consent')) { msg.textContent = 'Spunta il consenso per iscriverti.'; return; }
-    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-    btn.disabled = true; msg.className = 'jmsg'; msg.textContent = 'Un attimo…';
-    try {
-      // database della newsletter (Outbound): la funzione accetta l'iscrizione ma non rivela mai chi è già iscritto
-      const r = await fetch(`${NEWSLETTER.supabaseUrl}/rest/v1/rpc/newsletter_subscribe`, {
-        method: 'POST',
-        headers: { apikey: NEWSLETTER.supabaseKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_email: email.toLowerCase(), p_source: form.dataset.source || 'journal', p_consent: true, p_website: String(fd.get('website') || '') }),
-      });
-      if (!r.ok) throw 0;
-      form.reset();
-      msg.className = 'jmsg is-ok';
-      msg.textContent = 'Iscrizione fatta. Grazie! Riceverai la prossima newsletter.';
-      track('newsletter-iscrizione', { pagina: form.dataset.source || 'journal' });
-    } catch { msg.className = 'jmsg is-err'; msg.textContent = 'Non siamo riusciti a iscriverti. Riprova tra poco.'; }
-    finally { btn.disabled = false; }
-  });
-}
+/* ---------- newsletter (modulo condiviso con la home) ---------- */
+import './newsletter.ts';
