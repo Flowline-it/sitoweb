@@ -1,0 +1,52 @@
+---
+// Iscrizione alla newsletter nella home: stessa iscrizione del Journal (script condiviso newsletter.ts).
+import { p } from '../lib/paths.js';
+---
+<section class="section nlband" aria-labelledby="nlband-title">
+  <div class="wrap">
+    <div class="nlband__box" data-reveal>
+      <span class="glow nlband__glow" aria-hidden="true"></span>
+      <div class="nlband__text">
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Newsletter</p>
+        <h2 id="nlband-title" class="nlband__title">Le novità su AI e automazione, senza rumore</h2>
+        <p class="nlband__lead">Una mail quando pubblichiamo qualcosa che vale la pena leggere nel <a class="link" href={p('/journal')}>Journal</a>: casi reali, strumenti nuovi, normative che toccano le aziende.</p>
+      </div>
+      <form class="nlband__form" data-newsletter data-source="home" novalidate>
+        <div class="nlband__row">
+          <label class="sr-only" for="nl-email-home">La tua email</label>
+          <input id="nl-email-home" name="email" type="email" inputmode="email" autocomplete="email" placeholder="La tua email di lavoro" required maxlength="200" />
+          <button class="button button--ink" type="submit">Iscriviti</button>
+        </div>
+        <div class="nlband__honey" aria-hidden="true"><label>Lascia vuoto <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <label class="nlband__check"><input type="checkbox" name="consent" required /><span>Acconsento a ricevere la newsletter di Flowline. Posso cancellarmi quando voglio. Leggi la <a class="link" href={p('/privacy-policy')}>privacy policy</a>.</span></label>
+        <p class="nlband__msg" data-msg role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/newsletter.ts';
+</script>
+
+<style>
+  .nlband { padding-top: 0; }
+  .nlband__box { position: relative; overflow: hidden; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: center; padding: clamp(1.5rem, 4vw, 3rem); border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .nlband__glow { width: 34rem; height: 34rem; right: -12rem; top: -16rem; z-index: -1; }
+  .nlband__text { display: flex; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+  .nlband__title { font-size: clamp(1.6rem, 1.15rem + 1.6vw, 2.35rem); line-height: 1.08; letter-spacing: -0.03em; }
+  .nlband__lead { color: var(--muted); max-width: 34rem; }
+  .nlband__form { display: flex; flex-direction: column; gap: 0.75rem; }
+  .nlband__row { display: flex; gap: 0.5rem; padding: 0.35rem; border-radius: 999px; background: var(--bg); border: 1px solid var(--border-strong); transition: border-color 160ms ease, box-shadow 160ms ease; }
+  .nlband__row:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .nlband__row input { flex: 1; min-width: 0; border: 0; outline: none; background: none; padding: 0 0.9rem; font-size: 1rem; }
+  .nlband__row .button { min-height: 2.75rem; }
+  .nlband__check { display: grid; grid-template-columns: 1.15rem minmax(0, 1fr); gap: 0.6rem; font-size: 0.85rem; line-height: 1.5; color: var(--muted); }
+  .nlband__check input { width: 1.05rem; height: 1.05rem; margin: 0.15rem 0 0; accent-color: var(--accent); }
+  .nlband__honey { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .nlband__msg { font-size: 0.9rem; font-weight: 500; min-height: 1.4em; }
+  .nlband__msg:global(.is-ok) { color: var(--ok); }
+  .nlband__msg:global(.is-err) { color: #b42318; }
+  @media (max-width: 820px) { .nlband__box { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 440px) { .nlband__row { flex-direction: column; border-radius: var(--radius-sm); } .nlband__row input { padding: 0.65rem 0.75rem; } }
+</style>
