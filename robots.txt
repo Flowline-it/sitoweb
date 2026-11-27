@@ -1,0 +1,5 @@
+# Flowline — tutti i motori di ricerca e i crawler AI sono benvenuti
+User-agent: *
+Allow: /
+
+Sitemap: https://flowline.it/sitemap.xml
